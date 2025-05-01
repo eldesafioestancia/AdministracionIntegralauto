@@ -1,7 +1,6 @@
 import { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { generateToken, verifyPassword, hashPassword, authenticateToken, checkRole } from "./auth";
 import { z } from "zod";
 import {
   insertUserSchema,
@@ -11,82 +10,52 @@ import {
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Authentication routes
+  // Rutas de autenticación simuladas - sin verificación real
   app.post("/api/auth/login", async (req: Request, res: Response) => {
     try {
-      const { username, password } = req.body;
+      const { username } = req.body;
       
-      if (!username || !password) {
-        return res.status(400).json({ message: "Username and password are required" });
-      }
+      // Simulamos un login exitoso con un usuario demo
+      const demoUser = {
+        id: 1,
+        username: username || "usuario@ejemplo.com",
+        fullName: "Usuario Demo",
+        role: "admin"
+      };
       
-      const user = await storage.getUserByUsername(username);
-      
-      if (!user) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-      
-      const isPasswordValid = await verifyPassword(password, user.password);
-      
-      if (!isPasswordValid) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-      
-      const token = generateToken(user.id, user.username, user.role);
+      // Token ficticio
+      const demoToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoidXN1YXJpb0BlamVtcGxvLmNvbSIsInJvbGUiOiJhZG1pbiJ9.demo-token";
       
       res.json({
-        token,
-        user: {
-          id: user.id,
-          username: user.username,
-          fullName: user.fullName,
-          role: user.role,
-        },
+        token: demoToken,
+        user: demoUser
       });
     } catch (error) {
       console.error("Login error:", error);
-      res.status(500).json({ message: "Error during login process" });
+      res.status(500).json({ message: "Error durante el proceso de login" });
     }
   });
 
   app.post("/api/auth/register", async (req: Request, res: Response) => {
     try {
-      const userData = insertUserSchema.parse(req.body);
+      const { username, fullName, role } = req.body;
       
-      // Check if user already exists
-      const existingUser = await storage.getUserByUsername(userData.username);
-      if (existingUser) {
-        return res.status(400).json({ message: "Username already exists" });
-      }
-      
-      // Hash password
-      const hashedPassword = await hashPassword(userData.password);
-      
-      // Create user with hashed password
-      const newUser = await storage.createUser({
-        ...userData,
-        password: hashedPassword,
-      });
-      
+      // Simulamos un registro exitoso con un usuario demo
       res.status(201).json({
-        id: newUser.id,
-        username: newUser.username,
-        fullName: newUser.fullName,
-        role: newUser.role,
+        id: 1,
+        username: username || "usuario@ejemplo.com",
+        fullName: fullName || "Usuario Demo",
+        role: role || "admin"
       });
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid user data", errors: error.errors });
-      }
-      
       console.error("Registration error:", error);
-      res.status(500).json({ message: "Error during registration process" });
+      res.status(500).json({ message: "Error durante el proceso de registro" });
     }
   });
 
-  // Protected routes
+  // Rutas (sin protección de autenticación)
   // Dashboard
-  app.get("/api/dashboard", authenticateToken, async (req: Request, res: Response) => {
+  app.get("/api/dashboard", async (req: Request, res: Response) => {
     try {
       const stats = await storage.getDashboardStats();
       const upcomingMaintenances = await storage.getUpcomingMaintenances();
@@ -104,7 +73,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Machines routes
-  app.get("/api/machines", authenticateToken, async (req: Request, res: Response) => {
+  app.get("/api/machines", async (req: Request, res: Response) => {
     try {
       const machines = await storage.getMachines();
       res.json(machines);
@@ -114,7 +83,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.get("/api/machines/:id", authenticateToken, async (req: Request, res: Response) => {
+  app.get("/api/machines/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const machine = await storage.getMachine(id);
@@ -130,7 +99,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.post("/api/machines", authenticateToken, async (req: Request, res: Response) => {
+  app.post("/api/machines", async (req: Request, res: Response) => {
     try {
       const machineData = insertMachineSchema.parse(req.body);
       const newMachine = await storage.createMachine(machineData);
@@ -145,7 +114,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.put("/api/machines/:id", authenticateToken, async (req: Request, res: Response) => {
+  app.put("/api/machines/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const machineData = insertMachineSchema.partial().parse(req.body);
@@ -167,7 +136,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.delete("/api/machines/:id", authenticateToken, checkRole(["admin", "supervisor"]), async (req: Request, res: Response) => {
+  app.delete("/api/machines/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const deleted = await storage.deleteMachine(id);
@@ -184,7 +153,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Machine Maintenance routes
-  app.get("/api/maintenance", authenticateToken, async (req: Request, res: Response) => {
+  app.get("/api/maintenance", async (req: Request, res: Response) => {
     try {
       const machineId = req.query.machineId ? parseInt(req.query.machineId as string) : undefined;
       const maintenances = await storage.getMaintenances(machineId);
@@ -195,7 +164,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.get("/api/maintenance/:id", authenticateToken, async (req: Request, res: Response) => {
+  app.get("/api/maintenance/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const maintenance = await storage.getMaintenance(id);
@@ -211,7 +180,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.post("/api/maintenance", authenticateToken, async (req: Request, res: Response) => {
+  app.post("/api/maintenance", async (req: Request, res: Response) => {
     try {
       const maintenanceData = insertMaintenanceSchema.parse(req.body);
       const newMaintenance = await storage.createMaintenance(maintenanceData);
@@ -226,7 +195,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.put("/api/maintenance/:id", authenticateToken, async (req: Request, res: Response) => {
+  app.put("/api/maintenance/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const maintenanceData = insertMaintenanceSchema.partial().parse(req.body);
@@ -248,7 +217,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.delete("/api/maintenance/:id", authenticateToken, async (req: Request, res: Response) => {
+  app.delete("/api/maintenance/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const deleted = await storage.deleteMaintenance(id);
@@ -265,7 +234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Machine Finance routes
-  app.get("/api/machine-finances", authenticateToken, async (req: Request, res: Response) => {
+  app.get("/api/machine-finances", async (req: Request, res: Response) => {
     try {
       const machineId = req.query.machineId ? parseInt(req.query.machineId as string) : undefined;
       const finances = await storage.getMachineFinances(machineId);
@@ -276,7 +245,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.post("/api/machine-finances", authenticateToken, async (req: Request, res: Response) => {
+  app.post("/api/machine-finances", async (req: Request, res: Response) => {
     try {
       const financeData = insertMachineFinanceSchema.parse(req.body);
       const newFinance = await storage.createMachineFinance(financeData);
@@ -291,7 +260,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.delete("/api/machine-finances/:id", authenticateToken, checkRole(["admin", "supervisor"]), async (req: Request, res: Response) => {
+  app.delete("/api/machine-finances/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const deleted = await storage.deleteMachineFinance(id);

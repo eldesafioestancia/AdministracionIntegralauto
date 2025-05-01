@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, ReactNode } from 'react';
 
 interface User {
   id: number;
@@ -16,13 +16,21 @@ interface AuthContextType {
   checkAuth: () => Promise<boolean>;
 }
 
+// Datos de usuario por defecto para acceso sin login
+const defaultUser: User = {
+  id: 1,
+  username: 'usuario@ejemplo.com',
+  fullName: 'Usuario Demo',
+  role: 'admin'
+};
+
 export const AuthContext = createContext<AuthContextType>({
-  isAuthenticated: false,
-  user: null,
-  token: null,
+  isAuthenticated: true, // Siempre autenticado
+  user: defaultUser,
+  token: 'demo-token',
   login: () => {},
   logout: () => {},
-  checkAuth: async () => false
+  checkAuth: async () => true
 });
 
 interface AuthProviderProps {
@@ -30,63 +38,26 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [authChecked, setAuthChecked] = useState(false);
-
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const login = (newToken: string, userData: User) => {
-    localStorage.setItem('token', newToken);
-    localStorage.setItem('user', JSON.stringify(userData));
-    setToken(newToken);
-    setUser(userData);
-    setIsAuthenticated(true);
+  // Funciones simuladas que no hacen nada 
+  const login = (_newToken: string, _userData: User) => {
+    // No hace nada, siempre estamos "autenticados"
+    console.log('Login simulado (desactivado)');
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setToken(null);
-    setUser(null);
-    setIsAuthenticated(false);
+    // No hace nada, siempre estamos "autenticados"
+    console.log('Logout simulado (desactivado)');
   };
 
   const checkAuth = async (): Promise<boolean> => {
-    try {
-      const storedToken = localStorage.getItem('token');
-      const storedUser = localStorage.getItem('user');
-      
-      if (!storedToken || !storedUser) {
-        logout();
-        setAuthChecked(true);
-        return false;
-      }
-      
-      // Verify token is valid with the server
-      // We could make a request to a /verify endpoint, but for simplicity,
-      // we'll just set the state based on the stored token
-      
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
-      setIsAuthenticated(true);
-      setAuthChecked(true);
-      return true;
-    } catch (error) {
-      console.error("Auth check error:", error);
-      logout();
-      setAuthChecked(true);
-      return false;
-    }
+    // Siempre retorna true, para simular que estamos autenticados
+    return true;
   };
 
   const value = {
-    isAuthenticated,
-    user,
-    token,
+    isAuthenticated: true, // Siempre autenticado
+    user: defaultUser, // Usuario predeterminado
+    token: 'demo-token', // Token ficticio
     login,
     logout,
     checkAuth

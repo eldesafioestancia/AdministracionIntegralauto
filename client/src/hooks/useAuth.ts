@@ -1,6 +1,5 @@
 import { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { apiRequest } from '@/lib/queryClient';
 
 export interface LoginCredentials {
   username: string;
@@ -16,30 +15,23 @@ export interface User {
 
 export function useAuth() {
   const context = useContext(AuthContext);
+  // Siempre establecemos isLoading en false después de un breve retraso
+  // para simular una carga rápida sin autenticación real
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuthStatus = async () => {
-      await context.checkAuth();
+    // Simulamos una breve carga
+    const timer = setTimeout(() => {
       setIsLoading(false);
-    };
+    }, 500);
     
-    checkAuthStatus();
-  }, [context]);
+    return () => clearTimeout(timer);
+  }, []);
 
+  // Funciones simplificadas que no hacen llamadas reales a la API
   const login = async (credentials: LoginCredentials) => {
-    setIsLoading(true);
-    try {
-      const response = await apiRequest('POST', '/api/auth/login', credentials);
-      const data = await response.json();
-      context.login(data.token, data.user);
-      return data;
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
+    console.log('Login simulado con:', credentials);
+    return { success: true, message: 'Login simulado' };
   };
 
   const register = async (userData: {
@@ -48,25 +40,17 @@ export function useAuth() {
     fullName: string;
     role: string;
   }) => {
-    setIsLoading(true);
-    try {
-      const response = await apiRequest('POST', '/api/auth/register', userData);
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Registration error:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
+    console.log('Registro simulado con:', userData);
+    return { success: true, message: 'Registro simulado' };
   };
 
   const logout = () => {
-    context.logout();
+    console.log('Logout simulado');
   };
 
   return {
-    isAuthenticated: context.isAuthenticated,
+    // Siempre retornamos que estamos autenticados
+    isAuthenticated: true,
     user: context.user,
     login,
     register,
