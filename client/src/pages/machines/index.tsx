@@ -109,8 +109,8 @@ export default function MachinesIndex() {
       queryClient.invalidateQueries({ queryKey: ["/api/machines"] });
       
       toast({
-        title: "Unidad creada",
-        description: "La unidad productiva ha sido creada exitosamente",
+        title: "Máquina creada",
+        description: "La maquinaria ha sido registrada exitosamente",
       });
       
       setDialogOpen(false);
@@ -120,7 +120,7 @@ export default function MachinesIndex() {
       console.error("Error creating machine:", error);
       toast({
         title: "Error",
-        description: "No se pudo crear la unidad productiva",
+        description: "No se pudo registrar la maquinaria",
         variant: "destructive",
       });
     }
@@ -181,13 +181,13 @@ export default function MachinesIndex() {
   }) : [];
 
   if (isLoading) {
-    return <div className="py-10 text-center">Cargando unidades productivas...</div>;
+    return <div className="py-10 text-center">Cargando maquinarias...</div>;
   }
 
   if (error) {
     return (
       <div className="py-10 text-center">
-        <div className="text-destructive mb-2">Error al cargar las unidades productivas</div>
+        <div className="text-destructive mb-2">Error al cargar las maquinarias</div>
         <Button 
           variant="outline" 
           onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/machines"] })}
@@ -203,19 +203,19 @@ export default function MachinesIndex() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
         <div>
-          <h1 className="text-2xl font-header font-bold text-neutral-500">Unidades Productivas</h1>
-          <p className="text-neutral-400 text-sm">Gestiona tus tractores, topadoras y camiones</p>
+          <h1 className="text-2xl font-header font-bold text-neutral-500">Maquinarias</h1>
+          <p className="text-neutral-400 text-sm">Gestiona tus tractores, topadoras, camiones y accesorios</p>
         </div>
         
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button className="mt-2 sm:mt-0">
-              <i className="ri-add-line mr-1"></i> Nueva unidad
+              <i className="ri-add-line mr-1"></i> Nueva máquina
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Agregar nueva unidad productiva</DialogTitle>
+              <DialogTitle>Agregar nueva maquinaria</DialogTitle>
               <DialogDescription>
                 Complete los datos de la nueva máquina
               </DialogDescription>
@@ -380,11 +380,11 @@ export default function MachinesIndex() {
       {filteredMachines.length === 0 ? (
         <div className="text-center py-10 bg-white rounded-lg shadow">
           <i className="ri-truck-line text-4xl text-neutral-300 mb-2"></i>
-          <h3 className="text-lg font-medium text-neutral-500 mb-1">No se encontraron unidades</h3>
+          <h3 className="text-lg font-medium text-neutral-500 mb-1">No se encontraron máquinas</h3>
           <p className="text-neutral-400 mb-4">
             {search || filter !== "all" 
               ? "Intente con otros filtros de búsqueda" 
-              : "Registre una nueva unidad productiva para comenzar"}
+              : "Registre una nueva máquina para comenzar"}
           </p>
           {search || filter !== "all" ? (
             <Button 
@@ -399,7 +399,7 @@ export default function MachinesIndex() {
           ) : (
             <DialogTrigger asChild>
               <Button>
-                <i className="ri-add-line mr-1"></i> Nueva unidad
+                <i className="ri-add-line mr-1"></i> Nueva máquina
               </Button>
             </DialogTrigger>
           )}
