@@ -17,7 +17,7 @@ export const insertUserSchema = createInsertSchema(users).omit({
   createdAt: true,
 });
 
-// Machine Table (Unidades Productivas)
+// Machine Table (Maquinarias)
 export const machines = pgTable("machines", {
   id: serial("id").primaryKey(),
   type: text("type").notNull(), // camion, tractor, topadora, accesorio
