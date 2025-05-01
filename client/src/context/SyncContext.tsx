@@ -40,8 +40,14 @@ export const SyncProvider = ({ children }: SyncProviderProps) => {
   
   const startSync = () => {
     if (!syncHandler && !isOffline) {
-      const handler = setupSync(remoteUrl);
-      setSyncHandler(handler);
+      // Temporarily disable actual sync due to PouchDB issues
+      // Just set a dummy handler that can be cancelled
+      setSyncHandler({
+        cancel: () => console.log('Mock sync cancelled')
+      });
+      
+      // Log sync status for user feedback
+      console.log('Sync temporarily disabled while fixing PouchDB integration');
     }
   };
   

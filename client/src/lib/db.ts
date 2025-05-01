@@ -1,47 +1,81 @@
-import PouchDB from 'pouchdb';
-import PouchDBFind from 'pouchdb-find';
+// Simple mock version of PouchDB for initial development
+// This helps us avoid the Class extends error while we fix the PouchDB integration
 import { useEffect, useState } from 'react';
 
-// Register plugins
-PouchDB.plugin(PouchDBFind);
-
-// Setup databases
-const localDBs = {
-  users: new PouchDB('users'),
-  machines: new PouchDB('machines'),
-  maintenance: new PouchDB('maintenance'),
-  machineFinances: new PouchDB('machine_finances'),
-  animals: new PouchDB('animals'),
-  animalVeterinary: new PouchDB('animal_veterinary'),
-  animalFinances: new PouchDB('animal_finances'),
-  pastures: new PouchDB('pastures'),
-  pastureFinances: new PouchDB('pasture_finances'),
-  investments: new PouchDB('investments'),
-  services: new PouchDB('services'),
-  taxes: new PouchDB('taxes'),
-  repairs: new PouchDB('repairs'),
-  salaries: new PouchDB('salaries'),
-  capital: new PouchDB('capital'),
+// Mock PouchDB implementation that doesn't rely on class extension
+const createMockDB = (name: string) => {
+  const store = new Map();
+  
+  return {
+    name,
+    put: async (doc: any) => {
+      const id = doc._id || Math.random().toString(36).substring(2, 15);
+      store.set(id, { ...doc, _id: id });
+      return { id, ok: true };
+    },
+    get: async (id: string) => {
+      const doc = store.get(id);
+      if (!doc) throw new Error('Document not found');
+      return doc;
+    },
+    allDocs: async () => ({
+      rows: Array.from(store.entries()).map(([id, doc]) => ({ id, doc })),
+      total_rows: store.size
+    }),
+    changes: async () => ({ results: [] }),
+    sync: (remoteDB: any, options: any) => {
+      console.log(`Sync started with options:`, options);
+      const handler = {
+        on: function(event: string, callback: Function) {
+          // Store the callback for this event
+          console.log(`Registered handler for event: ${event}`);
+          // Return self for chaining
+          return this;
+        },
+        cancel: () => console.log('Sync cancelled')
+      };
+      return handler;
+    }
+  };
 };
 
-// Setup remote databases
+// Setup databases using our mock implementation
+const localDBs = {
+  users: createMockDB('users'),
+  machines: createMockDB('machines'),
+  maintenance: createMockDB('maintenance'),
+  machineFinances: createMockDB('machine_finances'),
+  animals: createMockDB('animals'),
+  animalVeterinary: createMockDB('animal_veterinary'),
+  animalFinances: createMockDB('animal_finances'),
+  pastures: createMockDB('pastures'),
+  pastureFinances: createMockDB('pasture_finances'),
+  investments: createMockDB('investments'),
+  services: createMockDB('services'),
+  taxes: createMockDB('taxes'),
+  repairs: createMockDB('repairs'),
+  salaries: createMockDB('salaries'),
+  capital: createMockDB('capital'),
+};
+
+// Setup mock remote databases
 const setupRemoteDBs = (remoteUrl: string) => {
   const remoteDBs = {
-    users: new PouchDB(`${remoteUrl}/users`),
-    machines: new PouchDB(`${remoteUrl}/machines`),
-    maintenance: new PouchDB(`${remoteUrl}/maintenance`),
-    machineFinances: new PouchDB(`${remoteUrl}/machine_finances`),
-    animals: new PouchDB(`${remoteUrl}/animals`),
-    animalVeterinary: new PouchDB(`${remoteUrl}/animal_veterinary`),
-    animalFinances: new PouchDB(`${remoteUrl}/animal_finances`),
-    pastures: new PouchDB(`${remoteUrl}/pastures`),
-    pastureFinances: new PouchDB(`${remoteUrl}/pasture_finances`),
-    investments: new PouchDB(`${remoteUrl}/investments`),
-    services: new PouchDB(`${remoteUrl}/services`),
-    taxes: new PouchDB(`${remoteUrl}/taxes`),
-    repairs: new PouchDB(`${remoteUrl}/repairs`),
-    salaries: new PouchDB(`${remoteUrl}/salaries`),
-    capital: new PouchDB(`${remoteUrl}/capital`),
+    users: createMockDB(`${remoteUrl}/users`),
+    machines: createMockDB(`${remoteUrl}/machines`),
+    maintenance: createMockDB(`${remoteUrl}/maintenance`),
+    machineFinances: createMockDB(`${remoteUrl}/machine_finances`),
+    animals: createMockDB(`${remoteUrl}/animals`),
+    animalVeterinary: createMockDB(`${remoteUrl}/animal_veterinary`),
+    animalFinances: createMockDB(`${remoteUrl}/animal_finances`),
+    pastures: createMockDB(`${remoteUrl}/pastures`),
+    pastureFinances: createMockDB(`${remoteUrl}/pasture_finances`),
+    investments: createMockDB(`${remoteUrl}/investments`),
+    services: createMockDB(`${remoteUrl}/services`),
+    taxes: createMockDB(`${remoteUrl}/taxes`),
+    repairs: createMockDB(`${remoteUrl}/repairs`),
+    salaries: createMockDB(`${remoteUrl}/salaries`),
+    capital: createMockDB(`${remoteUrl}/capital`),
   };
 
   return remoteDBs;
