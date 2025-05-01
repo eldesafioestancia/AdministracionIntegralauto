@@ -1,7 +1,7 @@
 import { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { generateToken, verifyPassword, hashPassword, authenticateToken, checkRole } from "./auth";
+import { generateToken, verifyPassword, hashPassword, checkRole } from "./auth";
 import { z } from "zod";
 import {
   insertUserSchema,
@@ -84,9 +84,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Protected routes
+  // Ya no hay rutas protegidas, quitamos el middleware authenticateToken
   // Dashboard
-  app.get("/api/dashboard", authenticateToken, async (req: Request, res: Response) => {
+  app.get("/api/dashboard", async (req: Request, res: Response) => {
     try {
       const stats = await storage.getDashboardStats();
       const upcomingMaintenances = await storage.getUpcomingMaintenances();
@@ -104,7 +104,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Machines routes
-  app.get("/api/machines", authenticateToken, async (req: Request, res: Response) => {
+  app.get("/api/machines", async (req: Request, res: Response) => {
     try {
       const machines = await storage.getMachines();
       res.json(machines);
@@ -114,7 +114,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.get("/api/machines/:id", authenticateToken, async (req: Request, res: Response) => {
+  app.get("/api/machines/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const machine = await storage.getMachine(id);
@@ -130,7 +130,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.post("/api/machines", authenticateToken, async (req: Request, res: Response) => {
+  app.post("/api/machines", async (req: Request, res: Response) => {
     try {
       const machineData = insertMachineSchema.parse(req.body);
       const newMachine = await storage.createMachine(machineData);
@@ -145,7 +145,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.put("/api/machines/:id", authenticateToken, async (req: Request, res: Response) => {
+  app.put("/api/machines/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const machineData = insertMachineSchema.partial().parse(req.body);
@@ -167,7 +167,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.delete("/api/machines/:id", authenticateToken, checkRole(["admin", "supervisor"]), async (req: Request, res: Response) => {
+  app.delete("/api/machines/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const deleted = await storage.deleteMachine(id);
@@ -184,7 +184,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Machine Maintenance routes
-  app.get("/api/maintenance", authenticateToken, async (req: Request, res: Response) => {
+  app.get("/api/maintenance", async (req: Request, res: Response) => {
     try {
       const machineId = req.query.machineId ? parseInt(req.query.machineId as string) : undefined;
       const maintenances = await storage.getMaintenances(machineId);
@@ -195,7 +195,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.get("/api/maintenance/:id", authenticateToken, async (req: Request, res: Response) => {
+  app.get("/api/maintenance/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const maintenance = await storage.getMaintenance(id);
@@ -211,7 +211,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.post("/api/maintenance", authenticateToken, async (req: Request, res: Response) => {
+  app.post("/api/maintenance", async (req: Request, res: Response) => {
     try {
       const maintenanceData = insertMaintenanceSchema.parse(req.body);
       const newMaintenance = await storage.createMaintenance(maintenanceData);
@@ -226,7 +226,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.put("/api/maintenance/:id", authenticateToken, async (req: Request, res: Response) => {
+  app.put("/api/maintenance/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const maintenanceData = insertMaintenanceSchema.partial().parse(req.body);
@@ -248,7 +248,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.delete("/api/maintenance/:id", authenticateToken, async (req: Request, res: Response) => {
+  app.delete("/api/maintenance/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const deleted = await storage.deleteMaintenance(id);
@@ -265,7 +265,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Machine Finance routes
-  app.get("/api/machine-finances", authenticateToken, async (req: Request, res: Response) => {
+  app.get("/api/machine-finances", async (req: Request, res: Response) => {
     try {
       const machineId = req.query.machineId ? parseInt(req.query.machineId as string) : undefined;
       const finances = await storage.getMachineFinances(machineId);
@@ -276,7 +276,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.post("/api/machine-finances", authenticateToken, async (req: Request, res: Response) => {
+  app.post("/api/machine-finances", async (req: Request, res: Response) => {
     try {
       const financeData = insertMachineFinanceSchema.parse(req.body);
       const newFinance = await storage.createMachineFinance(financeData);
@@ -291,7 +291,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.delete("/api/machine-finances/:id", authenticateToken, checkRole(["admin", "supervisor"]), async (req: Request, res: Response) => {
+  app.delete("/api/machine-finances/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const deleted = await storage.deleteMachineFinance(id);
