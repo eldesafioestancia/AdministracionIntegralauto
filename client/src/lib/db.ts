@@ -22,7 +22,10 @@ const createMockDB = (name: string) => {
       rows: Array.from(store.entries()).map(([id, doc]) => ({ id, doc })),
       total_rows: store.size
     }),
-    changes: async () => ({ results: [] }),
+    changes: async (options: any) => {
+      console.log('Mock changes called with options:', options);
+      return { results: [] };
+    },
     sync: (remoteDB: any, options: any) => {
       console.log(`Sync started with options:`, options);
       const handler = {
@@ -130,46 +133,17 @@ export const getDB = (name: keyof typeof localDBs) => {
 };
 
 // Get pending documents count (docs that need sync)
+// Using a mocked implementation until PouchDB is fixed
 export const getPendingDocsCount = async () => {
-  let totalPending = 0;
-  
-  for (const dbName in localDBs) {
-    const db = localDBs[dbName as keyof typeof localDBs];
-    // Get changes that haven't been synced yet
-    const changes = await db.changes({
-      since: 'now',
-      live: false,
-      include_docs: false
-    });
-    
-    if (changes.results) {
-      totalPending += changes.results.length;
-    }
-  }
-  
-  return totalPending;
+  // Return 0 for now as we're using a mock implementation
+  console.log('Mock getPendingDocsCount called');
+  return 0;
 };
 
 // Hook to monitor pending docs count
 export const usePendingDocsCount = () => {
-  const [pendingCount, setPendingCount] = useState(0);
-  
-  useEffect(() => {
-    const checkPendingDocs = async () => {
-      const count = await getPendingDocsCount();
-      setPendingCount(count);
-    };
-    
-    // Check immediately
-    checkPendingDocs();
-    
-    // Then check periodically
-    const interval = setInterval(checkPendingDocs, 5000);
-    
-    return () => clearInterval(interval);
-  }, []);
-  
-  return pendingCount;
+  // Simply return 0 for now - no pending documents in mock implementation
+  return 0;
 };
 
 // Export databases
