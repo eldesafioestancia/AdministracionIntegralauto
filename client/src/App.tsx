@@ -12,24 +12,48 @@ import { useAuth } from "@/hooks/useAuth";
 import AppLayout from "@/components/layouts/AppLayout";
 
 function ProtectedRoute({ component: Component, ...rest }: any) {
-  // Simplemente renderizamos el componente directamente sin verificar autenticación
+  const { isAuthenticated, isLoading } = useAuth();
+  const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    console.log('ProtectedRoute - Auth state:', { isAuthenticated, isLoading });
+    if (!isLoading && !isAuthenticated) {
+      console.log('Redirigiendo a login por falta de autenticación');
+      setLocation("/login");
+    }
+  }, [isLoading, isAuthenticated, setLocation]);
+
+  if (isLoading) {
+    return <div className="flex h-screen items-center justify-center">Cargando...</div>;
+  }
+
+  if (!isAuthenticated) {
+    console.log('No autenticado, retornando null en ProtectedRoute');
+    return null;
+  }
+
+  console.log('Autenticado, renderizando componente protegido');
   return <Component {...rest} />;
 }
 
 function App() {
-  // Ya no necesitamos verificar autenticación
+  const { isAuthenticated } = useAuth();
+  const [location] = useLocation();
+
+  // Redirect to dashboard if authenticated and on login page
+  useEffect(() => {
+    console.log('App - Auth state y ubicación:', { isAuthenticated, location });
+    if (isAuthenticated && location === "/login") {
+      console.log('Redirigiendo a dashboard desde página de login');
+      window.location.href = "/";
+    }
+  }, [isAuthenticated, location]);
+
   return (
     <TooltipProvider>
       <Toaster />
       <Switch>
-        {/* La ruta de login ya no es necesaria, pero la dejamos por si acaso */}
-        <Route path="/login">
-          {/* Redireccionamos automáticamente al dashboard */}
-          {() => {
-            window.location.href = "/";
-            return null;
-          }}
-        </Route>
+        <Route path="/login" component={Login} />
         
         <Route path="/">
           <AppLayout>

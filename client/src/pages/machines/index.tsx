@@ -32,8 +32,8 @@ import { format } from "date-fns";
 
 // Machine form schema
 const machineFormSchema = z.object({
-  type: z.enum(["tractor", "topadora", "camion", "accesorio"], { 
-    required_error: "El tipo de maquinaria es requerido",
+  type: z.enum(["tractor", "topadora", "camion"], { 
+    required_error: "El tipo de unidad es requerido",
   }),
   brand: z.string().min(1, { message: "La marca es requerida" }),
   model: z.string().min(1, { message: "El modelo es requerido" }),
@@ -42,26 +42,6 @@ const machineFormSchema = z.object({
   purchaseDate: z.date({
     required_error: "La fecha de compra es requerida",
   }),
-  serialNumber: z.string().optional(),
-  status: z.enum(["activo", "en_mantenimiento", "fuera_de_servicio"]).default("activo"),
-  fuelType: z.string().optional(),
-  engineType: z.string().optional(),
-  engineHp: z.number().int().optional(),
-  transmission: z.string().optional(),
-  weight: z.string().optional(),
-  dimensions: z.object({
-    length: z.number().optional(),
-    width: z.number().optional(),
-    height: z.number().optional(),
-  }).optional(),
-  licensePlate: z.string().optional(),
-  maxLoad: z.string().optional(),
-  attachments: z.array(z.string()).optional(),
-  purchasePrice: z.string().optional(),
-  notes: z.string().optional(),
-  lastMaintenanceDate: z.date().optional(),
-  nextMaintenanceDate: z.date().optional(),
-  image: z.string().optional(),
 });
 
 type MachineFormValues = z.infer<typeof machineFormSchema>;
@@ -85,19 +65,6 @@ export default function MachinesIndex() {
       year: new Date().getFullYear(),
       hours: "0",
       purchaseDate: new Date(),
-      status: "activo",
-      serialNumber: "",
-      fuelType: "",
-      engineType: "",
-      weight: "",
-      purchasePrice: "",
-      attachments: [],
-      dimensions: {
-        length: 0,
-        width: 0,
-        height: 0
-      },
-      image: ""
     },
   });
 
@@ -109,8 +76,8 @@ export default function MachinesIndex() {
       queryClient.invalidateQueries({ queryKey: ["/api/machines"] });
       
       toast({
-        title: "Máquina creada",
-        description: "La maquinaria ha sido registrada exitosamente",
+        title: "Unidad creada",
+        description: "La unidad productiva ha sido creada exitosamente",
       });
       
       setDialogOpen(false);
@@ -120,7 +87,7 @@ export default function MachinesIndex() {
       console.error("Error creating machine:", error);
       toast({
         title: "Error",
-        description: "No se pudo registrar la maquinaria",
+        description: "No se pudo crear la unidad productiva",
         variant: "destructive",
       });
     }
@@ -131,7 +98,6 @@ export default function MachinesIndex() {
       case "tractor": return "Tractor";
       case "topadora": return "Topadora";
       case "camion": return "Camión";
-      case "accesorio": return "Accesorio";
       default: return type;
     }
   };
@@ -141,18 +107,11 @@ export default function MachinesIndex() {
       case "tractor": return "ri-truck-line";
       case "topadora": return "ri-loader-line";
       case "camion": return "ri-truck-fill";
-      case "accesorio": return "ri-tools-line";
       default: return "ri-truck-line";
     }
   };
 
-  const getMachineImage = (type: string, image?: string) => {
-    // Si la máquina tiene una imagen definida, usarla
-    if (image) {
-      return image;
-    }
-    
-    // Si no, usar una imagen por defecto según el tipo
+  const getMachineImage = (type: string) => {
     switch (type) {
       case "tractor":
         return "https://images.unsplash.com/photo-1593613128698-1a5de600051a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=200&q=80";
@@ -160,8 +119,6 @@ export default function MachinesIndex() {
         return "https://images.unsplash.com/photo-1613046561926-371d5403d504?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=200&q=80";
       case "camion":
         return "https://images.unsplash.com/photo-1626078427472-7811789ed2dc?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=200&q=80";
-      case "accesorio":
-        return "https://images.unsplash.com/photo-1499013819532-e4ff41b00669?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=200&q=80";
       default:
         return "https://images.unsplash.com/photo-1605654145610-2f65428be306?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=200&q=80";
     }
@@ -181,13 +138,13 @@ export default function MachinesIndex() {
   }) : [];
 
   if (isLoading) {
-    return <div className="py-10 text-center">Cargando maquinarias...</div>;
+    return <div className="py-10 text-center">Cargando unidades productivas...</div>;
   }
 
   if (error) {
     return (
       <div className="py-10 text-center">
-        <div className="text-destructive mb-2">Error al cargar las maquinarias</div>
+        <div className="text-destructive mb-2">Error al cargar las unidades productivas</div>
         <Button 
           variant="outline" 
           onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/machines"] })}
@@ -203,19 +160,19 @@ export default function MachinesIndex() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
         <div>
-          <h1 className="text-2xl font-header font-bold text-neutral-500">Maquinarias</h1>
-          <p className="text-neutral-400 text-sm">Gestiona tus tractores, topadoras, camiones y accesorios</p>
+          <h1 className="text-2xl font-header font-bold text-neutral-500">Unidades Productivas</h1>
+          <p className="text-neutral-400 text-sm">Gestiona tus tractores, topadoras y camiones</p>
         </div>
         
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button className="mt-2 sm:mt-0">
-              <i className="ri-add-line mr-1"></i> Nueva máquina
+              <i className="ri-add-line mr-1"></i> Nueva unidad
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Agregar nueva maquinaria</DialogTitle>
+              <DialogTitle>Agregar nueva unidad productiva</DialogTitle>
               <DialogDescription>
                 Complete los datos de la nueva máquina
               </DialogDescription>
@@ -242,7 +199,6 @@ export default function MachinesIndex() {
                           <SelectItem value="tractor">Tractor</SelectItem>
                           <SelectItem value="topadora">Topadora</SelectItem>
                           <SelectItem value="camion">Camión</SelectItem>
-                          <SelectItem value="accesorio">Accesorio</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -371,7 +327,6 @@ export default function MachinesIndex() {
             <SelectItem value="tractor">Tractores</SelectItem>
             <SelectItem value="topadora">Topadoras</SelectItem>
             <SelectItem value="camion">Camiones</SelectItem>
-            <SelectItem value="accesorio">Accesorios</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -380,11 +335,11 @@ export default function MachinesIndex() {
       {filteredMachines.length === 0 ? (
         <div className="text-center py-10 bg-white rounded-lg shadow">
           <i className="ri-truck-line text-4xl text-neutral-300 mb-2"></i>
-          <h3 className="text-lg font-medium text-neutral-500 mb-1">No se encontraron máquinas</h3>
+          <h3 className="text-lg font-medium text-neutral-500 mb-1">No se encontraron unidades</h3>
           <p className="text-neutral-400 mb-4">
             {search || filter !== "all" 
               ? "Intente con otros filtros de búsqueda" 
-              : "Registre una nueva máquina para comenzar"}
+              : "Registre una nueva unidad productiva para comenzar"}
           </p>
           {search || filter !== "all" ? (
             <Button 
@@ -399,7 +354,7 @@ export default function MachinesIndex() {
           ) : (
             <DialogTrigger asChild>
               <Button>
-                <i className="ri-add-line mr-1"></i> Nueva máquina
+                <i className="ri-add-line mr-1"></i> Nueva unidad
               </Button>
             </DialogTrigger>
           )}
