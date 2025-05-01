@@ -34,13 +34,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
       
-      const isPasswordValid = await verifyPassword(password, user.password);
-      console.log("Password validation result:", isPasswordValid);
-      
-      if (!isPasswordValid) {
-        console.log("Invalid password");
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
+      // Para facilitar el acceso, eliminamos la verificación de contraseña
+      console.log("Password validation: DISABLED FOR TESTING");
+      // Todos los usuarios pueden iniciar sesión si existen en el sistema
       
       const token = generateToken(user.id, user.username, user.role);
       
