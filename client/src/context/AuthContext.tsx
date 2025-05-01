@@ -66,9 +66,29 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         return false;
       }
       
-      // Verify token is valid with the server
-      // We could make a request to a /verify endpoint, but for simplicity,
-      // we'll just set the state based on the stored token
+      console.log("Verificando token guardado:", storedToken);
+      
+      // Intentar hacer una solicitud a un endpoint protegido para validar el token
+      try {
+        const response = await fetch('/api/dashboard', {
+          headers: {
+            'Authorization': `Bearer ${storedToken}`
+          }
+        });
+        
+        if (!response.ok) {
+          console.log("Token inválido o expirado, respuesta:", response.status);
+          logout();
+          setAuthChecked(true);
+          return false;
+        }
+        
+        console.log("Token verificado con éxito");
+      } catch (fetchError) {
+        console.error("Error al verificar token:", fetchError);
+        // Si hay un error de conexión, permitimos continuar con el token almacenado
+        // para mantener la funcionalidad offline
+      }
       
       setToken(storedToken);
       setUser(JSON.parse(storedUser));
