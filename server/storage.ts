@@ -191,7 +191,7 @@ export class MemStorage implements IStorage {
       role: "admin",
     });
 
-    // Initialize with some sample machines
+    // Tractores
     this.createMachine({
       type: "tractor",
       brand: "John Deere",
@@ -199,8 +199,44 @@ export class MemStorage implements IStorage {
       year: 2020,
       hours: "1245",
       purchaseDate: new Date("2020-05-15"),
+      serialNumber: "JD6130M-54321",
+      status: "activo",
+      fuelType: "diesel",
+      engineType: "6 cilindros turbo",
+      engineHp: 130,
+      transmission: "PowerQuad Plus",
+      weight: "5200",
+      dimensions: { length: 4.5, width: 2.3, height: 2.9 },
+      attachments: ["arado", "rastra"],
+      purchasePrice: "85000",
+      lastMaintenanceDate: new Date("2024-03-15"),
+      nextMaintenanceDate: new Date("2025-06-15"),
+      image: "https://placehold.co/600x400/png?text=John+Deere+6130M"
     });
 
+    this.createMachine({
+      type: "tractor",
+      brand: "Massey Ferguson",
+      model: "5710",
+      year: 2021,
+      hours: "980",
+      purchaseDate: new Date("2021-02-10"),
+      serialNumber: "MF5710-98765",
+      status: "activo",
+      fuelType: "diesel",
+      engineType: "4 cilindros",
+      engineHp: 110,
+      transmission: "Dyna-4",
+      weight: "4800",
+      dimensions: { length: 4.3, width: 2.2, height: 2.8 },
+      attachments: ["sembradora", "fertilizadora"],
+      purchasePrice: "78000",
+      lastMaintenanceDate: new Date("2024-04-05"),
+      nextMaintenanceDate: new Date("2025-04-05"),
+      image: "https://placehold.co/600x400/png?text=Massey+Ferguson+5710"
+    });
+
+    // Topadoras
     this.createMachine({
       type: "topadora",
       brand: "Caterpillar",
@@ -208,8 +244,44 @@ export class MemStorage implements IStorage {
       year: 2018,
       hours: "2890",
       purchaseDate: new Date("2018-03-22"),
+      serialNumber: "CAT-D6-12345",
+      status: "activo",
+      fuelType: "diesel",
+      engineType: "C9.3B",
+      engineHp: 215,
+      transmission: "Servotransmisión",
+      weight: "22000",
+      dimensions: { length: 6.4, width: 3.4, height: 3.2 },
+      attachments: ["hoja estándar", "hoja en ángulo"],
+      purchasePrice: "290000",
+      lastMaintenanceDate: new Date("2024-02-10"),
+      nextMaintenanceDate: new Date("2025-02-10"),
+      image: "https://placehold.co/600x400/png?text=Caterpillar+D6"
     });
 
+    this.createMachine({
+      type: "topadora",
+      brand: "Komatsu",
+      model: "D65EX-18",
+      year: 2019,
+      hours: "2100",
+      purchaseDate: new Date("2019-06-15"),
+      serialNumber: "KOM-D65-54321",
+      status: "en_mantenimiento",
+      fuelType: "diesel",
+      engineType: "SAA6D114E-6",
+      engineHp: 220,
+      transmission: "ECMV automática",
+      weight: "23000",
+      dimensions: { length: 6.5, width: 3.5, height: 3.3 },
+      attachments: ["hoja sigmadozer", "escarificador"],
+      purchasePrice: "310000",
+      lastMaintenanceDate: new Date("2024-04-20"),
+      nextMaintenanceDate: new Date("2025-04-20"),
+      image: "https://placehold.co/600x400/png?text=Komatsu+D65EX"
+    });
+
+    // Camiones
     this.createMachine({
       type: "camion",
       brand: "Ford",
@@ -217,6 +289,80 @@ export class MemStorage implements IStorage {
       year: 2019,
       hours: "85600",
       purchaseDate: new Date("2019-11-10"),
+      serialNumber: "FORD-F350-67890",
+      status: "activo",
+      fuelType: "diesel",
+      engineType: "Power Stroke",
+      engineHp: 450,
+      transmission: "TorqShift 10 velocidades",
+      weight: "3500",
+      dimensions: { length: 6.3, width: 2.4, height: 2.0 },
+      licensePlate: "AB 123 CD",
+      maxLoad: "6000",
+      purchasePrice: "65000",
+      lastMaintenanceDate: new Date("2024-01-15"),
+      nextMaintenanceDate: new Date("2025-01-15"),
+      image: "https://placehold.co/600x400/png?text=Ford+F350"
+    });
+
+    this.createMachine({
+      type: "camion",
+      brand: "Mercedes-Benz",
+      model: "Actros 2645",
+      year: 2020,
+      hours: "65000",
+      purchaseDate: new Date("2020-08-22"),
+      serialNumber: "MB-ACT-123456",
+      status: "activo",
+      fuelType: "diesel",
+      engineType: "OM 471",
+      engineHp: 450,
+      transmission: "PowerShift 3",
+      weight: "8500",
+      dimensions: { length: 7.2, width: 2.5, height: 3.8 },
+      licensePlate: "CD 456 EF",
+      maxLoad: "25000",
+      purchasePrice: "125000",
+      lastMaintenanceDate: new Date("2024-03-10"),
+      nextMaintenanceDate: new Date("2025-03-10"),
+      image: "https://placehold.co/600x400/png?text=Mercedes+Actros"
+    });
+
+    // Accesorios
+    this.createMachine({
+      type: "accesorio",
+      brand: "John Deere",
+      model: "Arado de 5 surcos",
+      year: 2019,
+      hours: "850",
+      purchaseDate: new Date("2019-05-20"),
+      serialNumber: "JD-ARADO-12345",
+      status: "activo",
+      weight: "980",
+      dimensions: { length: 3.2, width: 2.8, height: 1.4 },
+      attachments: ["tractores serie 6M"],
+      purchasePrice: "12500",
+      lastMaintenanceDate: new Date("2024-02-15"),
+      nextMaintenanceDate: new Date("2025-02-15"),
+      image: "https://placehold.co/600x400/png?text=Arado+JD"
+    });
+
+    this.createMachine({
+      type: "accesorio",
+      brand: "Kuhn",
+      model: "Sembradora Multi-Drill",
+      year: 2021,
+      hours: "450",
+      purchaseDate: new Date("2021-03-15"),
+      serialNumber: "KUHN-SEM-54321",
+      status: "activo",
+      weight: "2200",
+      dimensions: { length: 4.5, width: 3.0, height: 1.8 },
+      attachments: ["tractores 100-150HP"],
+      purchasePrice: "35000",
+      lastMaintenanceDate: new Date("2024-01-10"),
+      nextMaintenanceDate: new Date("2025-01-10"),
+      image: "https://placehold.co/600x400/png?text=Sembradora+Kuhn"
     });
 
     // Add some maintenance records

@@ -20,12 +20,30 @@ export const insertUserSchema = createInsertSchema(users).omit({
 // Machine Table (Unidades Productivas)
 export const machines = pgTable("machines", {
   id: serial("id").primaryKey(),
-  type: text("type").notNull(), // tractor, topadora, camion
+  type: text("type").notNull(), // camion, tractor, topadora, accesorio
   brand: text("brand").notNull(),
   model: text("model").notNull(),
   year: integer("year").notNull(),
   hours: decimal("hours").notNull().default("0"),
   purchaseDate: timestamp("purchase_date").notNull(),
+  serialNumber: text("serial_number"),
+  status: text("status").default("activo").notNull(), // activo, en_mantenimiento, fuera_de_servicio
+  fuelType: text("fuel_type"), // diesel, gasolina, etc
+  engineType: text("engine_type"),
+  engineHp: integer("engine_hp"),
+  transmission: text("transmission"),
+  weight: decimal("weight"), // peso en kg
+  dimensions: json("dimensions"), // { length, width, height } en metros
+  licensePlate: text("license_plate"), // para camiones
+  maxLoad: decimal("max_load"), // para camiones en kg
+  attachments: json("attachments"), // lista de accesorios compatibles
+  insuranceInfo: json("insurance_info"), // datos del seguro
+  purchasePrice: decimal("purchase_price"),
+  notes: text("notes"),
+  lastMaintenanceDate: timestamp("last_maintenance_date"),
+  nextMaintenanceDate: timestamp("next_maintenance_date"),
+  documents: json("documents"), // lista de documentación asociada
+  image: text("image"), // URL de imagen
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
