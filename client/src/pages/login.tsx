@@ -56,12 +56,20 @@ export default function Login() {
 
   async function onLoginSubmit(data: LoginFormValues) {
     setIsLoggingIn(true);
+    console.log("Login - Intentando iniciar sesión con:", data.username);
     try {
-      await login({
+      const result = await login({
         username: data.username,
         password: data.password,
       });
-      // Successful login will redirect through the auth context
+      console.log("Login - Resultado de inicio de sesión:", result);
+      // Añadimos una redirección manual en caso de que el redireccionamiento automático no funcione
+      setTimeout(() => {
+        if (window.location.pathname === '/login') {
+          console.log('Login - Forzando redirección manual a home');
+          window.location.href = '/';
+        }
+      }, 1000);
     } catch (error) {
       console.error("Login error:", error);
       toast({

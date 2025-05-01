@@ -16,7 +16,9 @@ function ProtectedRoute({ component: Component, ...rest }: any) {
   const [, setLocation] = useLocation();
 
   useEffect(() => {
+    console.log('ProtectedRoute - Auth state:', { isAuthenticated, isLoading });
     if (!isLoading && !isAuthenticated) {
+      console.log('Redirigiendo a login por falta de autenticación');
       setLocation("/login");
     }
   }, [isLoading, isAuthenticated, setLocation]);
@@ -26,9 +28,11 @@ function ProtectedRoute({ component: Component, ...rest }: any) {
   }
 
   if (!isAuthenticated) {
+    console.log('No autenticado, retornando null en ProtectedRoute');
     return null;
   }
 
+  console.log('Autenticado, renderizando componente protegido');
   return <Component {...rest} />;
 }
 
@@ -38,7 +42,9 @@ function App() {
 
   // Redirect to dashboard if authenticated and on login page
   useEffect(() => {
+    console.log('App - Auth state y ubicación:', { isAuthenticated, location });
     if (isAuthenticated && location === "/login") {
+      console.log('Redirigiendo a dashboard desde página de login');
       window.location.href = "/";
     }
   }, [isAuthenticated, location]);

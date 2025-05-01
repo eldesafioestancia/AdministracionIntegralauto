@@ -40,11 +40,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, []);
 
   const login = (newToken: string, userData: User) => {
+    console.log('AuthContext login - Guardando token y datos de usuario', { newToken, userData });
     localStorage.setItem('token', newToken);
     localStorage.setItem('user', JSON.stringify(userData));
     setToken(newToken);
     setUser(userData);
     setIsAuthenticated(true);
+    console.log('AuthContext login - Estado actualizado, isAuthenticated:', true);
   };
 
   const logout = () => {
