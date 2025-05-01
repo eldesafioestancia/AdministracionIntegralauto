@@ -40,13 +40,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, []);
 
   const login = (newToken: string, userData: User) => {
-    console.log('AuthContext login - Guardando token y datos de usuario', { newToken, userData });
     localStorage.setItem('token', newToken);
     localStorage.setItem('user', JSON.stringify(userData));
     setToken(newToken);
     setUser(userData);
     setIsAuthenticated(true);
-    console.log('AuthContext login - Estado actualizado, isAuthenticated:', true);
   };
 
   const logout = () => {
@@ -68,29 +66,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         return false;
       }
       
-      console.log("Verificando token guardado:", storedToken);
-      
-      // Intentar hacer una solicitud a un endpoint protegido para validar el token
-      try {
-        const response = await fetch('/api/dashboard', {
-          headers: {
-            'Authorization': `Bearer ${storedToken}`
-          }
-        });
-        
-        if (!response.ok) {
-          console.log("Token inválido o expirado, respuesta:", response.status);
-          logout();
-          setAuthChecked(true);
-          return false;
-        }
-        
-        console.log("Token verificado con éxito");
-      } catch (fetchError) {
-        console.error("Error al verificar token:", fetchError);
-        // Si hay un error de conexión, permitimos continuar con el token almacenado
-        // para mantener la funcionalidad offline
-      }
+      // Verify token is valid with the server
+      // We could make a request to a /verify endpoint, but for simplicity,
+      // we'll just set the state based on the stored token
       
       setToken(storedToken);
       setUser(JSON.parse(storedUser));

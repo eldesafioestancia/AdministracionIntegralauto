@@ -32,15 +32,7 @@ export function useAuth() {
     try {
       const response = await apiRequest('POST', '/api/auth/login', credentials);
       const data = await response.json();
-      console.log('Login response data:', data);
       context.login(data.token, data.user);
-      
-      // Verificar que el token esté almacenado correctamente
-      console.log('Token stored in localStorage:', localStorage.getItem('token'));
-      
-      // Forzar la redirección después de un inicio de sesión exitoso
-      window.location.href = '/';
-      
       return data;
     } catch (error) {
       console.error('Login error:', error);

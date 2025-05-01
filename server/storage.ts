@@ -18,7 +18,6 @@ import {
 
 export interface IStorage {
   // Users
-  getUsers(): Promise<User[]>;
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
@@ -191,22 +190,6 @@ export class MemStorage implements IStorage {
       fullName: "Admin User",
       role: "admin",
     });
-    
-    // Add a new user for testing
-    this.createUser({
-      username: "test@ejemplo.com",
-      password: "$2b$10$eCJJFfGJXRrQGPc7KZbhfeoZXmn1tdGQM.8gGXqUEFSc40KWjN6fC", // This is "password" hashed
-      fullName: "Usuario de Prueba",
-      role: "user",
-    });
-    
-    // Add the admin@ejemplo.com user
-    this.createUser({
-      username: "admin@ejemplo.com",
-      password: "$2b$10$eCJJFfGJXRrQGPc7KZbhfeoZXmn1tdGQM.8gGXqUEFSc40KWjN6fC", // This is "password" hashed
-      fullName: "Administrador",
-      role: "admin",
-    });
 
     // Initialize with some sample machines
     this.createMachine({
@@ -296,10 +279,6 @@ export class MemStorage implements IStorage {
   }
 
   // Users
-  async getUsers(): Promise<User[]> {
-    return Array.from(this.users.values());
-  }
-  
   async getUser(id: number): Promise<User | undefined> {
     return this.users.get(id);
   }
