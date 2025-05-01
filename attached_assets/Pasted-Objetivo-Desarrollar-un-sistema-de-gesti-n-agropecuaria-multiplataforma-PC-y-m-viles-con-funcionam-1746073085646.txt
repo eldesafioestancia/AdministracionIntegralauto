@@ -1,0 +1,90 @@
+Objetivo
+Desarrollar un sistema de gestión agropecuaria multiplataforma (PC y móviles) con funcionamiento online y offline. Debe permitir el registro completo de unidades productivas, animales, pasturas, inversiones, servicios, impuestos, reparaciones, sueldos y capital.
+
+Tecnologías y arquitectura
+
+Frontend PWA usando Ionic React (o React + service workers) para que se pueda instalar en PC y móviles.
+
+Backend con Node.js + Express (o NestJS) exponiendo una API REST/GraphQL.
+
+Base de datos local PouchDB en el cliente y replicación automática con CouchDB en servidor para sincronización offline/online.
+
+Autenticación JWT y control de usuarios.
+
+Diseño responsive con Ionic UI, validaciones de formularios y accesibilidad.
+
+Módulos y requisitos funcionales
+
+1. Unidades productivas
+Tractores, Topadoras, Camiones
+
+CRUD de unidades: marca, modelo, año de fabricación, horas de trabajo, fecha de compra.
+
+Ficha de mantenimiento: checklist para cambio de aceite motor, aceite hidráulico, refrigerante; cantidad; reemplazo de filtros (aceite, hidráulico, combustible, aire); parches realizados; otros trabajos libres. Registrar fecha y responsable.
+
+Registro de ingresos y gastos asociados a cada máquina (fecha, concepto, monto).
+
+Vista de historial cronológico tanto de mantenimientos como de trabajos realizados.
+
+2. Animales
+CRUD de individuos: fecha de nacimiento, edad (cálculo automático), raza, madre, padre, descripción, nro caravana, color, estado corporal.
+
+Registro de actividad veterinaria: separación de toros, colocación/retiro de dispositivo, inseminación, tacto, fecha y descripción de visitas veterinarias, parto, destete, venta, vacunaciones (fecha + descripción).
+
+Ingresos por animal: tipo (ternero/a, novillo, vaquillona, vaca, toro), kg totales, precio por kg, monto.
+
+Gastos por animal: SENASA, vacunas, veterinaria, alimento, otros (descripción + monto).
+
+Historial cronológico en ficha individual con pestañas “Veterinaria” y “Cría”.
+
+3. Pasturas
+Registro de ingresos: rollos.
+
+Registro de gastos: semillas, control de malezas, fertilizante, hilos, repuestos, horas de tractor.
+
+4. Inversiones
+Maquinaria, alambrados, construcciones, desmontes, herramientas
+
+Para alambrados: mano de obra, alambre, postes, horas topadora.
+
+Para construcciones: materiales, mano de obra.
+
+Para desmontes: horas topadora.
+
+Servicios: EDESAL, consorcio de regantes, agua potable, internet.
+
+Impuestos
+
+Municipales y provinciales (con códigos, moratorias).
+
+Tasas y otros tributos.
+
+Reparaciones: construcciones, electricista, albañil, plomero, materiales.
+
+Sueldos: listado de empleados (Pincheira, Lima, Alfredo, Ozan) con fecha y monto.
+
+Capital: aportes y retiros por socio (Juan Carlos, Juan Alberto, Nacho).
+
+Requisitos adicionales
+
+Módulo de sincronización offline/online automática.
+
+Roles de usuario (admin, supervisor, operario).
+
+Exportación de reportes a PDF/Excel (resúmenes de ingresos/gastos, stock de animales/máquinas).
+
+Dashboard con indicadores clave (número de animales, horas de máquina, flujo de caja).
+
+Pruebas unitarias y de integración.
+
+Documentación auto-generada de la API (Swagger o GraphQL Playground).
+
+Entrega esperada
+
+Esqueleto del proyecto en Replit con carpetas /client, /server.
+
+Configuración de PWA y replicación PouchDB–CouchDB.
+
+Primeros endpoints y pantallas para Unidades productivas (máquinas).
+
+Instrucciones de despliegue local y en la nube (Replit Deploy).
