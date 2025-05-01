@@ -60,7 +60,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                   onClick={closeSidebar}
                 >
                   <i className="ri-truck-line mr-3 text-lg"></i>
-                  Unidades productivas
+                  Maquinarias
                 </a>
               </Link>
               <Link href="/animals">
