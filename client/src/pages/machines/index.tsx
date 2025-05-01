@@ -160,8 +160,8 @@ export default function MachinesIndex() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
         <div>
-          <h1 className="text-2xl font-header font-bold text-neutral-500">Unidades Productivas</h1>
-          <p className="text-neutral-400 text-sm">Gestiona tus tractores, topadoras y camiones</p>
+          <h1 className="text-2xl font-header font-bold text-neutral-500">Maquinarias</h1>
+          <p className="text-neutral-400 text-sm">Gestiona tus camiones, tractores, topadoras y accesorios</p>
         </div>
         
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -323,10 +323,11 @@ export default function MachinesIndex() {
             <SelectValue placeholder="Filtrar por tipo" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos los tipos</SelectItem>
+            <SelectItem value="all">Todas las categorías</SelectItem>
+            <SelectItem value="camion">Camiones</SelectItem>
             <SelectItem value="tractor">Tractores</SelectItem>
             <SelectItem value="topadora">Topadoras</SelectItem>
-            <SelectItem value="camion">Camiones</SelectItem>
+            <SelectItem value="accesorio">Accesorios</SelectItem>
           </SelectContent>
         </Select>
       </div>

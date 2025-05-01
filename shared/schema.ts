@@ -20,7 +20,7 @@ export const insertUserSchema = createInsertSchema(users).omit({
 // Machine Table (Unidades Productivas)
 export const machines = pgTable("machines", {
   id: serial("id").primaryKey(),
-  type: text("type").notNull(), // tractor, topadora, camion
+  type: text("type").notNull(), // camion, tractor, topadora, accesorio
   brand: text("brand").notNull(),
   model: text("model").notNull(),
   year: integer("year").notNull(),
