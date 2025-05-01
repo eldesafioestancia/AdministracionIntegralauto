@@ -1,0 +1,39 @@
+{
+  "name": "AgroGest",
+  "short_name": "AgroGest",
+  "description": "Sistema de Gestión Agropecuaria con funcionalidad online/offline",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3B7A57",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "orientation": "portrait-primary",
+  "categories": ["productivity", "business", "agriculture"],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "url": "/"
+    },
+    {
+      "name": "Unidades Productivas",
+      "url": "/machines"
+    },
+    {
+      "name": "Animales",
+      "url": "/animals"
+    }
+  ]
+}
