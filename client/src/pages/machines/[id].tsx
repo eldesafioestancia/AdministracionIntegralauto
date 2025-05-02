@@ -291,50 +291,157 @@ export default function MachineDetail() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
-                      {maintenance.motorOil && (
-                        <div className="flex items-center">
-                          <i className="ri-checkbox-circle-line text-success mr-1"></i>
-                          <span className="text-sm">Aceite motor: {maintenance.motorOilQuantity}L</span>
+                    {maintenance.type === "maintenance_repair" ? (
+                      <div className="space-y-3">
+                        {maintenance.workshopName && (
+                          <div className="mb-4">
+                            <div className="font-medium text-neutral-600 mb-1">Taller:</div>
+                            <div className="text-sm text-neutral-500">{maintenance.workshopName}</div>
+                            {maintenance.workshopPhone && (
+                              <div className="text-sm text-neutral-500">Tel: {maintenance.workshopPhone}</div>
+                            )}
+                            {maintenance.workshopAddress && (
+                              <div className="text-sm text-neutral-500">{maintenance.workshopAddress}</div>
+                            )}
+                          </div>
+                        )}
+                        
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                          {maintenance.electricalSystem && (
+                            <div className="flex items-center">
+                              <i className="ri-checkbox-circle-line text-success mr-1"></i>
+                              <span className="text-sm">Eléctrico</span>
+                            </div>
+                          )}
+                          {maintenance.mechanicalSystem && (
+                            <div className="flex items-center">
+                              <i className="ri-checkbox-circle-line text-success mr-1"></i>
+                              <span className="text-sm">Mecánico</span>
+                            </div>
+                          )}
+                          {maintenance.frontAxle && (
+                            <div className="flex items-center">
+                              <i className="ri-checkbox-circle-line text-success mr-1"></i>
+                              <span className="text-sm">Tren delantero</span>
+                            </div>
+                          )}
+                          {maintenance.gearbox && (
+                            <div className="flex items-center">
+                              <i className="ri-checkbox-circle-line text-success mr-1"></i>
+                              <span className="text-sm">Caja</span>
+                            </div>
+                          )}
+                          {maintenance.differential && (
+                            <div className="flex items-center">
+                              <i className="ri-checkbox-circle-line text-success mr-1"></i>
+                              <span className="text-sm">Diferencial</span>
+                            </div>
+                          )}
+                          {maintenance.hydraulicSystem && (
+                            <div className="flex items-center">
+                              <i className="ri-checkbox-circle-line text-success mr-1"></i>
+                              <span className="text-sm">Hidráulico</span>
+                            </div>
+                          )}
+                          {maintenance.brakes && (
+                            <div className="flex items-center">
+                              <i className="ri-checkbox-circle-line text-success mr-1"></i>
+                              <span className="text-sm">Frenos</span>
+                            </div>
+                          )}
                         </div>
-                      )}
-                      {maintenance.hydraulicOil && (
-                        <div className="flex items-center">
-                          <i className="ri-checkbox-circle-line text-success mr-1"></i>
-                          <span className="text-sm">Aceite hidráulico: {maintenance.hydraulicOilQuantity}L</span>
-                        </div>
-                      )}
-                      {maintenance.coolant && (
-                        <div className="flex items-center">
-                          <i className="ri-checkbox-circle-line text-success mr-1"></i>
-                          <span className="text-sm">Refrigerante: {maintenance.coolantQuantity}L</span>
-                        </div>
-                      )}
-                      {maintenance.oilFilter && (
-                        <div className="flex items-center">
-                          <i className="ri-checkbox-circle-line text-success mr-1"></i>
-                          <span className="text-sm">Filtro de aceite</span>
-                        </div>
-                      )}
-                      {maintenance.hydraulicFilter && (
-                        <div className="flex items-center">
-                          <i className="ri-checkbox-circle-line text-success mr-1"></i>
-                          <span className="text-sm">Filtro hidráulico</span>
-                        </div>
-                      )}
-                      {maintenance.fuelFilter && (
-                        <div className="flex items-center">
-                          <i className="ri-checkbox-circle-line text-success mr-1"></i>
-                          <span className="text-sm">Filtro de combustible</span>
-                        </div>
-                      )}
-                      {maintenance.airFilter && (
-                        <div className="flex items-center">
-                          <i className="ri-checkbox-circle-line text-success mr-1"></i>
-                          <span className="text-sm">Filtro de aire</span>
-                        </div>
-                      )}
-                    </div>
+                        
+                        {maintenance.diagnosis && (
+                          <div className="mt-3">
+                            <div className="font-medium text-neutral-600 mb-1">Diagnóstico:</div>
+                            <div className="text-sm text-neutral-500 bg-neutral-50 p-2 rounded border">
+                              {maintenance.diagnosis}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {(maintenance.spareParts || maintenance.labor || maintenance.totalCost) && (
+                          <div className="mt-3 border-t pt-3">
+                            <div className="font-medium text-neutral-600 mb-2">Costos:</div>
+                            
+                            {maintenance.spareParts && (
+                              <div className="flex items-start gap-2 mb-2">
+                                <div className="text-sm font-medium text-neutral-600 min-w-[80px]">Repuestos:</div>
+                                <div className="text-sm text-neutral-500">
+                                  <div>{maintenance.spareParts}</div>
+                                  {maintenance.sparePartsCost && (
+                                    <div className="font-medium">$ {maintenance.sparePartsCost}</div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {maintenance.labor && (
+                              <div className="flex items-start gap-2 mb-2">
+                                <div className="text-sm font-medium text-neutral-600 min-w-[80px]">Mano de obra:</div>
+                                <div className="text-sm text-neutral-500">
+                                  <div>{maintenance.labor}</div>
+                                  {maintenance.laborCost && (
+                                    <div className="font-medium">$ {maintenance.laborCost}</div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {maintenance.totalCost && (
+                              <div className="flex justify-end mt-2 pt-2 border-t">
+                                <div className="text-sm font-medium">Total: $ {maintenance.totalCost}</div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
+                        {maintenance.motorOil && (
+                          <div className="flex items-center">
+                            <i className="ri-checkbox-circle-line text-success mr-1"></i>
+                            <span className="text-sm">Aceite motor: {maintenance.motorOilQuantity}L</span>
+                          </div>
+                        )}
+                        {maintenance.hydraulicOil && (
+                          <div className="flex items-center">
+                            <i className="ri-checkbox-circle-line text-success mr-1"></i>
+                            <span className="text-sm">Aceite hidráulico: {maintenance.hydraulicOilQuantity}L</span>
+                          </div>
+                        )}
+                        {maintenance.coolant && (
+                          <div className="flex items-center">
+                            <i className="ri-checkbox-circle-line text-success mr-1"></i>
+                            <span className="text-sm">Refrigerante: {maintenance.coolantQuantity}L</span>
+                          </div>
+                        )}
+                        {maintenance.oilFilter && (
+                          <div className="flex items-center">
+                            <i className="ri-checkbox-circle-line text-success mr-1"></i>
+                            <span className="text-sm">Filtro de aceite</span>
+                          </div>
+                        )}
+                        {maintenance.hydraulicFilter && (
+                          <div className="flex items-center">
+                            <i className="ri-checkbox-circle-line text-success mr-1"></i>
+                            <span className="text-sm">Filtro hidráulico</span>
+                          </div>
+                        )}
+                        {maintenance.fuelFilter && (
+                          <div className="flex items-center">
+                            <i className="ri-checkbox-circle-line text-success mr-1"></i>
+                            <span className="text-sm">Filtro de combustible</span>
+                          </div>
+                        )}
+                        {maintenance.airFilter && (
+                          <div className="flex items-center">
+                            <i className="ri-checkbox-circle-line text-success mr-1"></i>
+                            <span className="text-sm">Filtro de aire</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
                     <div className="mt-4 pt-3 border-t border-neutral-100 flex justify-between">
                       <div className="text-sm text-neutral-400">
                         <div>

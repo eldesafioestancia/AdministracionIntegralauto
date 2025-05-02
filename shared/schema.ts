@@ -78,6 +78,28 @@ export const maintenance = pgTable("maintenance", {
   isModified: boolean("is_modified").default(false),
   modifiedAt: timestamp("modified_at"),
   
+  // Información del taller para mantenimiento y reparación
+  workshopName: text("workshop_name"), // Nombre del taller
+  workshopAddress: text("workshop_address"), // Dirección del taller
+  workshopPhone: text("workshop_phone"), // Teléfono del taller
+  
+  // Campos para mantenimiento y reparación
+  electricalSystem: boolean("electrical_system").default(false), // Eléctrico
+  mechanicalSystem: boolean("mechanical_system").default(false), // Mecánico
+  frontAxle: boolean("front_axle").default(false), // Tren delantero
+  gearbox: boolean("gearbox").default(false), // Caja
+  differential: boolean("differential").default(false), // Diferencial
+  hydraulicSystem: boolean("hydraulic_system").default(false), // Hidráulico
+  brakes: boolean("brakes").default(false), // Frenos
+  diagnosis: text("diagnosis"), // Diagnóstico
+  
+  // Costos de mantenimiento y reparación
+  spareParts: text("spare_parts"), // Descripción de repuestos
+  sparePartsCost: text("spare_parts_cost"), // Costo total de repuestos en pesos
+  labor: text("labor"), // Descripción de mano de obra
+  laborCost: text("labor_cost"), // Costo total de mano de obra en pesos
+  totalCost: text("total_cost"), // Costo total
+  
   // Previo al arranque
   gearboxOilLevel: boolean("gearbox_oil_level").default(false), // Chequear nivel aceite de caja
   engineOilLevel: boolean("engine_oil_level").default(false), // Chequear nivel aceite de motor

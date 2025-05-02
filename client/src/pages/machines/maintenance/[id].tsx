@@ -49,6 +49,28 @@ const maintenanceFormSchema = z.object({
   isModified: z.boolean().default(true),
   modifiedAt: z.date().optional(),
   
+  // Información del taller para mantenimiento y reparación
+  workshopName: z.string().optional(), // Nombre del taller
+  workshopAddress: z.string().optional(), // Dirección del taller
+  workshopPhone: z.string().optional(), // Teléfono del taller
+  
+  // Campos para mantenimiento y reparación
+  electricalSystem: z.boolean().default(false), // Eléctrico
+  mechanicalSystem: z.boolean().default(false), // Mecánico
+  frontAxle: z.boolean().default(false), // Tren delantero
+  gearbox: z.boolean().default(false), // Caja
+  differential: z.boolean().default(false), // Diferencial
+  hydraulicSystem: z.boolean().default(false), // Hidráulico
+  brakes: z.boolean().default(false), // Frenos
+  diagnosis: z.string().optional(), // Diagnóstico
+  
+  // Costos de mantenimiento y reparación
+  spareParts: z.string().optional(), // Descripción de repuestos
+  sparePartsCost: z.string().optional(), // Costo total de repuestos en pesos
+  labor: z.string().optional(), // Descripción de mano de obra
+  laborCost: z.string().optional(), // Costo total de mano de obra en pesos
+  totalCost: z.string().optional(), // Costo total
+  
   // Previo al arranque
   gearboxOilLevel: z.boolean().default(false), // Chequear nivel aceite de caja
   engineOilLevel: z.boolean().default(false), // Chequear nivel aceite de motor
@@ -288,6 +310,295 @@ export default function EditMaintenance() {
                   )}
                 />
               </div>
+
+              {form.watch("type") === "maintenance_repair" && (
+                <div className="space-y-6">
+                  {/* Información del taller */}
+                  <div className="border rounded-md p-4">
+                    <h3 className="font-medium text-neutral-500 mb-4">Información del Taller</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <FormField
+                        control={form.control}
+                        name="workshopName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Nombre del taller</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Nombre del taller" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="workshopPhone"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Teléfono</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Número de teléfono" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <div className="col-span-1 md:col-span-2">
+                        <FormField
+                          control={form.control}
+                          name="workshopAddress"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Dirección</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Dirección del taller" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Sistemas afectados */}
+                  <div className="border rounded-md p-4">
+                    <h3 className="font-medium text-neutral-500 mb-4">Sistemas revisados/reparados</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-y-4 gap-x-6">
+                      <FormField
+                        control={form.control}
+                        name="electricalSystem"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Eléctrico</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="mechanicalSystem"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Mecánico</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="frontAxle"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Tren delantero</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="gearbox"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Caja</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="differential"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Diferencial</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="hydraulicSystem"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Hidráulico</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="brakes"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Frenos</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Diagnóstico */}
+                  <div className="border rounded-md p-4">
+                    <h3 className="font-medium text-neutral-500 mb-4">Diagnóstico</h3>
+                    <FormField
+                      control={form.control}
+                      name="diagnosis"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Describa el diagnóstico realizado"
+                              className="min-h-[100px] resize-y"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Costos */}
+                  <div className="border rounded-md p-4">
+                    <h3 className="font-medium text-neutral-500 mb-4">Costos</h3>
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="col-span-1 md:col-span-2">
+                          <FormField
+                            control={form.control}
+                            name="spareParts"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Repuestos</FormLabel>
+                                <FormControl>
+                                  <Textarea 
+                                    placeholder="Detalle de repuestos utilizados"
+                                    className="min-h-[80px] resize-y"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <FormField
+                          control={form.control}
+                          name="sparePartsCost"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Costo repuestos ($)</FormLabel>
+                              <FormControl>
+                                <Input placeholder="0.00" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="col-span-1 md:col-span-2">
+                          <FormField
+                            control={form.control}
+                            name="labor"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Mano de obra</FormLabel>
+                                <FormControl>
+                                  <Textarea 
+                                    placeholder="Detalle de la mano de obra realizada"
+                                    className="min-h-[80px] resize-y"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <FormField
+                          control={form.control}
+                          name="laborCost"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Costo mano de obra ($)</FormLabel>
+                              <FormControl>
+                                <Input placeholder="0.00" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <FormField
+                        control={form.control}
+                        name="totalCost"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Costo total ($)</FormLabel>
+                            <FormControl>
+                              <Input placeholder="0.00" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {form.watch("type") === "pre_start_check" ? (
                 <div className="space-y-6">
