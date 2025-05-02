@@ -167,8 +167,11 @@ export default function AnimalsIndex() {
     switch (status) {
       case "prenada": return "Preñada";
       case "vacia": return "Vacía";
-      case "con_cria": return "Con cría";
-      case "toro_en_servicio": return "Toro en servicio";
+      case "servicio": return "A punto de entrar en servicio";
+      case "parida": return "Parida";
+      case "en_servicio": return "En servicio";
+      case "no_en_servicio": return "No en servicio";
+      case "no_aplica": return "No aplica";
       default: return status;
     }
   };
@@ -613,27 +616,30 @@ export default function AnimalsIndex() {
                   />
                 </div>
                 
-                <FormField
-                  control={form.control}
-                  name="expectedDeliveryDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Fecha probable de parto</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="date"
-                          {...field}
-                          value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-                          onChange={(e) => {
-                            const date = e.target.value ? new Date(e.target.value) : null;
-                            field.onChange(date);
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* Campo de fecha probable de parto solo cuando está preñada */}
+                {form.watch("reproductiveStatus") === "prenada" && (
+                  <FormField
+                    control={form.control}
+                    name="expectedDeliveryDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Fecha probable de parto</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="date"
+                            {...field}
+                            value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                            onChange={(e) => {
+                              const date = e.target.value ? new Date(e.target.value) : null;
+                              field.onChange(date);
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
                 
                 <SheetFooter className="pt-4">
                   <Button type="submit">Guardar animal</Button>
@@ -715,23 +721,51 @@ export default function AnimalsIndex() {
           {filteredAnimals.map((animal: any) => (
             <Card key={animal.id} className="p-0 overflow-hidden">
               <div className="flex items-center">
-                <div className="w-16 h-16 flex-shrink-0 bg-neutral-100 flex items-center justify-center">
-                  <i className={`${getCategoryIcon(animal.category)} text-2xl text-neutral-500`}></i>
+                <div 
+                  className="w-16 h-16 flex-shrink-0 flex items-center justify-center relative"
+                  style={{
+                    backgroundColor: 
+                      animal.cartagenaColor === "blanco" ? "#ffffff" : 
+                      animal.cartagenaColor === "amarillo" ? "#FFD700" :
+                      animal.cartagenaColor === "rojo" ? "#FF0000" :
+                      animal.cartagenaColor === "verde" ? "#008000" :
+                      animal.cartagenaColor === "azul" ? "#0000FF" :
+                      animal.cartagenaColor === "negro" ? "#000000" : "#f5f5f5",
+                    color: ["blanco", "amarillo"].includes(animal.cartagenaColor || "") ? "#333" : "#fff"
+                  }}
+                >
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-lg font-bold">{animal.cartagena}</span>
+                  </div>
                 </div>
                 
                 <Link href={`/animals/${animal.id}`} className="flex-1 px-4 py-3">
                   <div className="flex flex-col">
                     <div className="flex items-center">
-                      <h3 className="font-medium text-neutral-800">Caravana #{animal.cartagena}</h3>
+                      <h3 className="font-medium text-neutral-800">{getRaceLabel(animal.race)}</h3>
                       <Badge className="ml-2 px-2 py-0 h-5">{getCategoryLabel(animal.category)}</Badge>
                     </div>
                     <div className="text-sm text-neutral-500 flex items-center space-x-3">
                       <span className="flex items-center">
-                        <i className="ri-group-line mr-1"></i> {getRaceLabel(animal.race)}
+                        <i className="ri-price-tag-3-line mr-1"></i> #{animal.cartagena}
                       </span>
-                      {animal.reproductiveStatus && (
+                      {animal.reproductiveStatus && animal.reproductiveStatus !== "no_aplica" && (
                         <span className="flex items-center">
-                          <i className="ri-heart-line mr-1"></i> {getReproductiveStatusLabel(animal.reproductiveStatus)}
+                          {animal.reproductiveStatus === "prenada" ? (
+                            <i className="ri-heart-fill mr-1 text-red-500"></i>
+                          ) : animal.reproductiveStatus === "parida" ? (
+                            <i className="ri-parent-line mr-1"></i>
+                          ) : animal.reproductiveStatus === "en_servicio" ? (
+                            <i className="ri-heart-add-line mr-1 text-green-500"></i>
+                          ) : (
+                            <i className="ri-heart-line mr-1"></i>
+                          )}
+                          {getReproductiveStatusLabel(animal.reproductiveStatus)}
+                          {animal.reproductiveStatus === "prenada" && animal.expectedDeliveryDate && (
+                            <span className="ml-1">
+                              (Parto: {format(new Date(animal.expectedDeliveryDate), "dd/MM/yyyy")})
+                            </span>
+                          )}
                         </span>
                       )}
                     </div>
