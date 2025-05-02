@@ -305,7 +305,7 @@ export default function AnimalsIndex() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="">Ninguno</SelectItem>
+                            <SelectItem value="ninguno">Ninguno</SelectItem>
                             <SelectItem value="blanco">Blanco</SelectItem>
                             <SelectItem value="amarillo">Amarillo</SelectItem>
                             <SelectItem value="rojo">Rojo</SelectItem>
