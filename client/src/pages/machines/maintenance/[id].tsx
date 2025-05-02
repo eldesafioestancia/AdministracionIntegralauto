@@ -962,7 +962,8 @@ export default function EditMaintenance() {
               />
 
               <div className="mt-6 pt-4 border-t flex justify-between">
-                <div className="text-sm text-neutral-500">
+                <div className="text-sm text-neutral-500 flex flex-col">
+                  <span>Fecha de creación: {format(new Date(maintenance.createdAt), "dd/MM/yyyy HH:mm")}</span>
                   {maintenance.isModified && maintenance.modifiedAt && (
                     <span>Última modificación: {format(new Date(maintenance.modifiedAt), "dd/MM/yyyy HH:mm")}</span>
                   )}

@@ -277,8 +277,17 @@ export default function MachineDetail() {
                       </Badge>
                     </div>
                     <CardDescription>
-                      {maintenance.time && `Hora: ${maintenance.time}`}
-                      {maintenance.isModified && <span className="ml-2 text-amber-500">(Modificado)</span>}
+                      <div className="flex items-center justify-between">
+                        <div>
+                          {maintenance.time && `Hora: ${maintenance.time}`}
+                        </div>
+                        {maintenance.isModified && 
+                          <div className="text-amber-500 flex items-center">
+                            <i className="ri-edit-line mr-1"></i>
+                            <span>Modificado</span>
+                          </div>
+                        }
+                      </div>
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -328,14 +337,21 @@ export default function MachineDetail() {
                     </div>
                     <div className="mt-4 pt-3 border-t border-neutral-100 flex justify-between">
                       <div className="text-sm text-neutral-400">
-                        {maintenance.driver && (
-                          <span>Conductor: <span className="text-neutral-500">{maintenance.driver}</span></span>
-                        )}
-                        {maintenance.isModified && maintenance.modifiedAt && (
-                          <span className="ml-3">Modificado: <span className="text-neutral-500">
-                            {format(new Date(maintenance.modifiedAt), "dd/MM/yyyy HH:mm")}
+                        <div>
+                          {maintenance.driver && (
+                            <span>Conductor: <span className="text-neutral-500">{maintenance.driver}</span></span>
+                          )}
+                        </div>
+                        <div className="flex flex-col mt-2">
+                          <span>Creado: <span className="text-neutral-500">
+                            {format(new Date(maintenance.createdAt), "dd/MM/yyyy HH:mm")}
                           </span></span>
-                        )}
+                          {maintenance.isModified && maintenance.modifiedAt && (
+                            <span>Modificado: <span className="text-neutral-500">
+                              {format(new Date(maintenance.modifiedAt), "dd/MM/yyyy HH:mm")}
+                            </span></span>
+                          )}
+                        </div>
                       </div>
                       <Button variant="outline" size="sm" asChild>
                         <Link href={`/machines/${id}/maintenance/${maintenance.id}`}>
