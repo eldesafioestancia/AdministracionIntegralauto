@@ -188,6 +188,7 @@ export default function MachineMaintenance() {
   const coolantChecked = form.watch("coolant");
   const addOilChecked = form.watch("addOil");
   const addFuelChecked = form.watch("addFuel");
+  const maintenanceType = form.watch("type");
 
   async function onSubmit(values: MaintenanceFormValues) {
     try {
@@ -341,7 +342,8 @@ export default function MachineMaintenance() {
                 />
               </div>
 
-{form.watch("type") === "maintenance_repair" && (
+              {/* Sección para Mantenimiento y Reparación */}
+              {maintenanceType === "maintenance_repair" && (
                 <div className="space-y-6">
                   {/* Información del taller */}
                   <div className="border rounded-md p-4">
@@ -630,7 +632,8 @@ export default function MachineMaintenance() {
                 </div>
               )}
 
-              {form.watch("type") === "pre_start_check" ? (
+              {/* Sección para Control previo puesta en marcha */}
+              {maintenanceType === "pre_start_check" && (
                 <div className="space-y-6">
                   {/* Sección de inspección previa al arranque */}
                   <div className="border rounded-md p-4">
@@ -756,7 +759,7 @@ export default function MachineMaintenance() {
                               />
                             </FormControl>
                             <div className="space-y-1">
-                              <FormLabel>Filtro de aire baño de aceite</FormLabel>
+                              <FormLabel>Filtro de aire baño aceite</FormLabel>
                             </div>
                           </FormItem>
                         )}
@@ -792,7 +795,7 @@ export default function MachineMaintenance() {
                               />
                             </FormControl>
                             <div className="space-y-1">
-                              <FormLabel>Engrase general</FormLabel>
+                              <FormLabel>Engrasar</FormLabel>
                             </div>
                           </FormItem>
                         )}
@@ -800,7 +803,7 @@ export default function MachineMaintenance() {
                     </div>
                   </div>
 
-                  {/* Sección de verificación después del arranque */}
+                  {/* Sección de inspección después del arranque */}
                   <div className="border rounded-md p-4">
                     <h3 className="font-medium text-neutral-500 mb-4">Controles después del arranque</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
@@ -906,12 +909,18 @@ export default function MachineMaintenance() {
                               />
                             </FormControl>
                             <div className="space-y-1">
-                              <FormLabel>Presión y temperatura de aceite</FormLabel>
+                              <FormLabel>Presión de aceite y temperatura</FormLabel>
                             </div>
                           </FormItem>
                         )}
                       />
-                      
+                    </div>
+                  </div>
+
+                  {/* Sección de adición de aceite/combustible */}
+                  <div className="border rounded-md p-4">
+                    <h3 className="font-medium text-neutral-500 mb-4">Adición de aceite/combustible</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
                       <div>
                         <div className="flex items-start space-x-2">
                           <FormField
@@ -957,7 +966,7 @@ export default function MachineMaintenance() {
                           </div>
                         )}
                       </div>
-                      
+
                       <div>
                         <div className="flex items-start space-x-2">
                           <FormField
@@ -1066,7 +1075,10 @@ export default function MachineMaintenance() {
                     </div>
                   </div>
                 </div>
-              ) : (
+              )}
+
+              {/* Sección para Cambio de aceite y filtros */}
+              {maintenanceType === "oil_filter_change" && (
                 <div className="border rounded-md p-4">
                   <h3 className="font-medium text-neutral-500 mb-4">Tareas realizadas</h3>
   
@@ -1286,26 +1298,29 @@ export default function MachineMaintenance() {
                 </div>
               )}
 
-              <FormField
-                control={form.control}
-                name="notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Notas adicionales</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Información adicional, observaciones, etc."
-                        {...field}
-                        rows={4}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Registre cualquier observación relevante sobre el mantenimiento.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Notas adicionales - sólo para ciertos tipos */}
+              {maintenanceType !== "maintenance_repair" && (
+                <FormField
+                  control={form.control}
+                  name="notes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Notas adicionales</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Información adicional, observaciones, etc."
+                          {...field}
+                          rows={4}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Registre cualquier observación relevante sobre el mantenimiento.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
               <div className="flex justify-end space-x-2">
                 <Button
