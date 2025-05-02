@@ -599,46 +599,52 @@ export default function MachinesIndex() {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="space-y-3">
           {filteredMachines.map((machine: any) => (
-            <Link key={machine.id} href={`/machines/${machine.id}`}>
-              <Card className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer h-full flex flex-col">
-                <div className="aspect-w-16 aspect-h-9 bg-neutral-100">
-                  <img
-                    src={getMachineImage(machine.type)}
-                    alt={`${machine.brand} ${machine.model}`}
-                    className="object-cover"
-                  />
+            <Card key={machine.id} className="p-0 overflow-hidden">
+              <div className="flex items-center">
+                <div className="w-16 h-16 flex-shrink-0 bg-neutral-100 flex items-center justify-center">
+                  <i className={`${getMachineTypeIcon(machine.type)} text-2xl text-neutral-500`}></i>
                 </div>
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between items-start">
-                    <CardTitle className="text-xl">
-                      {machine.brand} {machine.model}
-                    </CardTitle>
-                    <Badge>{getMachineTypeLabel(machine.type)}</Badge>
-                  </div>
-                  <CardDescription>
-                    Año: {machine.year}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pb-2 flex-grow">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center text-sm text-neutral-500">
-                      <i className="ri-time-line mr-1"></i>
-                      <span>{machine.hours} horas de trabajo</span>
+                
+                <Link href={`/machines/${machine.id}`} className="flex-1 px-4 py-3">
+                  <div className="flex flex-col">
+                    <div className="flex items-center">
+                      <h3 className="font-medium text-neutral-800">{machine.brand} {machine.model}</h3>
+                      <Badge className="ml-2 px-2 py-0 h-5">{getMachineTypeLabel(machine.type)}</Badge>
+                    </div>
+                    <div className="text-sm text-neutral-500 flex items-center space-x-3">
+                      <span className="flex items-center">
+                        <i className="ri-calendar-line mr-1"></i> {machine.year}
+                      </span>
+                      <span className="flex items-center">
+                        <i className="ri-time-line mr-1"></i> {machine.hours} hs
+                      </span>
                     </div>
                   </div>
-                </CardContent>
-                <CardFooter className="pt-0 mt-auto">
-                  <div className="w-full flex justify-between text-sm text-neutral-400">
-                    <span>Adquirido: {format(new Date(machine.purchaseDate), "dd/MM/yyyy")}</span>
-                    <Button variant="ghost" size="sm" className="px-2">
-                      <i className="ri-arrow-right-line"></i>
-                    </Button>
-                  </div>
-                </CardFooter>
-              </Card>
-            </Link>
+                </Link>
+                
+                <div className="flex items-center space-x-1 pr-3">
+                  <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Editar">
+                    <Link href={`/machines/${machine.id}/edit`}>
+                      <i className="ri-edit-line text-lg"></i>
+                    </Link>
+                  </Button>
+                  
+                  <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Registrar mantenimiento">
+                    <Link href={`/machines/${machine.id}/maintenance`}>
+                      <i className="ri-tools-line text-lg"></i>
+                    </Link>
+                  </Button>
+                  
+                  <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Registrar trabajo">
+                    <Link href={`/machines/${machine.id}/work`}>
+                      <i className="ri-truck-line text-lg"></i>
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </Card>
           ))}
         </div>
       )}
