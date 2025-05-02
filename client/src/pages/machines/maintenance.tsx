@@ -20,12 +20,35 @@ const maintenanceFormSchema = z.object({
   date: z.date({
     required_error: "La fecha es requerida",
   }),
-  type: z.enum(["oil_change", "filter_change", "general_check"], {
+  time: z.string().optional(),
+  type: z.enum(["pre_start_check", "oil_filter_change", "maintenance_repair"], {
     required_error: "El tipo de mantenimiento es requerido",
   }),
   description: z.string().min(5, { message: "La descripción debe tener al menos 5 caracteres" }),
+  driver: z.string().optional(), // Chofer
   responsible: z.string().min(3, { message: "El responsable es requerido" }),
   notes: z.string().optional(),
+  
+  // Previo al arranque
+  gearboxOilLevel: z.boolean().default(false), // Chequear nivel aceite de caja
+  engineOilLevel: z.boolean().default(false), // Chequear nivel aceite de motor
+  fuelLevel: z.boolean().default(false), // Combustible
+  batteryWater: z.boolean().default(false), // Agua de batería
+  airPressure: z.boolean().default(false), // Presión de aire
+  airFilterCleaning: z.boolean().default(false), // Limpiar filtro de aire
+  oilBathAirFilter: z.boolean().default(false), // Limpiar filtro de aire baño aceite
+  differentialVent: z.boolean().default(false), // Limpiar venteo de diferencial
+  greasing: z.boolean().default(false), // Engrasar
+  
+  // Después del arranque
+  fuelLeaks: z.boolean().default(false), // Posibles pérdidas de combustible
+  engineOilLeaks: z.boolean().default(false), // Posibles pérdidas de aceite: Motor
+  gearboxOilLeaks: z.boolean().default(false), // Posibles pérdidas de aceite: Caja
+  differentialOilLeaks: z.boolean().default(false), // Posibles pérdidas de aceite: Diferencial
+  hydraulicOilLeaks: z.boolean().default(false), // Posibles pérdidas de aceite: Hidráulico
+  oilPressureTemp: z.boolean().default(false), // Presión de aceite y temperatura
+  
+  // Campos originales para cambio de aceite y filtros
   motorOil: z.boolean().default(false),
   motorOilQuantity: z.string().optional(),
   hydraulicOil: z.boolean().default(false),

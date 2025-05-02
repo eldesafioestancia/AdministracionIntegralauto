@@ -211,7 +211,7 @@ export default function Dashboard() {
       {/* Dashboard Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <SummaryCard 
-          title="Unidades Productivas"
+          title="Maquinarias"
           value={stats.machineCount}
           icon={<i className="ri-truck-line text-xl text-primary"></i>}
           color="primary"

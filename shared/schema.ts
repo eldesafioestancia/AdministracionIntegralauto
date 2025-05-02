@@ -71,10 +71,33 @@ export const maintenance = pgTable("maintenance", {
   id: serial("id").primaryKey(),
   machineId: integer("machine_id").notNull(),
   date: timestamp("date").notNull(),
-  type: text("type").notNull(), // oil_change, filter_change, general_check, etc.
+  time: text("time"), // Hora del mantenimiento/revisión
+  type: text("type").notNull(), // pre_start_check, oil_filter_change, maintenance_repair
   description: text("description").notNull(),
+  driver: text("driver"), // Chofer/conductor
   responsible: text("responsible").notNull(),
   notes: text("notes"),
+  
+  // Previo al arranque
+  gearboxOilLevel: boolean("gearbox_oil_level").default(false), // Chequear nivel aceite de caja
+  engineOilLevel: boolean("engine_oil_level").default(false), // Chequear nivel aceite de motor
+  fuelLevel: boolean("fuel_level").default(false), // Combustible
+  batteryWater: boolean("battery_water").default(false), // Agua de batería
+  airPressure: boolean("air_pressure").default(false), // Presión de aire
+  airFilterCleaning: boolean("air_filter_cleaning").default(false), // Limpiar filtro de aire
+  oilBathAirFilter: boolean("oil_bath_air_filter").default(false), // Limpiar filtro de aire baño aceite
+  differentialVent: boolean("differential_vent").default(false), // Limpiar venteo de diferencial
+  greasing: boolean("greasing").default(false), // Engrasar
+  
+  // Después del arranque
+  fuelLeaks: boolean("fuel_leaks").default(false), // Posibles pérdidas de combustible
+  engineOilLeaks: boolean("engine_oil_leaks").default(false), // Posibles pérdidas de aceite: Motor
+  gearboxOilLeaks: boolean("gearbox_oil_leaks").default(false), // Posibles pérdidas de aceite: Caja
+  differentialOilLeaks: boolean("differential_oil_leaks").default(false), // Posibles pérdidas de aceite: Diferencial
+  hydraulicOilLeaks: boolean("hydraulic_oil_leaks").default(false), // Posibles pérdidas de aceite: Hidráulico
+  oilPressureTemp: boolean("oil_pressure_temp").default(false), // Presión de aceite y temperatura
+  
+  // Campos originales para cambio de aceite y filtros
   motorOil: boolean("motor_oil").default(false),
   motorOilQuantity: decimal("motor_oil_quantity").default("0"),
   hydraulicOil: boolean("hydraulic_oil").default(false),
@@ -85,6 +108,7 @@ export const maintenance = pgTable("maintenance", {
   hydraulicFilter: boolean("hydraulic_filter").default(false),
   fuelFilter: boolean("fuel_filter").default(false),
   airFilter: boolean("air_filter").default(false),
+  
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
