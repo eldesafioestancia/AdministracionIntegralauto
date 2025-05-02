@@ -591,11 +591,11 @@ export default function MachinesIndex() {
               Limpiar filtros
             </Button>
           ) : (
-            <DialogTrigger asChild>
-              <Button>
-                <i className="ri-add-line mr-1"></i> Nueva unidad
-              </Button>
-            </DialogTrigger>
+            <Button
+              onClick={() => setDialogOpen(true)}
+            >
+              <i className="ri-add-line mr-1"></i> Nueva unidad
+            </Button>
           )}
         </div>
       ) : (
