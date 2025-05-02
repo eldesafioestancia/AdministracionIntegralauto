@@ -625,8 +625,8 @@ export default function MachinesIndex() {
                 </Link>
                 
                 <div className="flex items-center space-x-1 pr-3">
-                  <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Ver detalles y editar">
-                    <Link href={`/machines/${machine.id}`}>
+                  <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Editar">
+                    <Link href={`/machines/${machine.id}/edit`}>
                       <i className="ri-edit-line text-lg"></i>
                     </Link>
                   </Button>
@@ -638,7 +638,7 @@ export default function MachinesIndex() {
                   </Button>
                   
                   <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Registrar trabajo">
-                    <Link href={`/machines/${machine.id}`}>
+                    <Link href={`/machines/${machine.id}/work`}>
                       <i className="ri-truck-line text-lg"></i>
                     </Link>
                   </Button>
