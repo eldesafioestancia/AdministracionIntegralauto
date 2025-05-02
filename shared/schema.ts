@@ -97,9 +97,11 @@ export const maintenance = pgTable("maintenance", {
   hydraulicOilLeaks: boolean("hydraulic_oil_leaks").default(false), // Posibles pérdidas de aceite: Hidráulico
   oilPressureTemp: boolean("oil_pressure_temp").default(false), // Presión de aceite y temperatura
   
-  // Añadir aceite
+  // Añadir aceite/combustible
   addOil: boolean("add_oil").default(false), // Agregar aceite
   addOilQuantity: decimal("add_oil_quantity").default("0"), // Cantidad de aceite agregado
+  addFuel: boolean("add_fuel").default(false), // Agregar combustible
+  addFuelQuantity: decimal("add_fuel_quantity").default("0"), // Cantidad de combustible agregado
   
   // Terminado el turno
   cutoffSwitch: boolean("cutoff_switch").default(false), // Llave de corte

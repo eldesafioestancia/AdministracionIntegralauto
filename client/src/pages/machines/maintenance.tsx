@@ -48,9 +48,11 @@ const maintenanceFormSchema = z.object({
   hydraulicOilLeaks: z.boolean().default(false), // Posibles pérdidas de aceite: Hidráulico
   oilPressureTemp: z.boolean().default(false), // Presión de aceite y temperatura
   
-  // Agregar aceite
+  // Agregar aceite/combustible
   addOil: z.boolean().default(false), // Agregar aceite
   addOilQuantity: z.string().optional(), // Cantidad de aceite agregado
+  addFuel: z.boolean().default(false), // Agregar combustible
+  addFuelQuantity: z.string().optional(), // Cantidad de combustible agregado
   
   // Terminado el turno
   cutoffSwitch: z.boolean().default(false), // Llave de corte
@@ -113,9 +115,11 @@ export default function MachineMaintenance() {
       hydraulicOilLeaks: false,
       oilPressureTemp: false,
       
-      // Agregar aceite
+      // Agregar aceite/combustible
       addOil: false,
       addOilQuantity: "",
+      addFuel: false,
+      addFuelQuantity: "",
       
       // Terminado el turno
       cutoffSwitch: false,
@@ -140,6 +144,7 @@ export default function MachineMaintenance() {
   const hydraulicOilChecked = form.watch("hydraulicOil");
   const coolantChecked = form.watch("coolant");
   const addOilChecked = form.watch("addOil");
+  const addFuelChecked = form.watch("addFuel");
 
   async function onSubmit(values: MaintenanceFormValues) {
     try {
@@ -630,6 +635,52 @@ export default function MachineMaintenance() {
                             <FormField
                               control={form.control}
                               name="addOilQuantity"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <div className="flex items-center space-x-2">
+                                    <FormControl>
+                                      <Input
+                                        {...field}
+                                        type="number"
+                                        placeholder="0"
+                                        className="w-20"
+                                      />
+                                    </FormControl>
+                                    <span className="text-sm text-neutral-500">litros</span>
+                                  </div>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div>
+                        <div className="flex items-start space-x-2">
+                          <FormField
+                            control={form.control}
+                            name="addFuel"
+                            render={({ field }) => (
+                              <FormItem className="flex items-start space-x-2 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                                <div className="space-y-1">
+                                  <FormLabel>Agregar combustible</FormLabel>
+                                </div>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        {addFuelChecked && (
+                          <div className="ml-6 mt-2">
+                            <FormField
+                              control={form.control}
+                              name="addFuelQuantity"
                               render={({ field }) => (
                                 <FormItem>
                                   <div className="flex items-center space-x-2">
