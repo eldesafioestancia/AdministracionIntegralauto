@@ -8,15 +8,15 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { 
   Form, 
   FormControl, 
@@ -64,7 +64,7 @@ type MachineFormValues = z.infer<typeof machineFormSchema>;
 export default function MachinesIndex() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const { toast } = useToast();
   
   const { data: machines, isLoading, error } = useQuery({
@@ -107,7 +107,7 @@ export default function MachinesIndex() {
         description: "La unidad productiva ha sido creada exitosamente",
       });
       
-      setDialogOpen(false);
+      setSheetOpen(false);
       form.reset();
       
     } catch (error) {
@@ -160,7 +160,7 @@ export default function MachinesIndex() {
   };
 
   // Filter machines
-  const filteredMachines = machines ? machines.filter(machine => {
+  const filteredMachines = machines ? machines.filter((machine: any) => {
     const matchesSearch = 
       machine.brand.toLowerCase().includes(search.toLowerCase()) ||
       machine.model.toLowerCase().includes(search.toLowerCase());
@@ -199,22 +199,22 @@ export default function MachinesIndex() {
           <p className="text-neutral-400 text-sm">Gestiona tus camiones, tractores, topadoras y accesorios</p>
         </div>
         
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
+        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+          <SheetTrigger asChild>
             <Button className="mt-2 sm:mt-0">
               <i className="ri-add-line mr-1"></i> Nueva unidad
             </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Agregar nueva unidad productiva</DialogTitle>
-              <DialogDescription>
+          </SheetTrigger>
+          <SheetContent className="sm:max-w-md md:max-w-lg overflow-y-auto">
+            <SheetHeader>
+              <SheetTitle>Agregar nueva unidad productiva</SheetTitle>
+              <SheetDescription>
                 Complete los datos de la nueva máquina
-              </DialogDescription>
-            </DialogHeader>
+              </SheetDescription>
+            </SheetHeader>
             
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
                 <FormField
                   control={form.control}
                   name="type"
@@ -507,9 +507,9 @@ export default function MachinesIndex() {
                   name="documentation"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Documentación adjunta</FormLabel>
+                      <FormLabel>Documentación (URL)</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Manuales, certificados, etc." />
+                        <Input {...field} placeholder="https://ejemplo.com/documento.pdf" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -530,20 +530,20 @@ export default function MachinesIndex() {
                   )}
                 />
                 
-                <DialogFooter>
+                <SheetFooter className="pt-4">
                   <Button 
                     type="button" 
                     variant="outline" 
-                    onClick={() => setDialogOpen(false)}
+                    onClick={() => setSheetOpen(false)}
                   >
                     Cancelar
                   </Button>
                   <Button type="submit">Guardar</Button>
-                </DialogFooter>
+                </SheetFooter>
               </form>
             </Form>
-          </DialogContent>
-        </Dialog>
+          </SheetContent>
+        </Sheet>
       </div>
       
       {/* Filters */}
@@ -592,7 +592,7 @@ export default function MachinesIndex() {
             </Button>
           ) : (
             <Button
-              onClick={() => setDialogOpen(true)}
+              onClick={() => setSheetOpen(true)}
             >
               <i className="ri-add-line mr-1"></i> Nueva unidad
             </Button>
@@ -600,7 +600,7 @@ export default function MachinesIndex() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredMachines.map((machine) => (
+          {filteredMachines.map((machine: any) => (
             <Link key={machine.id} href={`/machines/${machine.id}`}>
               <Card className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer h-full flex flex-col">
                 <div className="aspect-w-16 aspect-h-9 bg-neutral-100">
