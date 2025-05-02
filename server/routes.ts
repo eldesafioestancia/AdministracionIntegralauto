@@ -7,6 +7,9 @@ import {
   insertMachineSchema,
   insertMaintenanceSchema,
   insertMachineFinanceSchema,
+  insertAnimalSchema,
+  insertAnimalVeterinarySchema,
+  insertAnimalFinanceSchema,
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -264,6 +267,172 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const deleted = await storage.deleteMachineFinance(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Finance record not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting finance record:", error);
+      res.status(500).json({ message: "Error deleting finance record" });
+    }
+  });
+
+  // Animal routes
+  app.get("/api/animals", async (req: Request, res: Response) => {
+    try {
+      const animals = await storage.getAnimals();
+      res.json(animals);
+    } catch (error) {
+      console.error("Error fetching animals:", error);
+      res.status(500).json({ message: "Error fetching animals" });
+    }
+  });
+  
+  app.get("/api/animals/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const animal = await storage.getAnimal(id);
+      
+      if (!animal) {
+        return res.status(404).json({ message: "Animal not found" });
+      }
+      
+      res.json(animal);
+    } catch (error) {
+      console.error("Error fetching animal:", error);
+      res.status(500).json({ message: "Error fetching animal" });
+    }
+  });
+  
+  app.post("/api/animals", async (req: Request, res: Response) => {
+    try {
+      const animalData = insertAnimalSchema.parse(req.body);
+      const newAnimal = await storage.createAnimal(animalData);
+      res.status(201).json(newAnimal);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid animal data", errors: error.errors });
+      }
+      
+      console.error("Error creating animal:", error);
+      res.status(500).json({ message: "Error creating animal" });
+    }
+  });
+  
+  app.put("/api/animals/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const animalData = insertAnimalSchema.partial().parse(req.body);
+      
+      const updatedAnimal = await storage.updateAnimal(id, animalData);
+      
+      if (!updatedAnimal) {
+        return res.status(404).json({ message: "Animal not found" });
+      }
+      
+      res.json(updatedAnimal);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid animal data", errors: error.errors });
+      }
+      
+      console.error("Error updating animal:", error);
+      res.status(500).json({ message: "Error updating animal" });
+    }
+  });
+  
+  app.delete("/api/animals/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteAnimal(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Animal not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting animal:", error);
+      res.status(500).json({ message: "Error deleting animal" });
+    }
+  });
+
+  // Animal Veterinary routes
+  app.get("/api/animal-veterinary", async (req: Request, res: Response) => {
+    try {
+      const animalId = req.query.animalId ? parseInt(req.query.animalId as string) : undefined;
+      const records = await storage.getAnimalVeterinary(animalId);
+      res.json(records);
+    } catch (error) {
+      console.error("Error fetching veterinary records:", error);
+      res.status(500).json({ message: "Error fetching veterinary records" });
+    }
+  });
+  
+  app.post("/api/animal-veterinary", async (req: Request, res: Response) => {
+    try {
+      const recordData = insertAnimalVeterinarySchema.parse(req.body);
+      const newRecord = await storage.createAnimalVeterinary(recordData);
+      res.status(201).json(newRecord);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid veterinary record data", errors: error.errors });
+      }
+      
+      console.error("Error creating veterinary record:", error);
+      res.status(500).json({ message: "Error creating veterinary record" });
+    }
+  });
+  
+  app.delete("/api/animal-veterinary/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteAnimalVeterinary(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Veterinary record not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting veterinary record:", error);
+      res.status(500).json({ message: "Error deleting veterinary record" });
+    }
+  });
+
+  // Animal Finance routes
+  app.get("/api/animal-finances", async (req: Request, res: Response) => {
+    try {
+      const animalId = req.query.animalId ? parseInt(req.query.animalId as string) : undefined;
+      const finances = await storage.getAnimalFinances(animalId);
+      res.json(finances);
+    } catch (error) {
+      console.error("Error fetching animal finances:", error);
+      res.status(500).json({ message: "Error fetching animal finances" });
+    }
+  });
+  
+  app.post("/api/animal-finances", async (req: Request, res: Response) => {
+    try {
+      const financeData = insertAnimalFinanceSchema.parse(req.body);
+      const newFinance = await storage.createAnimalFinance(financeData);
+      res.status(201).json(newFinance);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid finance data", errors: error.errors });
+      }
+      
+      console.error("Error creating animal finance:", error);
+      res.status(500).json({ message: "Error creating animal finance" });
+    }
+  });
+  
+  app.delete("/api/animal-finances/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteAnimalFinance(id);
       
       if (!deleted) {
         return res.status(404).json({ message: "Finance record not found" });

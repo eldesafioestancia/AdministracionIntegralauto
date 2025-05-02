@@ -192,12 +192,25 @@ export const animals = pgTable("animals", {
   id: serial("id").primaryKey(),
   birthDate: timestamp("birth_date").notNull(),
   race: text("race").notNull(),
+  category: text("category").notNull(), // vaca, toro, novillo, ternero, ternera
+  reproductiveStatus: text("reproductive_status"), // preñada, vacía, con_cria, toro_en_servicio
+  origin: text("origin"), // nacido_establecimiento, comprado
+  supplier: text("supplier"), // proveedor si fue comprado
+  purchaseDate: timestamp("purchase_date"), // fecha de compra si fue comprado
   motherId: integer("mother_id"),
   fatherId: integer("father_id"),
   description: text("description"),
-  cartagena: text("cartagena"), // nro caravana
+  cartagena: text("cartagena").notNull(), // nro caravana (obligatorio)
+  cartagenaColor: text("caravana_color"), // color de la caravana
+  cartagenaSecondaryColor: text("caravana_secondary_color"), // color secundario
+  marks: text("marks"), // señales o marcas particulares
+  currentWeight: text("current_weight"), // peso actual en kg
+  lastWeightDate: timestamp("last_weight_date"), // fecha del último control de peso
+  bodyCondition: text("body_condition"), // condición corporal (1-5)
+  lastServiceDate: timestamp("last_service_date"), // fecha del último servicio
+  lastServiceType: text("last_service_type"), // tipo del último servicio
+  expectedDeliveryDate: timestamp("expected_delivery_date"), // fecha probable de parto  
   color: text("color"),
-  bodyCondition: text("body_condition"),
   status: text("status").default("active").notNull(), // active, sold, dead
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -215,6 +228,18 @@ export const insertAnimalSchema = baseAnimalSchema.extend({
   birthDate: z.string().or(z.date()).transform(val => 
     typeof val === 'string' ? new Date(val) : val
   ),
+  purchaseDate: z.string().or(z.date()).transform(val => 
+    typeof val === 'string' ? new Date(val) : val
+  ).optional().nullable(),
+  lastWeightDate: z.string().or(z.date()).transform(val => 
+    typeof val === 'string' ? new Date(val) : val
+  ).optional().nullable(),
+  lastServiceDate: z.string().or(z.date()).transform(val => 
+    typeof val === 'string' ? new Date(val) : val
+  ).optional().nullable(),
+  expectedDeliveryDate: z.string().or(z.date()).transform(val => 
+    typeof val === 'string' ? new Date(val) : val
+  ).optional().nullable(),
 });
 
 // Animal Veterinary Records

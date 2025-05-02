@@ -7,6 +7,8 @@ import MachinesIndex from "@/pages/machines/index";
 import MachineDetail from "@/pages/machines/[id]";
 import MachineMaintenance from "@/pages/machines/maintenance";
 import EditMaintenance from "@/pages/machines/maintenance/[id]";
+import AnimalsIndex from "@/pages/animals/index";
+import AnimalDetail from "@/pages/animals/[id]";
 import AppLayout from "@/components/layouts/AppLayout";
 
 function App() {
