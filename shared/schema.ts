@@ -97,6 +97,15 @@ export const maintenance = pgTable("maintenance", {
   hydraulicOilLeaks: boolean("hydraulic_oil_leaks").default(false), // Posibles pérdidas de aceite: Hidráulico
   oilPressureTemp: boolean("oil_pressure_temp").default(false), // Presión de aceite y temperatura
   
+  // Añadir aceite
+  addOil: boolean("add_oil").default(false), // Agregar aceite
+  addOilQuantity: decimal("add_oil_quantity").default("0"), // Cantidad de aceite agregado
+  
+  // Terminado el turno
+  cutoffSwitch: boolean("cutoff_switch").default(false), // Llave de corte
+  cleaning: boolean("cleaning").default(false), // Limpiar
+  generalCheck: boolean("general_check").default(false), // Chequeo general y reporte de fallas
+  
   // Campos originales para cambio de aceite y filtros
   motorOil: boolean("motor_oil").default(false),
   motorOilQuantity: decimal("motor_oil_quantity").default("0"),

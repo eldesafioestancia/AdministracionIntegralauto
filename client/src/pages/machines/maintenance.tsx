@@ -48,6 +48,15 @@ const maintenanceFormSchema = z.object({
   hydraulicOilLeaks: z.boolean().default(false), // Posibles pérdidas de aceite: Hidráulico
   oilPressureTemp: z.boolean().default(false), // Presión de aceite y temperatura
   
+  // Agregar aceite
+  addOil: z.boolean().default(false), // Agregar aceite
+  addOilQuantity: z.string().optional(), // Cantidad de aceite agregado
+  
+  // Terminado el turno
+  cutoffSwitch: z.boolean().default(false), // Llave de corte
+  cleaning: z.boolean().default(false), // Limpiar
+  generalCheck: z.boolean().default(false), // Chequeo general y reporte de fallas
+  
   // Campos originales para cambio de aceite y filtros
   motorOil: z.boolean().default(false),
   motorOilQuantity: z.string().optional(),
@@ -104,6 +113,15 @@ export default function MachineMaintenance() {
       hydraulicOilLeaks: false,
       oilPressureTemp: false,
       
+      // Agregar aceite
+      addOil: false,
+      addOilQuantity: "",
+      
+      // Terminado el turno
+      cutoffSwitch: false,
+      cleaning: false,
+      generalCheck: false,
+      
       // Campos para cambio de aceite y filtros
       motorOil: false,
       motorOilQuantity: "",
@@ -121,6 +139,7 @@ export default function MachineMaintenance() {
   const motorOilChecked = form.watch("motorOil");
   const hydraulicOilChecked = form.watch("hydraulicOil");
   const coolantChecked = form.watch("coolant");
+  const addOilChecked = form.watch("addOil");
 
   async function onSubmit(values: MaintenanceFormValues) {
     try {
@@ -581,6 +600,112 @@ export default function MachineMaintenance() {
                             </FormControl>
                             <div className="space-y-1">
                               <FormLabel>Presión y temperatura de aceite</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <div>
+                        <div className="flex items-start space-x-2">
+                          <FormField
+                            control={form.control}
+                            name="addOil"
+                            render={({ field }) => (
+                              <FormItem className="flex items-start space-x-2 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                                <div className="space-y-1">
+                                  <FormLabel>Agregar aceite</FormLabel>
+                                </div>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        {addOilChecked && (
+                          <div className="ml-6 mt-2">
+                            <FormField
+                              control={form.control}
+                              name="addOilQuantity"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <div className="flex items-center space-x-2">
+                                    <FormControl>
+                                      <Input
+                                        {...field}
+                                        type="number"
+                                        placeholder="0"
+                                        className="w-20"
+                                      />
+                                    </FormControl>
+                                    <span className="text-sm text-neutral-500">litros</span>
+                                  </div>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Sección de terminado el turno */}
+                  <div className="border rounded-md p-4">
+                    <h3 className="font-medium text-neutral-500 mb-4">Terminado el turno</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
+                      <FormField
+                        control={form.control}
+                        name="cutoffSwitch"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Llave de corte</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="cleaning"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Limpiar</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="generalCheck"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Chequeo general y reporte de fallas</FormLabel>
                             </div>
                           </FormItem>
                         )}
