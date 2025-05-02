@@ -193,7 +193,8 @@ export const animals = pgTable("animals", {
   birthDate: timestamp("birth_date").notNull(),
   race: text("race").notNull(),
   category: text("category").notNull(), // vaca, toro, novillo, ternero, ternera
-  reproductiveStatus: text("reproductive_status"), // preñada, vacía, con_cria, toro_en_servicio
+  reproductiveStatus: text("reproductive_status"), // vacia, servicio, preñada, parida (para vacas) / en_servicio, no_en_servicio (para toros)
+  reproductiveDetail: text("reproductive_detail"), // detalles adicionales según el estado reproductivo
   origin: text("origin"), // nacido_establecimiento, comprado
   supplier: text("supplier"), // proveedor si fue comprado
   purchaseDate: timestamp("purchase_date"), // fecha de compra si fue comprado
@@ -201,8 +202,7 @@ export const animals = pgTable("animals", {
   fatherId: integer("father_id"),
   description: text("description"),
   cartagena: text("cartagena").notNull(), // nro caravana (obligatorio)
-  cartagenaColor: text("caravana_color"), // color de la caravana
-  cartagenaSecondaryColor: text("caravana_secondary_color"), // color secundario
+  cartagenaColor: text("caravana_color").notNull(), // color de la caravana
   marks: text("marks"), // señales o marcas particulares
   currentWeight: text("current_weight"), // peso actual en kg
   lastWeightDate: timestamp("last_weight_date"), // fecha del último control de peso

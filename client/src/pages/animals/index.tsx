@@ -35,8 +35,7 @@ import { format } from "date-fns";
 const animalFormSchema = z.object({
   // Información básica
   cartagena: z.string().min(1, { message: "El número de caravana es requerido" }),
-  cartagenaColor: z.string().optional(),
-  cartagenaSecondaryColor: z.string().optional(),
+  cartagenaColor: z.string().min(1, { message: "El color de caravana es requerido" }),
   category: z.string().min(1, { message: "La categoría es requerida" }),
   race: z.string().min(1, { message: "La raza es requerida" }),
   birthDate: z.date({
@@ -45,6 +44,7 @@ const animalFormSchema = z.object({
   
   // Estado reproductivo
   reproductiveStatus: z.string().optional(),
+  reproductiveDetail: z.string().optional(),
   
   // Origen
   origin: z.string().optional(),
@@ -89,7 +89,6 @@ export default function AnimalsIndex() {
     defaultValues: {
       cartagena: "",
       cartagenaColor: "blanco",
-      cartagenaSecondaryColor: "",
       category: "vaca",
       race: "angus",
       birthDate: new Date(),
@@ -259,66 +258,37 @@ export default function AnimalsIndex() {
                   )}
                 />
                 
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="cartagenaColor"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Color primario caravana</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Seleccione un color" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="blanco">Blanco</SelectItem>
-                            <SelectItem value="amarillo">Amarillo</SelectItem>
-                            <SelectItem value="rojo">Rojo</SelectItem>
-                            <SelectItem value="verde">Verde</SelectItem>
-                            <SelectItem value="azul">Azul</SelectItem>
-                            <SelectItem value="negro">Negro</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="cartagenaSecondaryColor"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Color secundario (opcional)</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Seleccione un color" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="ninguno">Ninguno</SelectItem>
-                            <SelectItem value="blanco">Blanco</SelectItem>
-                            <SelectItem value="amarillo">Amarillo</SelectItem>
-                            <SelectItem value="rojo">Rojo</SelectItem>
-                            <SelectItem value="verde">Verde</SelectItem>
-                            <SelectItem value="azul">Azul</SelectItem>
-                            <SelectItem value="negro">Negro</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="cartagenaColor"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Color de caravana</FormLabel>
+                      <div className="grid grid-cols-6 gap-2">
+                        {["blanco", "amarillo", "rojo", "verde", "azul", "negro"].map((color) => (
+                          <div 
+                            key={color}
+                            className={`
+                              w-full aspect-square rounded-md cursor-pointer border-2 
+                              ${field.value === color ? "border-primary ring-2 ring-primary ring-opacity-50" : "border-neutral-200"}
+                            `}
+                            style={{ 
+                              backgroundColor: 
+                                color === "blanco" ? "#ffffff" : 
+                                color === "amarillo" ? "#FFD700" :
+                                color === "rojo" ? "#FF0000" :
+                                color === "verde" ? "#008000" :
+                                color === "azul" ? "#0000FF" :
+                                color === "negro" ? "#000000" : "#ffffff"
+                            }}
+                            onClick={() => field.onChange(color)}
+                          />
+                        ))}
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
@@ -413,7 +383,13 @@ export default function AnimalsIndex() {
                       <FormItem>
                         <FormLabel>Estado reproductivo</FormLabel>
                         <Select 
-                          onValueChange={field.onChange} 
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            // Reset related fields when changing reproductive status
+                            if (value !== "prenada") {
+                              form.setValue("expectedDeliveryDate", null);
+                            }
+                          }} 
                           defaultValue={field.value}
                         >
                           <FormControl>
@@ -422,10 +398,28 @@ export default function AnimalsIndex() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="prenada">Preñada</SelectItem>
-                            <SelectItem value="vacia">Vacía</SelectItem>
-                            <SelectItem value="con_cria">Con cría</SelectItem>
-                            <SelectItem value="toro_en_servicio">Toro en servicio</SelectItem>
+                            {/* Opciones para vaca/vaquillona */}
+                            {(form.watch("category") === "vaca" || form.watch("category") === "vaquillona") && (
+                              <>
+                                <SelectItem value="vacia">Vacía</SelectItem>
+                                <SelectItem value="servicio">A punto de entrar en servicio</SelectItem>
+                                <SelectItem value="prenada">Preñada</SelectItem>
+                                <SelectItem value="parida">Parida</SelectItem>
+                              </>
+                            )}
+                            
+                            {/* Opciones para toro */}
+                            {form.watch("category") === "toro" && (
+                              <>
+                                <SelectItem value="en_servicio">En servicio</SelectItem>
+                                <SelectItem value="no_en_servicio">No en servicio</SelectItem>
+                              </>
+                            )}
+                            
+                            {/* Opciones para otras categorías */}
+                            {!["vaca", "vaquillona", "toro"].includes(form.watch("category")) && (
+                              <SelectItem value="no_aplica">No aplica</SelectItem>
+                            )}
                           </SelectContent>
                         </Select>
                         <FormMessage />
