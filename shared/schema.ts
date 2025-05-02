@@ -136,6 +136,9 @@ export const insertMaintenanceSchema = baseMaintenanceSchema.extend({
   date: z.string().or(z.date()).transform(val => 
     typeof val === 'string' ? new Date(val) : val
   ),
+  modifiedAt: z.string().or(z.date()).transform(val => 
+    typeof val === 'string' ? new Date(val) : val
+  ).optional(),
 });
 
 // Machine Financial Records

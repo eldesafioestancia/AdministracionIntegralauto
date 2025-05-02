@@ -30,7 +30,7 @@ function App() {
         <Route path="/machines/:id">
           {(params) => (
             <AppLayout>
-              <MachineDetail id={params.id} />
+              <MachineDetail />
             </AppLayout>
           )}
         </Route>
@@ -38,7 +38,7 @@ function App() {
         <Route path="/machines/:id/maintenance">
           {(params) => (
             <AppLayout>
-              <MachineMaintenance id={params.id} />
+              <MachineMaintenance />
             </AppLayout>
           )}
         </Route>
