@@ -46,10 +46,24 @@ export const machines = pgTable("machines", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertMachineSchema = createInsertSchema(machines).omit({
+// Base insertion schema
+const baseMachineSchema = createInsertSchema(machines).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+});
+
+// Extended schema with date transformations
+export const insertMachineSchema = baseMachineSchema.extend({
+  purchaseDate: z.string().or(z.date()).transform(val => 
+    typeof val === 'string' ? new Date(val) : val
+  ),
+  warrantyStart: z.string().or(z.date()).nullable().transform(val => 
+    typeof val === 'string' ? new Date(val) : val
+  ).optional(),
+  warrantyEnd: z.string().or(z.date()).nullable().transform(val => 
+    typeof val === 'string' ? new Date(val) : val
+  ).optional(),
 });
 
 // Machine Maintenance
@@ -75,10 +89,18 @@ export const maintenance = pgTable("maintenance", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertMaintenanceSchema = createInsertSchema(maintenance).omit({
+// Base maintenance schema
+const baseMaintenanceSchema = createInsertSchema(maintenance).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+});
+
+// Extended schema with date transformations
+export const insertMaintenanceSchema = baseMaintenanceSchema.extend({
+  date: z.string().or(z.date()).transform(val => 
+    typeof val === 'string' ? new Date(val) : val
+  ),
 });
 
 // Machine Financial Records
@@ -92,9 +114,17 @@ export const machineFinances = pgTable("machine_finances", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const insertMachineFinanceSchema = createInsertSchema(machineFinances).omit({
+// Base machine finance schema
+const baseMachineFinanceSchema = createInsertSchema(machineFinances).omit({
   id: true,
   createdAt: true,
+});
+
+// Extended schema with date transformations
+export const insertMachineFinanceSchema = baseMachineFinanceSchema.extend({
+  date: z.string().or(z.date()).transform(val => 
+    typeof val === 'string' ? new Date(val) : val
+  ),
 });
 
 // Animal Table
@@ -113,10 +143,18 @@ export const animals = pgTable("animals", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertAnimalSchema = createInsertSchema(animals).omit({
+// Base animal schema
+const baseAnimalSchema = createInsertSchema(animals).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+});
+
+// Extended schema with date transformations
+export const insertAnimalSchema = baseAnimalSchema.extend({
+  birthDate: z.string().or(z.date()).transform(val => 
+    typeof val === 'string' ? new Date(val) : val
+  ),
 });
 
 // Animal Veterinary Records
@@ -129,9 +167,17 @@ export const animalVeterinary = pgTable("animal_veterinary", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const insertAnimalVeterinarySchema = createInsertSchema(animalVeterinary).omit({
+// Base animal veterinary schema
+const baseAnimalVeterinarySchema = createInsertSchema(animalVeterinary).omit({
   id: true,
   createdAt: true,
+});
+
+// Extended schema with date transformations
+export const insertAnimalVeterinarySchema = baseAnimalVeterinarySchema.extend({
+  date: z.string().or(z.date()).transform(val => 
+    typeof val === 'string' ? new Date(val) : val
+  ),
 });
 
 // Animal Financial Records
@@ -148,9 +194,17 @@ export const animalFinances = pgTable("animal_finances", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const insertAnimalFinanceSchema = createInsertSchema(animalFinances).omit({
+// Base animal finance schema
+const baseAnimalFinanceSchema = createInsertSchema(animalFinances).omit({
   id: true,
   createdAt: true,
+});
+
+// Extended schema with date transformations
+export const insertAnimalFinanceSchema = baseAnimalFinanceSchema.extend({
+  date: z.string().or(z.date()).transform(val => 
+    typeof val === 'string' ? new Date(val) : val
+  ),
 });
 
 // Pasture Table
