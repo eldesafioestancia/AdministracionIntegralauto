@@ -31,18 +31,17 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
 
       <div className="p-4 relative z-10">
         <div className="space-y-1">
-          <Link href="/">
-            <a
-              className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                isActive("/")
-                  ? "bg-primary-light bg-opacity-10 text-primary"
-                  : "text-neutral-500 hover:bg-neutral-100"
-              }`}
-              onClick={closeSidebar}
-            >
-              <i className="ri-dashboard-line mr-3 text-lg"></i>
-              Dashboard
-            </a>
+          <Link 
+            href="/"
+            className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+              isActive("/")
+                ? "bg-primary-light bg-opacity-10 text-primary" 
+                : "text-neutral-500 hover:bg-neutral-100"
+            }`}
+            onClick={closeSidebar}
+          >
+            <i className="ri-dashboard-line mr-3 text-lg"></i>
+            Dashboard
           </Link>
 
           <div className="pt-2">
@@ -50,57 +49,53 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
               Módulos principales
             </p>
             <div className="mt-1 space-y-1">
-              <Link href="/machines">
-                <a
-                  className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                    isActive("/machines")
-                      ? "bg-primary-light bg-opacity-10 text-primary"
-                      : "text-neutral-500 hover:bg-neutral-100"
-                  }`}
-                  onClick={closeSidebar}
-                >
-                  <i className="ri-truck-line mr-3 text-lg"></i>
-                  Maquinarias
-                </a>
+              <Link 
+                href="/machines"
+                className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  isActive("/machines")
+                    ? "bg-primary-light bg-opacity-10 text-primary"
+                    : "text-neutral-500 hover:bg-neutral-100"
+                }`}
+                onClick={closeSidebar}
+              >
+                <i className="ri-truck-line mr-3 text-lg"></i>
+                Maquinarias
               </Link>
-              <Link href="/animals">
-                <a
-                  className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                    isActive("/animals")
-                      ? "bg-primary-light bg-opacity-10 text-primary"
-                      : "text-neutral-500 hover:bg-neutral-100"
-                  }`}
-                  onClick={closeSidebar}
-                >
-                  <i className="ri-bear-smile-line mr-3 text-lg"></i>
-                  Animales
-                </a>
+              <Link 
+                href="/animals"
+                className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  isActive("/animals")
+                    ? "bg-primary-light bg-opacity-10 text-primary"
+                    : "text-neutral-500 hover:bg-neutral-100"
+                }`}
+                onClick={closeSidebar}
+              >
+                <i className="ri-bear-smile-line mr-3 text-lg"></i>
+                Animales
               </Link>
-              <Link href="/pastures">
-                <a
-                  className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                    isActive("/pastures")
-                      ? "bg-primary-light bg-opacity-10 text-primary"
-                      : "text-neutral-500 hover:bg-neutral-100"
-                  }`}
-                  onClick={closeSidebar}
-                >
-                  <i className="ri-plant-line mr-3 text-lg"></i>
-                  Pasturas
-                </a>
+              <Link 
+                href="/pastures"
+                className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  isActive("/pastures")
+                    ? "bg-primary-light bg-opacity-10 text-primary"
+                    : "text-neutral-500 hover:bg-neutral-100"
+                }`}
+                onClick={closeSidebar}
+              >
+                <i className="ri-plant-line mr-3 text-lg"></i>
+                Pasturas
               </Link>
-              <Link href="/investments">
-                <a
-                  className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                    isActive("/investments")
-                      ? "bg-primary-light bg-opacity-10 text-primary"
-                      : "text-neutral-500 hover:bg-neutral-100"
-                  }`}
-                  onClick={closeSidebar}
-                >
-                  <i className="ri-funds-line mr-3 text-lg"></i>
-                  Inversiones
-                </a>
+              <Link 
+                href="/investments"
+                className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  isActive("/investments")
+                    ? "bg-primary-light bg-opacity-10 text-primary"
+                    : "text-neutral-500 hover:bg-neutral-100"
+                }`}
+                onClick={closeSidebar}
+              >
+                <i className="ri-funds-line mr-3 text-lg"></i>
+                Inversiones
               </Link>
             </div>
           </div>
@@ -110,70 +105,65 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
               Gestión financiera
             </p>
             <div className="mt-1 space-y-1">
-              <Link href="/services">
-                <a
-                  className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                    isActive("/services")
-                      ? "bg-primary-light bg-opacity-10 text-primary"
-                      : "text-neutral-500 hover:bg-neutral-100"
-                  }`}
-                  onClick={closeSidebar}
-                >
-                  <i className="ri-service-line mr-3 text-lg"></i>
-                  Servicios
-                </a>
+              <Link 
+                href="/services"
+                className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  isActive("/services")
+                    ? "bg-primary-light bg-opacity-10 text-primary"
+                    : "text-neutral-500 hover:bg-neutral-100"
+                }`}
+                onClick={closeSidebar}
+              >
+                <i className="ri-service-line mr-3 text-lg"></i>
+                Servicios
               </Link>
-              <Link href="/taxes">
-                <a
-                  className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                    isActive("/taxes")
-                      ? "bg-primary-light bg-opacity-10 text-primary"
-                      : "text-neutral-500 hover:bg-neutral-100"
-                  }`}
-                  onClick={closeSidebar}
-                >
-                  <i className="ri-bank-line mr-3 text-lg"></i>
-                  Impuestos
-                </a>
+              <Link 
+                href="/taxes"
+                className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  isActive("/taxes")
+                    ? "bg-primary-light bg-opacity-10 text-primary"
+                    : "text-neutral-500 hover:bg-neutral-100"
+                }`}
+                onClick={closeSidebar}
+              >
+                <i className="ri-bank-line mr-3 text-lg"></i>
+                Impuestos
               </Link>
-              <Link href="/repairs">
-                <a
-                  className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                    isActive("/repairs")
-                      ? "bg-primary-light bg-opacity-10 text-primary"
-                      : "text-neutral-500 hover:bg-neutral-100"
-                  }`}
-                  onClick={closeSidebar}
-                >
-                  <i className="ri-tools-line mr-3 text-lg"></i>
-                  Reparaciones
-                </a>
+              <Link 
+                href="/repairs"
+                className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  isActive("/repairs")
+                    ? "bg-primary-light bg-opacity-10 text-primary"
+                    : "text-neutral-500 hover:bg-neutral-100"
+                }`}
+                onClick={closeSidebar}
+              >
+                <i className="ri-tools-line mr-3 text-lg"></i>
+                Reparaciones
               </Link>
-              <Link href="/salaries">
-                <a
-                  className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                    isActive("/salaries")
-                      ? "bg-primary-light bg-opacity-10 text-primary"
-                      : "text-neutral-500 hover:bg-neutral-100"
-                  }`}
-                  onClick={closeSidebar}
-                >
-                  <i className="ri-user-star-line mr-3 text-lg"></i>
-                  Sueldos
-                </a>
+              <Link 
+                href="/salaries"
+                className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  isActive("/salaries")
+                    ? "bg-primary-light bg-opacity-10 text-primary"
+                    : "text-neutral-500 hover:bg-neutral-100"
+                }`}
+                onClick={closeSidebar}
+              >
+                <i className="ri-user-star-line mr-3 text-lg"></i>
+                Sueldos
               </Link>
-              <Link href="/capital">
-                <a
-                  className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                    isActive("/capital")
-                      ? "bg-primary-light bg-opacity-10 text-primary"
-                      : "text-neutral-500 hover:bg-neutral-100"
-                  }`}
-                  onClick={closeSidebar}
-                >
-                  <i className="ri-money-dollar-circle-line mr-3 text-lg"></i>
-                  Capital
-                </a>
+              <Link 
+                href="/capital"
+                className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  isActive("/capital")
+                    ? "bg-primary-light bg-opacity-10 text-primary"
+                    : "text-neutral-500 hover:bg-neutral-100"
+                }`}
+                onClick={closeSidebar}
+              >
+                <i className="ri-money-dollar-circle-line mr-3 text-lg"></i>
+                Capital
               </Link>
             </div>
           </div>
@@ -183,31 +173,29 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
               Sistema
             </p>
             <div className="mt-1 space-y-1">
-              <Link href="/reports">
-                <a
-                  className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                    isActive("/reports")
-                      ? "bg-primary-light bg-opacity-10 text-primary"
-                      : "text-neutral-500 hover:bg-neutral-100"
-                  }`}
-                  onClick={closeSidebar}
-                >
-                  <i className="ri-file-chart-line mr-3 text-lg"></i>
-                  Reportes
-                </a>
+              <Link 
+                href="/reports"
+                className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  isActive("/reports")
+                    ? "bg-primary-light bg-opacity-10 text-primary"
+                    : "text-neutral-500 hover:bg-neutral-100"
+                }`}
+                onClick={closeSidebar}
+              >
+                <i className="ri-file-chart-line mr-3 text-lg"></i>
+                Reportes
               </Link>
-              <Link href="/settings">
-                <a
-                  className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                    isActive("/settings")
-                      ? "bg-primary-light bg-opacity-10 text-primary"
-                      : "text-neutral-500 hover:bg-neutral-100"
-                  }`}
-                  onClick={closeSidebar}
-                >
-                  <i className="ri-settings-line mr-3 text-lg"></i>
-                  Configuración
-                </a>
+              <Link 
+                href="/settings"
+                className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  isActive("/settings")
+                    ? "bg-primary-light bg-opacity-10 text-primary"
+                    : "text-neutral-500 hover:bg-neutral-100"
+                }`}
+                onClick={closeSidebar}
+              >
+                <i className="ri-settings-line mr-3 text-lg"></i>
+                Configuración
               </Link>
             </div>
           </div>
