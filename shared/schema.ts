@@ -73,10 +73,10 @@ export const maintenance = pgTable("maintenance", {
   date: timestamp("date").notNull(),
   time: text("time"), // Hora del mantenimiento/revisión
   type: text("type").notNull(), // pre_start_check, oil_filter_change, maintenance_repair
-  description: text("description").notNull(),
   driver: text("driver"), // Chofer/conductor
-  responsible: text("responsible").notNull(),
   notes: text("notes"),
+  isModified: boolean("is_modified").default(false),
+  modifiedAt: timestamp("modified_at"),
   
   // Previo al arranque
   gearboxOilLevel: boolean("gearbox_oil_level").default(false), // Chequear nivel aceite de caja

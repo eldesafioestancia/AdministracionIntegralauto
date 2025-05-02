@@ -20,14 +20,14 @@ const maintenanceFormSchema = z.object({
   date: z.date({
     required_error: "La fecha es requerida",
   }),
-  time: z.string().optional(),
+  time: z.string(),
   type: z.enum(["pre_start_check", "oil_filter_change", "maintenance_repair"], {
     required_error: "El tipo de mantenimiento es requerido",
   }),
-  description: z.string().min(5, { message: "La descripción debe tener al menos 5 caracteres" }),
   driver: z.string().optional(), // Chofer
-  responsible: z.string().min(3, { message: "El responsable es requerido" }),
   notes: z.string().optional(),
+  isModified: z.boolean().default(false),
+  modifiedAt: z.date().optional(),
   
   // Previo al arranque
   gearboxOilLevel: z.boolean().default(false), // Chequear nivel aceite de caja
@@ -89,12 +89,11 @@ export default function MachineMaintenance() {
     resolver: zodResolver(maintenanceFormSchema),
     defaultValues: {
       date: new Date(),
-      time: "",
+      time: format(new Date(), "HH:mm"),
       type: "pre_start_check",
-      description: "",
       driver: "",
-      responsible: "",
       notes: "",
+      isModified: false,
       
       // Previo al arranque
       gearboxOilLevel: false,
@@ -285,42 +284,12 @@ export default function MachineMaintenance() {
 
                 <FormField
                   control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Descripción</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Descripción breve del mantenimiento" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
                   name="driver"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Chofer/Conductor</FormLabel>
                       <FormControl>
                         <Input placeholder="Nombre del chofer o conductor" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="responsible"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Responsable</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Nombre del responsable" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
