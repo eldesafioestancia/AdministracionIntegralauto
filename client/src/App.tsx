@@ -53,6 +53,21 @@ function App() {
           )}
         </Route>
         
+        {/* Rutas para animales */}
+        <Route path="/animals">
+          <AppLayout>
+            <AnimalsIndex />
+          </AppLayout>
+        </Route>
+        
+        <Route path="/animals/:id">
+          {(params) => (
+            <AppLayout>
+              <AnimalDetail />
+            </AppLayout>
+          )}
+        </Route>
+        
         <Route>
           <AppLayout>
             <NotFound />
