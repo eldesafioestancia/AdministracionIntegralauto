@@ -6,6 +6,7 @@ import Dashboard from "@/pages/dashboard";
 import MachinesIndex from "@/pages/machines/index";
 import MachineDetail from "@/pages/machines/[id]";
 import MachineMaintenance from "@/pages/machines/maintenance";
+import EditMaintenance from "@/pages/machines/maintenance/[id]";
 import AppLayout from "@/components/layouts/AppLayout";
 
 function App() {
@@ -38,6 +39,14 @@ function App() {
           {(params) => (
             <AppLayout>
               <MachineMaintenance id={params.id} />
+            </AppLayout>
+          )}
+        </Route>
+        
+        <Route path="/machines/:machineId/maintenance/:id">
+          {(params) => (
+            <AppLayout>
+              <EditMaintenance />
             </AppLayout>
           )}
         </Route>

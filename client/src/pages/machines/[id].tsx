@@ -84,6 +84,15 @@ export default function MachineDetail() {
       case "camion": return "Camión";
       default: return type;
     }
+  }
+  
+  const getMaintenanceTypeLabel = (type: string) => {
+    switch (type) {
+      case "pre_start_check": return "Control previo puesta en marcha";
+      case "oil_filter_change": return "Cambio de aceite y filtros";
+      case "maintenance_repair": return "Mantenimiento y reparación";
+      default: return type;
+    }
   };
 
   const getMachineImage = (type: string) => {
@@ -262,14 +271,15 @@ export default function MachineDetail() {
                 <Card key={maintenance.id}>
                   <CardHeader className="pb-2">
                     <div className="flex justify-between">
-                      <CardTitle>{maintenance.type === "oil_change" ? "Cambio de aceite" : 
-                               maintenance.type === "filter_change" ? "Cambio de filtros" : 
-                               "Revisión general"}</CardTitle>
+                      <CardTitle>{getMaintenanceTypeLabel(maintenance.type)}</CardTitle>
                       <Badge variant="outline">
                         {format(new Date(maintenance.date), "dd/MM/yyyy")}
                       </Badge>
                     </div>
-                    <CardDescription>{maintenance.description}</CardDescription>
+                    <CardDescription>
+                      {maintenance.time && `Hora: ${maintenance.time}`}
+                      {maintenance.isModified && <span className="ml-2 text-amber-500">(Modificado)</span>}
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
@@ -318,10 +328,19 @@ export default function MachineDetail() {
                     </div>
                     <div className="mt-4 pt-3 border-t border-neutral-100 flex justify-between">
                       <div className="text-sm text-neutral-400">
-                        Responsable: <span className="text-neutral-500">{maintenance.responsible}</span>
+                        {maintenance.driver && (
+                          <span>Conductor: <span className="text-neutral-500">{maintenance.driver}</span></span>
+                        )}
+                        {maintenance.isModified && maintenance.modifiedAt && (
+                          <span className="ml-3">Modificado: <span className="text-neutral-500">
+                            {format(new Date(maintenance.modifiedAt), "dd/MM/yyyy HH:mm")}
+                          </span></span>
+                        )}
                       </div>
-                      <Button variant="ghost" size="sm">
-                        <i className="ri-more-line"></i>
+                      <Button variant="outline" size="sm" asChild>
+                        <Link href={`/machines/${id}/maintenance/${maintenance.id}`}>
+                          <i className="ri-edit-line mr-1"></i> Editar
+                        </Link>
                       </Button>
                     </div>
                   </CardContent>
