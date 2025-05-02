@@ -32,16 +32,31 @@ import { format } from "date-fns";
 
 // Machine form schema
 const machineFormSchema = z.object({
-  type: z.enum(["tractor", "topadora", "camion"], { 
+  // Datos de identificación
+  type: z.enum(["tractor", "topadora", "camion", "vehiculo", "accesorio"], { 
     required_error: "El tipo de unidad es requerido",
   }),
   brand: z.string().min(1, { message: "La marca es requerida" }),
   model: z.string().min(1, { message: "El modelo es requerido" }),
+  serialNumber: z.string().optional(),
   year: z.number().int().min(1900, { message: "Año inválido" }).max(new Date().getFullYear(), { message: "Año inválido" }),
-  hours: z.string().min(1, { message: "Las horas son requeridas" }),
+  hours: z.string().min(1, { message: "Las horas/kilómetros son requeridos" }),
+  power: z.string().optional(),
+  fuelType: z.string().optional(),
+  licensePlate: z.string().optional(),
+  
+  // Datos de adquisición
   purchaseDate: z.date({
     required_error: "La fecha de compra es requerida",
   }),
+  supplier: z.string().optional(),
+  invoiceNumber: z.string().optional(),
+  purchasePrice: z.string().optional(),
+  paymentMethod: z.string().optional(),
+  warrantyStart: z.date().optional().nullable(),
+  warrantyEnd: z.date().optional().nullable(),
+  documentation: z.string().optional(),
+  photo: z.string().optional(),
 });
 
 type MachineFormValues = z.infer<typeof machineFormSchema>;
@@ -62,9 +77,21 @@ export default function MachinesIndex() {
       type: "tractor",
       brand: "",
       model: "",
+      serialNumber: "",
       year: new Date().getFullYear(),
       hours: "0",
+      power: "",
+      fuelType: "",
+      licensePlate: "",
       purchaseDate: new Date(),
+      supplier: "",
+      invoiceNumber: "",
+      purchasePrice: "",
+      paymentMethod: "",
+      warrantyStart: null,
+      warrantyEnd: null,
+      documentation: "",
+      photo: "",
     },
   });
 
@@ -98,6 +125,8 @@ export default function MachinesIndex() {
       case "tractor": return "Tractor";
       case "topadora": return "Topadora";
       case "camion": return "Camión";
+      case "vehiculo": return "Vehículo";
+      case "accesorio": return "Accesorio";
       default: return type;
     }
   };
@@ -107,6 +136,8 @@ export default function MachinesIndex() {
       case "tractor": return "ri-truck-line";
       case "topadora": return "ri-loader-line";
       case "camion": return "ri-truck-fill";
+      case "vehiculo": return "ri-car-line";
+      case "accesorio": return "ri-tools-line";
       default: return "ri-truck-line";
     }
   };
@@ -119,6 +150,10 @@ export default function MachinesIndex() {
         return "https://images.unsplash.com/photo-1613046561926-371d5403d504?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=200&q=80";
       case "camion":
         return "https://images.unsplash.com/photo-1626078427472-7811789ed2dc?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=200&q=80";
+      case "vehiculo":
+        return "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=200&q=80";
+      case "accesorio":
+        return "https://images.unsplash.com/photo-1617703191607-f5e3ca7f34dd?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=200&q=80";
       default:
         return "https://images.unsplash.com/photo-1605654145610-2f65428be306?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=200&q=80";
     }
@@ -199,6 +234,8 @@ export default function MachinesIndex() {
                           <SelectItem value="tractor">Tractor</SelectItem>
                           <SelectItem value="topadora">Topadora</SelectItem>
                           <SelectItem value="camion">Camión</SelectItem>
+                          <SelectItem value="vehiculo">Vehículo</SelectItem>
+                          <SelectItem value="accesorio">Accesorio</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -236,13 +273,30 @@ export default function MachinesIndex() {
                   />
                 </div>
                 
+                {/* Datos de identificación */}
+                <h3 className="font-semibold text-base text-neutral-500 mt-4">Datos de identificación</h3>
+                
                 <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="serialNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Número de serie</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="SN-12345678" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
                   <FormField
                     control={form.control}
                     name="year"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Año</FormLabel>
+                        <FormLabel>Año de fabricación</FormLabel>
                         <FormControl>
                           <Input 
                             type="number" 
@@ -255,13 +309,15 @@ export default function MachinesIndex() {
                       </FormItem>
                     )}
                   />
-                  
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="hours"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Horas de trabajo</FormLabel>
+                        <FormLabel>Horas/Kms</FormLabel>
                         <FormControl>
                           <Input {...field} placeholder="0" />
                         </FormControl>
@@ -269,7 +325,54 @@ export default function MachinesIndex() {
                       </FormItem>
                     )}
                   />
+                  
+                  <FormField
+                    control={form.control}
+                    name="power"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Potencia (HP/kW)</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="150 HP" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="fuelType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Combustible</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Diesel" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="licensePlate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Patente/matrícula</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="ABC-123" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                {/* Datos de adquisición */}
+                <h3 className="font-semibold text-base text-neutral-500 mt-4">Datos de adquisición</h3>
                 
                 <FormField
                   control={form.control}
@@ -287,6 +390,140 @@ export default function MachinesIndex() {
                             field.onChange(date);
                           }}
                         />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="supplier"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Proveedor/Vendedor</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Concesionario S.A." />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="invoiceNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Número de factura</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="A-0001-00000123" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="purchasePrice"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Precio de compra</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="25000" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="paymentMethod"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Forma de pago</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Crédito" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="warrantyStart"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Inicio garantía</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="date"
+                            {...field}
+                            value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                            onChange={(e) => {
+                              const date = e.target.value ? new Date(e.target.value) : null;
+                              field.onChange(date);
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="warrantyEnd"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Fin garantía</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="date"
+                            {...field}
+                            value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                            onChange={(e) => {
+                              const date = e.target.value ? new Date(e.target.value) : null;
+                              field.onChange(date);
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <FormField
+                  control={form.control}
+                  name="documentation"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Documentación adjunta</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Manuales, certificados, etc." />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="photo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Fotografía (URL)</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="https://ejemplo.com/foto.jpg" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -327,6 +564,7 @@ export default function MachinesIndex() {
             <SelectItem value="camion">Camiones</SelectItem>
             <SelectItem value="tractor">Tractores</SelectItem>
             <SelectItem value="topadora">Topadoras</SelectItem>
+            <SelectItem value="vehiculo">Vehículos</SelectItem>
             <SelectItem value="accesorio">Accesorios</SelectItem>
           </SelectContent>
         </Select>
