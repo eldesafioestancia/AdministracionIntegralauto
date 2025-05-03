@@ -87,15 +87,15 @@ export default function ReproductiveManagement() {
   const { toast } = useToast();
   
   // Obtener listas de animales existentes
-  const { data: animals, isLoading: animalsLoading } = useQuery({
+  const { data: animals = [], isLoading: animalsLoading } = useQuery({
     queryKey: ["/api/animals"],
   });
   
-  const { data: naturalServices, isLoading: naturalServicesLoading } = useQuery({
+  const { data: naturalServices = [], isLoading: naturalServicesLoading } = useQuery({
     queryKey: ["/api/reproductive/natural"],
   });
   
-  const { data: artificialServices, isLoading: artificialServicesLoading } = useQuery({
+  const { data: artificialServices = [], isLoading: artificialServicesLoading } = useQuery({
     queryKey: ["/api/reproductive/artificial"],
   });
   

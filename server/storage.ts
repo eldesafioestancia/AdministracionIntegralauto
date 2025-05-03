@@ -594,6 +594,84 @@ export class MemStorage implements IStorage {
   async deleteCapital(id: number): Promise<boolean> {
     return this.capitals.delete(id);
   }
+  
+  // Natural Services (Reproductive - Monta Natural)
+  async getNaturalServices(animalId?: number): Promise<NaturalService[]> {
+    const services = Array.from(this.naturalServices.values());
+    if (animalId) {
+      return services.filter(s => s.animalId === animalId);
+    }
+    return services;
+  }
+  
+  async getNaturalService(id: number): Promise<NaturalService | undefined> {
+    return this.naturalServices.get(id);
+  }
+  
+  async createNaturalService(insertService: InsertNaturalService): Promise<NaturalService> {
+    const id = this.currentIds.naturalService++;
+    const now = new Date();
+    const service: NaturalService = { ...insertService, id, createdAt: now, updatedAt: now };
+    this.naturalServices.set(id, service);
+    return service;
+  }
+  
+  async updateNaturalService(id: number, updateData: Partial<InsertNaturalService>): Promise<NaturalService | undefined> {
+    const service = this.naturalServices.get(id);
+    if (!service) return undefined;
+    
+    const updatedService: NaturalService = {
+      ...service,
+      ...updateData,
+      updatedAt: new Date(),
+    };
+    
+    this.naturalServices.set(id, updatedService);
+    return updatedService;
+  }
+  
+  async deleteNaturalService(id: number): Promise<boolean> {
+    return this.naturalServices.delete(id);
+  }
+  
+  // Artificial Services (Reproductive - Inseminación Artificial)
+  async getArtificialServices(animalId?: number): Promise<ArtificialService[]> {
+    const services = Array.from(this.artificialServices.values());
+    if (animalId) {
+      return services.filter(s => s.animalId === animalId);
+    }
+    return services;
+  }
+  
+  async getArtificialService(id: number): Promise<ArtificialService | undefined> {
+    return this.artificialServices.get(id);
+  }
+  
+  async createArtificialService(insertService: InsertArtificialService): Promise<ArtificialService> {
+    const id = this.currentIds.artificialService++;
+    const now = new Date();
+    const service: ArtificialService = { ...insertService, id, createdAt: now, updatedAt: now };
+    this.artificialServices.set(id, service);
+    return service;
+  }
+  
+  async updateArtificialService(id: number, updateData: Partial<InsertArtificialService>): Promise<ArtificialService | undefined> {
+    const service = this.artificialServices.get(id);
+    if (!service) return undefined;
+    
+    const updatedService: ArtificialService = {
+      ...service,
+      ...updateData,
+      updatedAt: new Date(),
+    };
+    
+    this.artificialServices.set(id, updatedService);
+    return updatedService;
+  }
+  
+  async deleteArtificialService(id: number): Promise<boolean> {
+    return this.artificialServices.delete(id);
+  }
 
   // Dashboard
   async getDashboardStats(): Promise<{
