@@ -86,16 +86,16 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                 Pasturas
               </Link>
               <Link 
-                href="/investments"
+                href="/financial"
                 className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                  isActive("/investments")
+                  isActive("/financial")
                     ? "bg-primary-light bg-opacity-10 text-primary"
                     : "text-neutral-500 hover:bg-neutral-100"
                 }`}
                 onClick={closeSidebar}
               >
                 <i className="ri-funds-line mr-3 text-lg"></i>
-                Inversiones
+                Gestión Financiera
               </Link>
             </div>
           </div>

@@ -49,7 +49,7 @@ export default function MobileMenu({ open, setOpen }: MobileMenuProps) {
             </a>
           </Link>
 
-          <Link href="/investments">
+          <Link href="/financial">
             <a
               className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-neutral-100"
               onClick={() => setOpen(false)}
@@ -58,7 +58,7 @@ export default function MobileMenu({ open, setOpen }: MobileMenuProps) {
                 <i className="ri-funds-line text-xl text-secondary"></i>
               </div>
               <span className="text-xs text-neutral-500 text-center">
-                Inversiones
+                Gestión Financiera
               </span>
             </a>
           </Link>
