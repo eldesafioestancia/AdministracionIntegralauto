@@ -387,31 +387,12 @@ export const insertRepairSchema = createInsertSchema(repairs).omit({
   createdAt: true,
 });
 
-// Employees Table
-export const employees = pgTable("employees", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  position: text("position"),
-  fixedSalary: decimal("fixed_salary").default("0"),
-  active: boolean("active").default(true),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
-export const insertEmployeeSchema = createInsertSchema(employees).omit({
-  id: true,
-  createdAt: true,
-});
-
 // Salary Table
 export const salaries = pgTable("salaries", {
   id: serial("id").primaryKey(),
   date: timestamp("date").notNull(),
-  employeeId: integer("employee_id").notNull(),
-  employeeName: text("employee_name").notNull(), // Nombre del empleado para referencia
-  salaryType: text("salary_type").notNull(), // fixed (fijo), variable
+  employee: text("employee").notNull(), // Pincheira, Lima, Alfredo, Ozan
   amount: decimal("amount").notNull(),
-  description: text("description"), // Para detalles adicionales, especialmente en pagos variables
-  period: text("period"), // Para indicar el período (quincena, mensual, etc.)
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -474,9 +455,6 @@ export type InsertTax = z.infer<typeof insertTaxSchema>;
 
 export type Repair = typeof repairs.$inferSelect;
 export type InsertRepair = z.infer<typeof insertRepairSchema>;
-
-export type Employee = typeof employees.$inferSelect;
-export type InsertEmployee = z.infer<typeof insertEmployeeSchema>;
 
 export type Salary = typeof salaries.$inferSelect;
 export type InsertSalary = z.infer<typeof insertSalarySchema>;
