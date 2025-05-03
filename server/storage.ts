@@ -13,7 +13,9 @@ import {
   taxes, Tax, InsertTax,
   repairs, Repair, InsertRepair,
   salaries, Salary, InsertSalary,
-  capital, Capital, InsertCapital
+  capital, Capital, InsertCapital,
+  naturalServices, NaturalService, InsertNaturalService,
+  artificialServices, ArtificialService, InsertArtificialService
 } from "@shared/schema";
 
 export interface IStorage {
@@ -162,6 +164,8 @@ export class MemStorage implements IStorage {
     repair: number;
     salary: number;
     capital: number;
+    naturalService: number;
+    artificialService: number;
   };
 
   constructor() {
@@ -199,7 +203,7 @@ export class MemStorage implements IStorage {
       repair: 1,
       salary: 1,
       capital: 1,
-      naturalService: 1,
+      naturalService: 1, 
       artificialService: 1,
     };
 
