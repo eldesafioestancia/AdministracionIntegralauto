@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +31,7 @@ const naturalServiceFormSchema = z.object({
   pregnancyCheckDate: z.date().optional().nullable(),
   pregnancyResult: z.string().optional(),
   expectedDeliveryDate: z.date().optional().nullable(),
+  moveToWinterPasture: z.boolean().optional().default(false),
   notes: z.string().optional(),
 });
 
@@ -46,6 +48,7 @@ const artificialInseminationFormSchema = z.object({
   inseminationDate: z.date().optional().nullable(),
   bullId: z.string().min(1, { message: "La identificación del toro (pajuela) es requerida" }),
   expectedDeliveryDate: z.date().optional().nullable(),
+  moveToWinterPasture: z.boolean().optional().default(false),
   notes: z.string().optional(),
 });
 
@@ -86,6 +89,7 @@ export default function AnimalReproduction() {
       pregnancyCheckDate: null,
       pregnancyResult: "",
       expectedDeliveryDate: null,
+      moveToWinterPasture: false,
       notes: "",
     },
   });
@@ -103,6 +107,7 @@ export default function AnimalReproduction() {
       inseminationDate: null,
       bullId: "",
       expectedDeliveryDate: null,
+      moveToWinterPasture: false,
       notes: "",
     },
   });
@@ -158,10 +163,27 @@ export default function AnimalReproduction() {
     
     if (serviceDate) {
       const isPrenada = value === "prenada";
-      const expectedDate = calculateExpectedDeliveryDate(serviceDate, isPrenada);
-      form.setValue("expectedDeliveryDate", expectedDate);
+      
+      if (isPrenada) {
+        // Si está preñada, calcular la fecha probable de parto (280 días)
+        const expectedDate = calculateExpectedDeliveryDate(serviceDate, isPrenada);
+        form.setValue("expectedDeliveryDate", expectedDate);
+        
+        // Si está preñada, agregar campo para indicar traslado a pastura de invierno
+        form.setValue("moveToWinterPasture", true);
+      } else if (value === "vacia" || value === "duda") {
+        // Si está vacía o dudosa, se deriva a inseminación artificial
+        form.setValue("expectedDeliveryDate", null);
+        
+        // No se traslada a pastura de invierno
+        form.setValue("moveToWinterPasture", false);
+      } else {
+        form.setValue("expectedDeliveryDate", null);
+        form.setValue("moveToWinterPasture", false);
+      }
     } else {
       form.setValue("expectedDeliveryDate", null);
+      form.setValue("moveToWinterPasture", false);
     }
   };
   
@@ -190,6 +212,11 @@ export default function AnimalReproduction() {
       // Si está preñada, también actualizar la fecha probable de parto
       if (reproductiveStatus === "prenada" && values.expectedDeliveryDate) {
         updates.expectedDeliveryDate = values.expectedDeliveryDate;
+        
+        // Si está preñada y se marcó la opción de traslado, actualizar ubicación a pastura de invierno
+        if (values.moveToWinterPasture) {
+          updates.location = "Pastura de Invierno";
+        }
       }
       
       await apiRequest("PUT", `/api/animals/${animalId}`, updates);
@@ -458,30 +485,58 @@ export default function AnimalReproduction() {
                     </div>
                     
                     {naturalServiceForm.watch("pregnancyResult") === "prenada" && (
-                      <FormField
-                        control={naturalServiceForm.control}
-                        name="expectedDeliveryDate"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Fecha Probable de Parto</FormLabel>
-                            <FormControl>
-                              <Input 
-                                type="date"
-                                {...field}
-                                value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-                                onChange={(e) => {
-                                  const date = e.target.value ? new Date(e.target.value) : null;
-                                  field.onChange(date);
-                                }}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                            <FormDescription>
-                              Calculada automáticamente, pero puede ser modificada
-                            </FormDescription>
-                          </FormItem>
-                        )}
-                      />
+                      <div className="p-4 border border-primary/20 rounded-lg mb-4">
+                        <h3 className="text-base font-semibold mb-4">Resultado: Preñada</h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-4">
+                          <FormField
+                            control={naturalServiceForm.control}
+                            name="expectedDeliveryDate"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Fecha Probable de Parto</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    type="date"
+                                    {...field}
+                                    value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                                    onChange={(e) => {
+                                      const date = e.target.value ? new Date(e.target.value) : null;
+                                      field.onChange(date);
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                                <FormDescription>
+                                  Calculada automáticamente, pero puede ser modificada
+                                </FormDescription>
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={naturalServiceForm.control}
+                            name="moveToWinterPasture"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                                <div className="space-y-1 leading-none">
+                                  <FormLabel>
+                                    Trasladar a pastura de invierno
+                                  </FormLabel>
+                                  <FormDescription>
+                                    Activar esta opción trasladará el animal a la pastura de invierno
+                                  </FormDescription>
+                                </div>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
                     )}
                     
                     <FormField
@@ -756,30 +811,55 @@ export default function AnimalReproduction() {
                     {artificialInseminationForm.watch("pregnancyResult") === "prenada" && (
                       <div className="p-4 border border-primary/20 rounded-lg mb-4">
                         <h3 className="text-base font-semibold mb-4">Resultado: Preñada</h3>
-                        <FormField
-                          control={artificialInseminationForm.control}
-                          name="expectedDeliveryDate"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Fecha Probable de Parto</FormLabel>
-                              <FormControl>
-                                <Input 
-                                  type="date"
-                                  {...field}
-                                  value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-                                  onChange={(e) => {
-                                    const date = e.target.value ? new Date(e.target.value) : null;
-                                    field.onChange(date);
-                                  }}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                              <FormDescription>
-                                Calculada automáticamente, pero puede ser modificada
-                              </FormDescription>
-                            </FormItem>
-                          )}
-                        />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-4">
+                          <FormField
+                            control={artificialInseminationForm.control}
+                            name="expectedDeliveryDate"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Fecha Probable de Parto</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    type="date"
+                                    {...field}
+                                    value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                                    onChange={(e) => {
+                                      const date = e.target.value ? new Date(e.target.value) : null;
+                                      field.onChange(date);
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                                <FormDescription>
+                                  Calculada automáticamente, pero puede ser modificada
+                                </FormDescription>
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={artificialInseminationForm.control}
+                            name="moveToWinterPasture"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                                <div className="space-y-1 leading-none">
+                                  <FormLabel>
+                                    Trasladar a pastura de invierno
+                                  </FormLabel>
+                                  <FormDescription>
+                                    Activar esta opción trasladará el animal a la pastura de invierno
+                                  </FormDescription>
+                                </div>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
                       </div>
                     )}
                     
