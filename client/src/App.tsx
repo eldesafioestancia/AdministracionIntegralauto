@@ -17,6 +17,7 @@ import AnimalFinances from "@/pages/animals/[id]/finances";
 import InvestmentsIndex from "./pages/investments/index";
 import Services from "@/pages/services";
 import Taxes from "@/pages/taxes";
+import Repairs from "@/pages/repairs";
 import AppLayout from "@/components/layouts/AppLayout";
 
 function App() {
@@ -134,6 +135,13 @@ function App() {
         <Route path="/taxes">
           <AppLayout>
             <Taxes />
+          </AppLayout>
+        </Route>
+        
+        {/* Rutas para reparaciones */}
+        <Route path="/repairs">
+          <AppLayout>
+            <Repairs />
           </AppLayout>
         </Route>
         
