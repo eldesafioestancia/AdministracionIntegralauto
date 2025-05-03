@@ -778,8 +778,11 @@ export default function AnimalsIndex() {
                       animal.cartagenaColor === "rojo" ? "#FF0000" :
                       animal.cartagenaColor === "verde" ? "#008000" :
                       animal.cartagenaColor === "azul" ? "#0000FF" :
+                      animal.cartagenaColor === "violeta" ? "#8A2BE2" :
+                      animal.cartagenaColor === "naranja" ? "#FFA500" :
+                      animal.cartagenaColor === "rosa" ? "#FFC0CB" :
                       animal.cartagenaColor === "negro" ? "#000000" : "#f5f5f5",
-                    color: ["blanco", "amarillo"].includes(animal.cartagenaColor || "") ? "#333" : "#fff"
+                    color: ["blanco", "amarillo", "rosa", "naranja"].includes(animal.cartagenaColor || "") ? "#333" : "#fff"
                   }}
                 >
                   <div className="absolute inset-0 flex items-center justify-center">
