@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -46,16 +46,6 @@ const investmentFormSchema = z.object({
   }).min(1, {
     message: "La descripción es requerida"
   }),
-  quantity: z.string({
-    required_error: "La cantidad es requerida",
-  }).min(1, {
-    message: "La cantidad es requerida"
-  }),
-  unitValue: z.string({
-    required_error: "El valor unitario es requerido",
-  }).min(1, {
-    message: "El valor unitario es requerido"
-  }),
   amount: z.string({
     required_error: "El monto es requerido",
   }).min(1, {
@@ -84,25 +74,13 @@ export default function InvestmentsIndex() {
       date: new Date(),
       type: "machinery",
       description: "",
-      quantity: "1",
-      unitValue: "",
       amount: "",
       details: {},
     },
   });
 
-  // Obtener el tipo de inversión actual y otros valores para cálculos
+  // Obtener el tipo de inversión actual para mostrar campos adicionales
   const currentInvestmentType = form.watch("type");
-  const quantity = form.watch("quantity");
-  const unitValue = form.watch("unitValue");
-
-  // Calcula el monto total automáticamente
-  useEffect(() => {
-    if (quantity && unitValue) {
-      const total = (parseFloat(quantity) * parseFloat(unitValue)).toString();
-      form.setValue("amount", total);
-    }
-  }, [quantity, unitValue, form]);
 
   // Definir qué campos adicionales mostrar según el tipo
   const getDetailFields = () => {
@@ -338,63 +316,13 @@ export default function InvestmentsIndex() {
                 
                 <FormField
                   control={form.control}
-                  name="quantity"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Cantidad</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number"
-                          placeholder="1" 
-                          {...field} 
-                          onChange={(e) => {
-                            field.onChange(e.target.value);
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="unitValue"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Valor unitario ($)</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number"
-                          placeholder="0" 
-                          {...field} 
-                          onChange={(e) => {
-                            field.onChange(e.target.value);
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
                   name="amount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Monto total ($)</FormLabel>
+                      <FormLabel>Monto ($)</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="0" 
-                          {...field} 
-                          readOnly 
-                          className="bg-gray-100"
-                        />
+                        <Input placeholder="0" {...field} />
                       </FormControl>
-                      <FormDescription className="text-xs">
-                        Calculado automáticamente (cantidad × valor unitario)
-                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
