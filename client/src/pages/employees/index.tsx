@@ -157,6 +157,35 @@ export default function Employees() {
       });
     }
   }
+  
+  async function handleDeleteEmployee(employeeId: number) {
+    // Confirmar eliminación con el usuario
+    if (!confirm("¿Está seguro de eliminar este empleado? Esta acción no se puede deshacer y también eliminará todos los registros de salarios asociados.")) {
+      return;
+    }
+    
+    try {
+      await apiRequest("DELETE", `/api/employees/${employeeId}`, {});
+      
+      // Invalidar consulta de empleados
+      queryClient.invalidateQueries({ queryKey: ["/api/employees"] });
+      // También invalidar salarios, ya que pueden estar relacionados
+      queryClient.invalidateQueries({ queryKey: ["/api/salaries"] });
+      
+      toast({
+        title: "Empleado eliminado",
+        description: "El empleado ha sido eliminado completamente del sistema",
+      });
+      
+    } catch (error) {
+      console.error("Error deleting employee:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar el empleado. Puede tener registros relacionados.",
+        variant: "destructive",
+      });
+    }
+  }
 
   if (isLoading) {
     return <div className="py-10 text-center">Cargando empleados...</div>;
@@ -373,11 +402,21 @@ export default function Employees() {
                     <Button 
                       variant="ghost" 
                       size="sm"
-                      className="h-9 text-red-500 hover:text-red-700 hover:bg-red-50"
+                      className="h-9 text-orange-500 hover:text-orange-700 hover:bg-orange-50"
                       onClick={() => handleUpdateStatus(employee.id, "inactive")}
                     >
                       <i className="ri-user-unfollow-line mr-1"></i>
                       Desactivar
+                    </Button>
+                    
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      className="h-9 text-red-500 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => handleDeleteEmployee(employee.id)}
+                    >
+                      <i className="ri-delete-bin-line mr-1"></i>
+                      Eliminar
                     </Button>
                   </div>
                 </div>
@@ -423,6 +462,16 @@ export default function Employees() {
                     >
                       <i className="ri-user-follow-line mr-1"></i>
                       Activar
+                    </Button>
+                    
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      className="h-9 text-red-500 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => handleDeleteEmployee(employee.id)}
+                    >
+                      <i className="ri-delete-bin-line mr-1"></i>
+                      Eliminar
                     </Button>
                   </div>
                 </div>
