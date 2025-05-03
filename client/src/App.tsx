@@ -14,6 +14,7 @@ import AnimalWeight from "@/pages/animals/[id]/weight";
 import AnimalVeterinary from "@/pages/animals/[id]/veterinary";
 import AnimalReproduction from "@/pages/animals/[id]/reproduction";
 import AnimalFinances from "@/pages/animals/[id]/finances";
+import InvestmentsIndex from "./pages/investments/index";
 import AppLayout from "@/components/layouts/AppLayout";
 
 function App() {
@@ -111,6 +112,13 @@ function App() {
               <AnimalFinances />
             </AppLayout>
           )}
+        </Route>
+        
+        {/* Rutas para inversiones */}
+        <Route path="/investments">
+          <AppLayout>
+            <InvestmentsIndex />
+          </AppLayout>
         </Route>
         
         <Route>
