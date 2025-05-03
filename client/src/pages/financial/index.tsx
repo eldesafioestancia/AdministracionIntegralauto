@@ -1566,78 +1566,167 @@ export default function FinancialIndex() {
         {/* Sección de Reparaciones */}
         <TabsContent value="repairs">
           <div className="bg-white rounded-lg p-6 shadow-sm border border-neutral-200">
-            <h2 className="text-xl font-semibold mb-4">Reparaciones</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center">
-                    <i className="ri-building-line mr-2 text-blue-500"></i>
-                    <span>Construcciones</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-neutral-500">
-                    Reparaciones de construcciones
-                  </p>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center">
-                    <i className="ri-flashlight-line mr-2 text-yellow-500"></i>
-                    <span>Electricista</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-neutral-500">
-                    Servicios de electricista
-                  </p>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center">
-                    <i className="ri-hammer-line mr-2 text-orange-500"></i>
-                    <span>Albañil</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-neutral-500">
-                    Servicios de albañilería
-                  </p>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center">
-                    <i className="ri-drop-line mr-2 text-blue-400"></i>
-                    <span>Plomero</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-neutral-500">
-                    Servicios de plomería
-                  </p>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center">
-                    <i className="ri-box-3-line mr-2 text-brown-500"></i>
-                    <span>Materiales</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-neutral-500">
-                    Materiales de construcción
-                  </p>
-                </CardContent>
-              </Card>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Reparaciones</h2>
+              <Sheet open={selectedTab === "repairs" && sheetOpen} onOpenChange={(open) => selectedTab === "repairs" && setSheetOpen(open)}>
+                <SheetTrigger asChild>
+                  <Button>
+                    <i className="ri-add-line mr-1"></i> Nueva reparación
+                  </Button>
+                </SheetTrigger>
+                <SheetContent className="sm:max-w-md overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle>Registrar reparación</SheetTitle>
+                    <SheetDescription>
+                      Complete los datos de la nueva reparación
+                    </SheetDescription>
+                  </SheetHeader>
+                  
+                  <Form {...repairForm}>
+                    <form onSubmit={repairForm.handleSubmit(onRepairSubmit)} className="space-y-4 py-4">
+                      <FormField
+                        control={repairForm.control}
+                        name="date"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Fecha</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="date"
+                                {...field}
+                                value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                                onChange={(e) => {
+                                  const date = e.target.value ? new Date(e.target.value) : null;
+                                  field.onChange(date);
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={repairForm.control}
+                        name="type"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Tipo</FormLabel>
+                            <Select 
+                              onValueChange={field.onChange} 
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Seleccione un tipo" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="construcciones">Construcciones</SelectItem>
+                                <SelectItem value="electricista">Electricista</SelectItem>
+                                <SelectItem value="albanil">Albañil</SelectItem>
+                                <SelectItem value="plomero">Plomero</SelectItem>
+                                <SelectItem value="materiales">Materiales</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={repairForm.control}
+                        name="description"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Descripción</FormLabel>
+                            <FormControl>
+                              <Textarea
+                                placeholder="Describa la reparación"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={repairForm.control}
+                        name="amount"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Monto ($)</FormLabel>
+                            <FormControl>
+                              <Input placeholder="0" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <SheetFooter>
+                        <Button type="submit">Guardar reparación</Button>
+                      </SheetFooter>
+                    </form>
+                  </Form>
+                </SheetContent>
+              </Sheet>
             </div>
+            
+            {repairsLoading ? (
+              <div className="text-center py-8">
+                <p className="text-neutral-500">Cargando reparaciones...</p>
+              </div>
+            ) : repairs && repairs.length > 0 ? (
+              <div className="space-y-4">
+                {repairs.map((repair: any) => (
+                  <Collapsible key={repair.id} className="border rounded-lg border-neutral-200">
+                    <div className="flex justify-between items-center p-4">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-neutral-100">
+                          <i className={`${getRepairTypeIcon(repair.type)} text-neutral-600`}></i>
+                        </div>
+                        <div>
+                          <h3 className="font-medium">{getRepairTypeLabel(repair.type)}</h3>
+                          <p className="text-sm text-neutral-500">
+                            {format(new Date(repair.date), 'dd/MM/yyyy')}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <p className="font-medium text-lg">${repair.amount}</p>
+                        <CollapsibleTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <i className="ri-arrow-down-s-line"></i>
+                          </Button>
+                        </CollapsibleTrigger>
+                      </div>
+                    </div>
+                    <CollapsibleContent>
+                      <div className="px-4 pb-4 pt-0 border-t border-neutral-200">
+                        <div className="pt-4">
+                          <p className="text-sm text-neutral-600 mb-2">{repair.description}</p>
+                        </div>
+                        <div className="flex justify-end mt-2">
+                          <Button 
+                            variant="destructive" 
+                            size="sm" 
+                            onClick={() => handleRepairDelete(repair.id)}
+                          >
+                            <i className="ri-delete-bin-line mr-1"></i> Eliminar
+                          </Button>
+                        </div>
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 border rounded-lg border-dashed border-neutral-300">
+                <p className="text-neutral-500">No hay reparaciones registradas</p>
+              </div>
+            )}
           </div>
         </TabsContent>
       </Tabs>
