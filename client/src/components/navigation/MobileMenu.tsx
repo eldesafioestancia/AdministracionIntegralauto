@@ -91,7 +91,7 @@ export default function MobileMenu({ open, setOpen }: MobileMenuProps) {
             </a>
           </Link>
 
-          <Link href="/repairs">
+          <Link href="/investments/repairs">
             <a
               className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-neutral-100"
               onClick={() => setOpen(false)}

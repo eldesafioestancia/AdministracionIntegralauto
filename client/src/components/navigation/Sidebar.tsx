@@ -93,18 +93,103 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
               Gestión financiera
             </p>
             <div className="mt-1 space-y-1">
-              <Link 
-                href="/investments"
-                className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                  isActive("/investments")
-                    ? "bg-primary-light bg-opacity-10 text-primary"
-                    : "text-neutral-500 hover:bg-neutral-100"
-                }`}
-                onClick={closeSidebar}
-              >
-                <i className="ri-funds-line mr-3 text-lg"></i>
-                Inversiones
-              </Link>
+              <div className="pl-2">
+                <Link 
+                  href="/investments"
+                  className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                    isActive("/investments") && !isActive("/investments/repairs")
+                      ? "bg-primary-light bg-opacity-10 text-primary"
+                      : "text-neutral-500 hover:bg-neutral-100"
+                  }`}
+                  onClick={closeSidebar}
+                >
+                  <i className="ri-funds-line mr-3 text-lg"></i>
+                  Inversiones
+                </Link>
+                
+                {/* Reparaciones como subcategoría de Inversiones */}
+                <div className="ml-6 border-l-2 border-neutral-200 pl-2 space-y-1">
+                  <Link 
+                    href="/investments/repairs"
+                    className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                      isActive("/investments/repairs")
+                        ? "bg-primary-light bg-opacity-10 text-primary"
+                        : "text-neutral-500 hover:bg-neutral-100"
+                    }`}
+                    onClick={closeSidebar}
+                  >
+                    <i className="ri-tools-line mr-3 text-lg"></i>
+                    Reparaciones
+                  </Link>
+                  
+                  {/* Subcategorías de reparaciones */}
+                  <Link 
+                    href="/investments/repairs/construction"
+                    className={`flex items-center px-2 py-1 text-xs font-medium rounded-md ml-5 ${
+                      isActive("/investments/repairs/construction")
+                        ? "text-primary"
+                        : "text-neutral-500 hover:bg-neutral-100"
+                    }`}
+                    onClick={closeSidebar}
+                  >
+                    <i className="ri-building-line mr-2"></i>
+                    Construcciones
+                  </Link>
+                  
+                  <Link 
+                    href="/investments/repairs/electrician"
+                    className={`flex items-center px-2 py-1 text-xs font-medium rounded-md ml-5 ${
+                      isActive("/investments/repairs/electrician")
+                        ? "text-primary"
+                        : "text-neutral-500 hover:bg-neutral-100"
+                    }`}
+                    onClick={closeSidebar}
+                  >
+                    <i className="ri-flashlight-line mr-2"></i>
+                    Electricista
+                  </Link>
+                  
+                  <Link 
+                    href="/investments/repairs/mason"
+                    className={`flex items-center px-2 py-1 text-xs font-medium rounded-md ml-5 ${
+                      isActive("/investments/repairs/mason")
+                        ? "text-primary"
+                        : "text-neutral-500 hover:bg-neutral-100"
+                    }`}
+                    onClick={closeSidebar}
+                  >
+                    <i className="ri-hammer-line mr-2"></i>
+                    Albañil
+                  </Link>
+                  
+                  <Link 
+                    href="/investments/repairs/plumber"
+                    className={`flex items-center px-2 py-1 text-xs font-medium rounded-md ml-5 ${
+                      isActive("/investments/repairs/plumber")
+                        ? "text-primary"
+                        : "text-neutral-500 hover:bg-neutral-100"
+                    }`}
+                    onClick={closeSidebar}
+                  >
+                    <i className="ri-drop-line mr-2"></i>
+                    Plomero
+                  </Link>
+                  
+                  <Link 
+                    href="/investments/repairs/materials"
+                    className={`flex items-center px-2 py-1 text-xs font-medium rounded-md ml-5 ${
+                      isActive("/investments/repairs/materials")
+                        ? "text-primary"
+                        : "text-neutral-500 hover:bg-neutral-100"
+                    }`}
+                    onClick={closeSidebar}
+                  >
+                    <i className="ri-stack-line mr-2"></i>
+                    Materiales
+                  </Link>
+                </div>
+              </div>
+              
               <Link 
                 href="/services"
                 className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
@@ -117,6 +202,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                 <i className="ri-service-line mr-3 text-lg"></i>
                 Servicios
               </Link>
+              
               <Link 
                 href="/taxes"
                 className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
@@ -129,18 +215,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                 <i className="ri-bank-line mr-3 text-lg"></i>
                 Impuestos
               </Link>
-              <Link 
-                href="/repairs"
-                className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                  isActive("/repairs")
-                    ? "bg-primary-light bg-opacity-10 text-primary"
-                    : "text-neutral-500 hover:bg-neutral-100"
-                }`}
-                onClick={closeSidebar}
-              >
-                <i className="ri-tools-line mr-3 text-lg"></i>
-                Reparaciones
-              </Link>
+              
               <Link 
                 href="/salaries"
                 className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
