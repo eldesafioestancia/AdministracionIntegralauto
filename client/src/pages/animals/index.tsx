@@ -62,8 +62,8 @@ const animalFormSchema = z.object({
   expectedDeliveryDate: z.date().optional().nullable(),
   
   // Genealogía
-  motherId: z.number().optional().nullable(),
-  fatherId: z.number().optional().nullable(),
+  motherCartagena: z.string().optional(),
+  fatherCartagena: z.string().optional(),
   
   // Otros
   marks: z.string().optional(),
@@ -102,8 +102,8 @@ export default function AnimalsIndex() {
       lastServiceDate: null,
       lastServiceType: "",
       expectedDeliveryDate: null,
-      motherId: null,
-      fatherId: null,
+      motherCartagena: "",
+      fatherCartagena: "",
       marks: "",
       description: "",
       color: "",
@@ -507,6 +507,38 @@ export default function AnimalsIndex() {
                   </div>
                 )}
                 
+                <h3 className="font-semibold text-base text-neutral-500 mt-4">Filiación</h3>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="fatherCartagena"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nº Caravana Padre</FormLabel>
+                        <FormControl>
+                          <Input placeholder="123" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="motherCartagena"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nº Caravana Madre</FormLabel>
+                        <FormControl>
+                          <Input placeholder="456" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <FormField
                   control={form.control}
                   name="marks"
@@ -578,9 +610,13 @@ export default function AnimalsIndex() {
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="1">1 - Muy delgado</SelectItem>
+                          <SelectItem value="1.5">1.5</SelectItem>
                           <SelectItem value="2">2 - Delgado</SelectItem>
+                          <SelectItem value="2.5">2.5</SelectItem>
                           <SelectItem value="3">3 - Normal</SelectItem>
+                          <SelectItem value="3.5">3.5</SelectItem>
                           <SelectItem value="4">4 - Gordo</SelectItem>
+                          <SelectItem value="4.5">4.5</SelectItem>
                           <SelectItem value="5">5 - Muy gordo</SelectItem>
                         </SelectContent>
                       </Select>
