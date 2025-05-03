@@ -212,18 +212,18 @@ export default function ReproductiveManagement() {
   };
   
   // Filtrar solo animales hembra (vacas y vaquillonas)
-  const femaleAnimals = animals ? animals.filter((animal: any) => 
+  const femaleAnimals = animals.filter((animal: any) => 
     animal.category === "vaca" || animal.category === "vaquillona"
-  ) : [];
+  );
   
   // Filtrar solo toros
-  const bulls = animals ? animals.filter((animal: any) => 
+  const bulls = animals.filter((animal: any) => 
     animal.category === "toro"
-  ) : [];
+  );
   
   // Buscar detalles del animal por ID
   const findAnimalById = (id: number) => {
-    return animals?.find((animal: any) => animal.id === id);
+    return animals.find((animal: any) => animal.id === id);
   };
   
   if (animalsLoading || naturalServicesLoading || artificialServicesLoading) {
@@ -501,7 +501,7 @@ export default function ReproductiveManagement() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {naturalServices && naturalServices.length > 0 ? (
+                {naturalServices.length > 0 ? (
                   naturalServices.map((service: any) => (
                     <TableRow key={service.id}>
                       <TableCell>#{service.animalCartagena}</TableCell>
@@ -831,7 +831,7 @@ export default function ReproductiveManagement() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {artificialServices && artificialServices.length > 0 ? (
+                {artificialServices.length > 0 ? (
                   artificialServices.map((service: any) => (
                     <TableRow key={service.id}>
                       <TableCell>#{service.animalCartagena}</TableCell>

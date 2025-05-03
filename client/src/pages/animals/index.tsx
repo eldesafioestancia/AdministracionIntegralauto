@@ -80,7 +80,7 @@ export default function AnimalsIndex() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const { toast } = useToast();
   
-  const { data: animals, isLoading, error } = useQuery({
+  const { data: animals = [], isLoading, error } = useQuery({
     queryKey: ["/api/animals"],
   });
 
@@ -191,7 +191,7 @@ export default function AnimalsIndex() {
   };
 
   // Filter animals
-  const filteredAnimals = animals ? animals.filter((animal: any) => {
+  const filteredAnimals = animals.filter((animal: any) => {
     const matchesSearch = 
       animal.cartagena?.toLowerCase().includes(search.toLowerCase()) ||
       animal.race?.toLowerCase().includes(search.toLowerCase()) ||
@@ -202,7 +202,7 @@ export default function AnimalsIndex() {
       animal.category === filter;
     
     return matchesSearch && matchesFilter;
-  }) : [];
+  });
 
   if (isLoading) {
     return <div className="py-10 text-center">Cargando animales...</div>;
