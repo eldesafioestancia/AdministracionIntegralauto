@@ -124,31 +124,41 @@ export default function AnimalReproduction() {
         const removalDate = addDays(deviceDate, 7); // 7 días después para retiro del dispositivo
         const insemDate = addDays(removalDate, 2); // 2 días después para la inseminación
         
+        // Programar automáticamente tacto para 40 días después de la inseminación
+        const nextCheckDate = addDays(insemDate, 40);
+        
         artificialInseminationForm.setValue("devicePlacementDate", deviceDate);
         artificialInseminationForm.setValue("deviceRemovalDate", removalDate);
         artificialInseminationForm.setValue("inseminationDate", insemDate);
+        artificialInseminationForm.setValue("pregnancyCheckDate", nextCheckDate);
         
-        // También calcular la fecha probable de parto (283 días después de la inseminación)
-        const deliveryDate = addDays(insemDate, 283);
-        artificialInseminationForm.setValue("expectedDeliveryDate", deliveryDate);
+        // No calculamos la fecha de parto aún, se hará después del tacto
       }
     });
     
     return () => subscription.unsubscribe();
   }, [artificialInseminationForm]);
   
-  // Función para calcular la fecha probable de parto (283 días después de la inseminación)
-  const calculateExpectedDeliveryDate = (serviceDate: Date | null) => {
+  // Función para calcular la fecha probable de parto según el tipo de servicio y resultado del tacto
+  const calculateExpectedDeliveryDate = (serviceDate: Date | null, isPrenada: boolean) => {
     if (!serviceDate) return null;
-    return addDays(serviceDate, 283); // Aproximadamente 283 días de gestación
+    
+    if (isPrenada) {
+      // Si está preñada, el parto es 280 días después de la inseminación
+      return addDays(serviceDate, 280);
+    } else {
+      // Si está vacía, el parto se calcula para 305 días después de la inseminación
+      return addDays(serviceDate, 305);
+    }
   };
   
-  // Cuando cambia el resultado del tacto, actualizar la fecha probable de parto si es preñada
+  // Cuando cambia el resultado del tacto, actualizar la fecha probable de parto
   const handlePregnancyResultChange = (value: string, form: any, serviceDate: Date | null) => {
     form.setValue("pregnancyResult", value);
     
-    if (value === "prenada" && serviceDate) {
-      const expectedDate = calculateExpectedDeliveryDate(serviceDate);
+    if (serviceDate) {
+      const isPrenada = value === "prenada";
+      const expectedDate = calculateExpectedDeliveryDate(serviceDate, isPrenada);
       form.setValue("expectedDeliveryDate", expectedDate);
     } else {
       form.setValue("expectedDeliveryDate", null);
@@ -542,7 +552,11 @@ export default function AnimalReproduction() {
                     
                     {/* Etapa 2: Tacto */}
                     <div className="p-4 border border-primary/20 rounded-lg mb-4">
-                      <h3 className="text-base font-semibold mb-4">Etapa 2: Tacto (45 días después)</h3>
+                      <h3 className="text-base font-semibold mb-4">
+                        Etapa 2: Tacto {artificialInseminationForm.watch("inseminationDate") 
+                          ? "(40 días después de la inseminación)" 
+                          : "(45 días después del retiro de toros)"}
+                      </h3>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <FormField
                           control={artificialInseminationForm.control}
@@ -563,7 +577,9 @@ export default function AnimalReproduction() {
                               </FormControl>
                               <FormMessage />
                               <FormDescription>
-                                Calculada automáticamente (45 días después del retiro de toros)
+                                {artificialInseminationForm.watch("inseminationDate") 
+                                  ? "Calculada automáticamente (40 días después de la inseminación)" 
+                                  : "Calculada automáticamente (45 días después del retiro de toros)"}
                               </FormDescription>
                             </FormItem>
                           )}
@@ -576,13 +592,18 @@ export default function AnimalReproduction() {
                             <FormItem>
                               <FormLabel>Resultado del Tacto</FormLabel>
                               <Select 
-                                onValueChange={(value) => 
+                                onValueChange={(value) => {
+                                  // Usamos la fecha de inseminación si está disponible, si no usamos la fecha de retiro de toros
+                                  const inseminationDate = artificialInseminationForm.getValues("inseminationDate");
+                                  const bullExitDate = artificialInseminationForm.getValues("bullExitDate");
+                                  const serviceDate = inseminationDate || bullExitDate;
+                                  
                                   handlePregnancyResultChange(
                                     value, 
                                     artificialInseminationForm, 
-                                    artificialInseminationForm.getValues("bullExitDate")
+                                    serviceDate
                                   )
-                                } 
+                                }} 
                                 defaultValue={field.value}
                               >
                                 <FormControl>
@@ -722,7 +743,7 @@ export default function AnimalReproduction() {
                                 </FormControl>
                                 <FormMessage />
                                 <FormDescription>
-                                  Calculada automáticamente (283 días después de la inseminación)
+                                  Calculada automáticamente (280 días después de la inseminación)
                                 </FormDescription>
                               </FormItem>
                             )}
