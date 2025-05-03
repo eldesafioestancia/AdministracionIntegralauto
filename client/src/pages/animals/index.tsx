@@ -139,6 +139,7 @@ export default function AnimalsIndex() {
   const getCategoryLabel = (category: string) => {
     switch (category) {
       case "vaca": return "Vaca";
+      case "vaquillona": return "Vaquillona";
       case "toro": return "Toro";
       case "novillo": return "Novillo";
       case "ternero": return "Ternero";
@@ -179,6 +180,7 @@ export default function AnimalsIndex() {
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case "vaca": return "ri-cow-line";
+      case "vaquillona": return "ri-cow-line";
       case "toro": return "ri-rhinoceros-line";
       case "novillo": return "ri-bear-smile-line";
       case "ternero":
@@ -267,8 +269,8 @@ export default function AnimalsIndex() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Color de caravana</FormLabel>
-                      <div className="grid grid-cols-6 gap-2">
-                        {["blanco", "amarillo", "rojo", "verde", "azul", "negro"].map((color) => (
+                      <div className="grid grid-cols-5 gap-2">
+                        {["rojo", "amarillo", "azul", "verde", "violeta", "naranja", "rosa", "blanco", "negro"].map((color) => (
                           <div 
                             key={color}
                             className={`
@@ -282,10 +284,18 @@ export default function AnimalsIndex() {
                                 color === "rojo" ? "#FF0000" :
                                 color === "verde" ? "#008000" :
                                 color === "azul" ? "#0000FF" :
-                                color === "negro" ? "#000000" : "#ffffff"
+                                color === "violeta" ? "#8A2BE2" :
+                                color === "naranja" ? "#FFA500" :
+                                color === "rosa" ? "#FFC0CB" :
+                                color === "negro" ? "#000000" : "#ffffff",
+                              color: ["blanco", "amarillo", "rosa", "naranja"].includes(color) ? "#333" : "#fff"
                             }}
                             onClick={() => field.onChange(color)}
-                          />
+                          >
+                            <div className="w-full h-full flex items-center justify-center">
+                              {field.value === color && <i className="ri-check-line text-lg" />}
+                            </div>
+                          </div>
                         ))}
                       </div>
                       <FormMessage />
@@ -311,6 +321,7 @@ export default function AnimalsIndex() {
                           </FormControl>
                           <SelectContent>
                             <SelectItem value="vaca">Vaca</SelectItem>
+                            <SelectItem value="vaquillona">Vaquillona</SelectItem>
                             <SelectItem value="toro">Toro</SelectItem>
                             <SelectItem value="novillo">Novillo</SelectItem>
                             <SelectItem value="ternero">Ternero</SelectItem>
@@ -672,6 +683,7 @@ export default function AnimalsIndex() {
             <SelectContent>
               <SelectItem value="all">Todos</SelectItem>
               <SelectItem value="vaca">Vacas</SelectItem>
+              <SelectItem value="vaquillona">Vaquillonas</SelectItem>
               <SelectItem value="toro">Toros</SelectItem>
               <SelectItem value="novillo">Novillos</SelectItem>
               <SelectItem value="ternero">Terneros</SelectItem>
