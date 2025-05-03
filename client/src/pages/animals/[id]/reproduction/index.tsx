@@ -93,6 +93,12 @@ export default function AnimalReproduction() {
     },
   });
   
+  // Cuando cambia la fecha de retiro del toro, calcular automáticamente la fecha de tacto (40 días después)
+  const calculatePregnancyCheckDate = (exitDate: Date | null) => {
+    if (!exitDate) return null;
+    return addDays(exitDate, 40); // 40 días después del retiro del toro
+  };
+  
   // Formulario para Inseminación Artificial
   const artificialInseminationForm = useForm<ArtificialInseminationFormValues>({
     resolver: zodResolver(artificialInseminationFormSchema),
@@ -313,6 +319,10 @@ export default function AnimalReproduction() {
                                 onChange={(e) => {
                                   const date = e.target.value ? new Date(e.target.value) : null;
                                   field.onChange(date);
+                                  
+                                  // Calcular automáticamente la fecha de tacto
+                                  const pregnancyCheckDate = calculatePregnancyCheckDate(date);
+                                  naturalServiceForm.setValue("pregnancyCheckDate", pregnancyCheckDate);
                                 }}
                               />
                             </FormControl>
