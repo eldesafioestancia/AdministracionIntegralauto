@@ -549,6 +549,40 @@ export class MemStorage implements IStorage {
     return this.repairs.delete(id);
   }
 
+  // Employees
+  async getEmployees(): Promise<Employee[]> {
+    return Array.from(this.employees.values());
+  }
+
+  async getEmployee(id: number): Promise<Employee | undefined> {
+    return this.employees.get(id);
+  }
+
+  async createEmployee(insertEmployee: InsertEmployee): Promise<Employee> {
+    const id = this.currentIds.employee++;
+    const now = new Date();
+    const employee: Employee = { ...insertEmployee, id, createdAt: now };
+    this.employees.set(id, employee);
+    return employee;
+  }
+
+  async updateEmployee(id: number, updateData: Partial<InsertEmployee>): Promise<Employee | undefined> {
+    const employee = this.employees.get(id);
+    if (!employee) return undefined;
+    
+    const updatedEmployee: Employee = {
+      ...employee,
+      ...updateData,
+    };
+    
+    this.employees.set(id, updatedEmployee);
+    return updatedEmployee;
+  }
+
+  async deleteEmployee(id: number): Promise<boolean> {
+    return this.employees.delete(id);
+  }
+  
   // Salaries
   async getSalaries(): Promise<Salary[]> {
     return Array.from(this.salaries.values());
