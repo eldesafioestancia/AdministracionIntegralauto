@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -13,7 +13,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -31,24 +30,25 @@ const naturalServiceFormSchema = z.object({
   pregnancyCheckDate: z.date().optional().nullable(),
   pregnancyResult: z.string().optional(),
   expectedDeliveryDate: z.date().optional().nullable(),
-  moveToWinterPasture: z.boolean().optional().default(false),
   notes: z.string().optional(),
 });
 
 // Esquema para Inseminación Artificial
 const artificialInseminationFormSchema = z.object({
   type: z.literal("artificial"),
-  bullExitDate: z.date({
-    required_error: "La fecha de retiro de toros es requerida",
+  devicePlacementDate: z.date({
+    required_error: "La fecha de colocación del dispositivo es requerida",
   }),
+  deviceRemovalDate: z.date({
+    required_error: "La fecha de retiro del dispositivo es requerida",
+  }),
+  inseminationDate: z.date({
+    required_error: "La fecha de inseminación es requerida",
+  }),
+  bullId: z.string().min(1, { message: "La identificación del toro (pajuela) es requerida" }),
   pregnancyCheckDate: z.date().optional().nullable(),
   pregnancyResult: z.string().optional(),
-  devicePlacementDate: z.date().optional().nullable(),
-  deviceRemovalDate: z.date().optional().nullable(),
-  inseminationDate: z.date().optional().nullable(),
-  bullId: z.string().min(1, { message: "La identificación del toro (pajuela) es requerida" }),
   expectedDeliveryDate: z.date().optional().nullable(),
-  moveToWinterPasture: z.boolean().optional().default(false),
   notes: z.string().optional(),
 });
 
@@ -89,7 +89,6 @@ export default function AnimalReproduction() {
       pregnancyCheckDate: null,
       pregnancyResult: "",
       expectedDeliveryDate: null,
-      moveToWinterPasture: false,
       notes: "",
     },
   });
@@ -99,91 +98,32 @@ export default function AnimalReproduction() {
     resolver: zodResolver(artificialInseminationFormSchema),
     defaultValues: {
       type: "artificial",
-      bullExitDate: new Date(),
-      pregnancyCheckDate: addDays(new Date(), 45), // 45 días después para el tacto
-      pregnancyResult: "",
-      devicePlacementDate: null,
-      deviceRemovalDate: null,
-      inseminationDate: null,
+      devicePlacementDate: new Date(),
+      deviceRemovalDate: new Date(),
+      inseminationDate: new Date(),
       bullId: "",
+      pregnancyCheckDate: null,
+      pregnancyResult: "",
       expectedDeliveryDate: null,
-      moveToWinterPasture: false,
       notes: "",
     },
   });
   
-  // Al cambiar la fecha de retiro de toros, actualizamos automáticamente la fecha de tacto
-  useEffect(() => {
-    const subscription = artificialInseminationForm.watch((value, { name }) => {
-      if (name === "bullExitDate" && value.bullExitDate) {
-        // Actualizar fecha de tacto a 45 días después del retiro de toros
-        const checkDate = addDays(new Date(value.bullExitDate), 45);
-        artificialInseminationForm.setValue("pregnancyCheckDate", checkDate);
-      }
-      
-      if (name === "pregnancyResult" && value.pregnancyResult === "vacia" && value.pregnancyCheckDate) {
-        // Si el resultado del tacto es "vacía", configurar las fechas de inseminación
-        // La fecha de colocación del dispositivo es la misma que la fecha del tacto
-        const checkDate = new Date(value.pregnancyCheckDate);
-        const deviceDate = checkDate; // Misma fecha que el tacto
-        const removalDate = addDays(deviceDate, 7); // 7 días después para retiro del dispositivo
-        const insemDate = addDays(removalDate, 2); // 2 días después para la inseminación
-        
-        // Programar automáticamente tacto para 40 días después de la inseminación
-        const nextCheckDate = addDays(insemDate, 40);
-        
-        artificialInseminationForm.setValue("devicePlacementDate", deviceDate);
-        artificialInseminationForm.setValue("deviceRemovalDate", removalDate);
-        artificialInseminationForm.setValue("inseminationDate", insemDate);
-        artificialInseminationForm.setValue("pregnancyCheckDate", nextCheckDate);
-        
-        // No calculamos la fecha de parto aún, se hará después del tacto
-      }
-    });
-    
-    return () => subscription.unsubscribe();
-  }, [artificialInseminationForm]);
-  
-  // Función para calcular la fecha probable de parto según el tipo de servicio y resultado del tacto
-  const calculateExpectedDeliveryDate = (serviceDate: Date | null, isPrenada: boolean) => {
+  // Función para calcular la fecha probable de parto (283 días después de la inseminación)
+  const calculateExpectedDeliveryDate = (serviceDate: Date | null) => {
     if (!serviceDate) return null;
-    
-    if (isPrenada) {
-      // Si está preñada, el parto es 280 días después de la inseminación
-      return addDays(serviceDate, 280);
-    } else {
-      // Si está vacía, el parto se calcula para 305 días después de la inseminación
-      return addDays(serviceDate, 305);
-    }
+    return addDays(serviceDate, 283); // Aproximadamente 283 días de gestación
   };
   
-  // Cuando cambia el resultado del tacto, actualizar la fecha probable de parto
+  // Cuando cambia el resultado del tacto, actualizar la fecha probable de parto si es preñada
   const handlePregnancyResultChange = (value: string, form: any, serviceDate: Date | null) => {
     form.setValue("pregnancyResult", value);
     
-    if (serviceDate) {
-      const isPrenada = value === "prenada";
-      
-      if (isPrenada) {
-        // Si está preñada, calcular la fecha probable de parto (280 días)
-        const expectedDate = calculateExpectedDeliveryDate(serviceDate, isPrenada);
-        form.setValue("expectedDeliveryDate", expectedDate);
-        
-        // Si está preñada, agregar campo para indicar traslado a pastura de invierno
-        form.setValue("moveToWinterPasture", true);
-      } else if (value === "vacia" || value === "duda") {
-        // Si está vacía o dudosa, se deriva a inseminación artificial
-        form.setValue("expectedDeliveryDate", null);
-        
-        // No se traslada a pastura de invierno
-        form.setValue("moveToWinterPasture", false);
-      } else {
-        form.setValue("expectedDeliveryDate", null);
-        form.setValue("moveToWinterPasture", false);
-      }
+    if (value === "prenada" && serviceDate) {
+      const expectedDate = calculateExpectedDeliveryDate(serviceDate);
+      form.setValue("expectedDeliveryDate", expectedDate);
     } else {
       form.setValue("expectedDeliveryDate", null);
-      form.setValue("moveToWinterPasture", false);
     }
   };
   
@@ -212,11 +152,6 @@ export default function AnimalReproduction() {
       // Si está preñada, también actualizar la fecha probable de parto
       if (reproductiveStatus === "prenada" && values.expectedDeliveryDate) {
         updates.expectedDeliveryDate = values.expectedDeliveryDate;
-        
-        // Si está preñada y se marcó la opción de traslado, actualizar ubicación a pastura de invierno
-        if (values.moveToWinterPasture) {
-          updates.location = "Pastura de Invierno";
-        }
       }
       
       await apiRequest("PUT", `/api/animals/${animalId}`, updates);
@@ -485,58 +420,30 @@ export default function AnimalReproduction() {
                     </div>
                     
                     {naturalServiceForm.watch("pregnancyResult") === "prenada" && (
-                      <div className="p-4 border border-primary/20 rounded-lg mb-4">
-                        <h3 className="text-base font-semibold mb-4">Resultado: Preñada</h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-4">
-                          <FormField
-                            control={naturalServiceForm.control}
-                            name="expectedDeliveryDate"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Fecha Probable de Parto</FormLabel>
-                                <FormControl>
-                                  <Input 
-                                    type="date"
-                                    {...field}
-                                    value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-                                    onChange={(e) => {
-                                      const date = e.target.value ? new Date(e.target.value) : null;
-                                      field.onChange(date);
-                                    }}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                                <FormDescription>
-                                  Calculada automáticamente, pero puede ser modificada
-                                </FormDescription>
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={naturalServiceForm.control}
-                            name="moveToWinterPasture"
-                            render={({ field }) => (
-                              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                  />
-                                </FormControl>
-                                <div className="space-y-1 leading-none">
-                                  <FormLabel>
-                                    Trasladar a pastura de invierno
-                                  </FormLabel>
-                                  <FormDescription>
-                                    Activar esta opción trasladará el animal a la pastura de invierno
-                                  </FormDescription>
-                                </div>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                      </div>
+                      <FormField
+                        control={naturalServiceForm.control}
+                        name="expectedDeliveryDate"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Fecha Probable de Parto</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="date"
+                                {...field}
+                                value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                                onChange={(e) => {
+                                  const date = e.target.value ? new Date(e.target.value) : null;
+                                  field.onChange(date);
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                            <FormDescription>
+                              Calculada automáticamente, pero puede ser modificada
+                            </FormDescription>
+                          </FormItem>
+                        )}
+                      />
                     )}
                     
                     <FormField
@@ -576,15 +483,95 @@ export default function AnimalReproduction() {
               <div className="pt-6">
                 <Form {...artificialInseminationForm}>
                   <form onSubmit={artificialInseminationForm.handleSubmit(onSubmitArtificialInsemination)} className="space-y-6">
-                    {/* Etapa 1: Fecha de retiro de toros */}
-                    <div className="p-4 border border-primary/20 rounded-lg mb-4">
-                      <h3 className="text-base font-semibold mb-4">Etapa 1: Retiro de Toros</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                       <FormField
                         control={artificialInseminationForm.control}
-                        name="bullExitDate"
+                        name="devicePlacementDate"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Fecha Retiro de Toros</FormLabel>
+                            <FormLabel>Fecha Colocación Dispositivo</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="date"
+                                {...field}
+                                value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                                onChange={(e) => {
+                                  const date = e.target.value ? new Date(e.target.value) : null;
+                                  field.onChange(date);
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={artificialInseminationForm.control}
+                        name="deviceRemovalDate"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Fecha Retiro Dispositivo</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="date"
+                                {...field}
+                                value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                                onChange={(e) => {
+                                  const date = e.target.value ? new Date(e.target.value) : null;
+                                  field.onChange(date);
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={artificialInseminationForm.control}
+                        name="inseminationDate"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Fecha Inseminación</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="date"
+                                {...field}
+                                value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                                onChange={(e) => {
+                                  const date = e.target.value ? new Date(e.target.value) : null;
+                                  field.onChange(date);
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    
+                    <FormField
+                      control={artificialInseminationForm.control}
+                      name="bullId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Identificación del Toro (Pajuela)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Código o nombre del toro donante" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      <FormField
+                        control={artificialInseminationForm.control}
+                        name="pregnancyCheckDate"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Fecha de Tacto</FormLabel>
                             <FormControl>
                               <Input 
                                 type="date"
@@ -598,269 +585,71 @@ export default function AnimalReproduction() {
                             </FormControl>
                             <FormMessage />
                             <FormDescription>
-                              Al cambiar esta fecha, se actualizará automáticamente la fecha de tacto (45 días después)
+                              Dejar en blanco si el tacto aún no se ha realizado
                             </FormDescription>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={artificialInseminationForm.control}
+                        name="pregnancyResult"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Resultado del Tacto</FormLabel>
+                            <Select 
+                              onValueChange={(value) => 
+                                handlePregnancyResultChange(
+                                  value, 
+                                  artificialInseminationForm, 
+                                  artificialInseminationForm.getValues("inseminationDate")
+                                )
+                              } 
+                              defaultValue={field.value}
+                              disabled={!artificialInseminationForm.getValues("pregnancyCheckDate")}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Seleccione un resultado" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="prenada">Preñada</SelectItem>
+                                <SelectItem value="vacia">Vacía</SelectItem>
+                                <SelectItem value="duda">En duda</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
                     </div>
                     
-                    {/* Etapa 2: Tacto */}
-                    <div className="p-4 border border-primary/20 rounded-lg mb-4">
-                      <h3 className="text-base font-semibold mb-4">
-                        Etapa 2: Tacto {artificialInseminationForm.watch("inseminationDate") 
-                          ? "(40 días después de la inseminación)" 
-                          : "(45 días después del retiro de toros)"}
-                      </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <FormField
-                          control={artificialInseminationForm.control}
-                          name="pregnancyCheckDate"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Fecha de Tacto</FormLabel>
-                              <FormControl>
-                                <Input 
-                                  type="date"
-                                  {...field}
-                                  value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-                                  onChange={(e) => {
-                                    const date = e.target.value ? new Date(e.target.value) : null;
-                                    field.onChange(date);
-                                  }}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                              <FormDescription>
-                                {artificialInseminationForm.watch("inseminationDate") 
-                                  ? "Calculada automáticamente (40 días después de la inseminación)" 
-                                  : "Calculada automáticamente (45 días después del retiro de toros)"}
-                              </FormDescription>
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={artificialInseminationForm.control}
-                          name="pregnancyResult"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Resultado del Tacto</FormLabel>
-                              <Select 
-                                onValueChange={(value) => {
-                                  // Usamos la fecha de inseminación si está disponible, si no usamos la fecha de retiro de toros
-                                  const inseminationDate = artificialInseminationForm.getValues("inseminationDate");
-                                  const bullExitDate = artificialInseminationForm.getValues("bullExitDate");
-                                  const serviceDate = inseminationDate || bullExitDate;
-                                  
-                                  handlePregnancyResultChange(
-                                    value, 
-                                    artificialInseminationForm, 
-                                    serviceDate
-                                  )
-                                }} 
-                                defaultValue={field.value}
-                              >
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Seleccione un resultado" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="prenada">Preñada</SelectItem>
-                                  <SelectItem value="vacia">Vacía</SelectItem>
-                                  <SelectItem value="duda">Dudosa</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                              <FormDescription>
-                                Si está vacía, se habilitarán las opciones de inseminación
-                              </FormDescription>
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    </div>
-                    
-                    {/* Etapa 3: Inseminación (Solo si el tacto dio vacía) */}
-                    {artificialInseminationForm.watch("pregnancyResult") === "vacia" && (
-                      <div className="p-4 border border-primary/20 rounded-lg mb-4">
-                        <h3 className="text-base font-semibold mb-4">Etapa 3: Inseminación Artificial</h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                          <FormField
-                            control={artificialInseminationForm.control}
-                            name="devicePlacementDate"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Fecha Colocación Dispositivo</FormLabel>
-                                <FormControl>
-                                  <Input 
-                                    type="date"
-                                    {...field}
-                                    value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-                                    onChange={(e) => {
-                                      const date = e.target.value ? new Date(e.target.value) : null;
-                                      field.onChange(date);
-                                      
-                                      // Actualizar fechas dependientes
-                                      if (date) {
-                                        const removalDate = addDays(date, 7);
-                                        const insemDate = addDays(removalDate, 2);
-                                        artificialInseminationForm.setValue("deviceRemovalDate", removalDate);
-                                        artificialInseminationForm.setValue("inseminationDate", insemDate);
-                                      }
-                                    }}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                                <FormDescription>
-                                  La colocación del dispositivo se realiza el mismo día del tacto
-                                </FormDescription>
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={artificialInseminationForm.control}
-                            name="deviceRemovalDate"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Fecha Retiro Dispositivo</FormLabel>
-                                <FormControl>
-                                  <Input 
-                                    type="date"
-                                    {...field}
-                                    value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-                                    readOnly
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                                <FormDescription>
-                                  Calculada automáticamente (7 días después de colocación)
-                                </FormDescription>
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={artificialInseminationForm.control}
-                            name="inseminationDate"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Fecha Inseminación</FormLabel>
-                                <FormControl>
-                                  <Input 
-                                    type="date"
-                                    {...field}
-                                    value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-                                    readOnly
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                                <FormDescription>
-                                  Calculada automáticamente (2 días después del retiro)
-                                </FormDescription>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        
-                        <div className="mt-4">
-                          <FormField
-                            control={artificialInseminationForm.control}
-                            name="bullId"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Identificación del Toro (Pajuela)</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="Código o nombre del toro donante" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        
-                        <div className="mt-4">
-                          <FormField
-                            control={artificialInseminationForm.control}
-                            name="expectedDeliveryDate"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Fecha Probable de Parto</FormLabel>
-                                <FormControl>
-                                  <Input 
-                                    type="date"
-                                    {...field}
-                                    value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-                                    readOnly
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                                <FormDescription>
-                                  Calculada automáticamente (280 días después de la inseminación)
-                                </FormDescription>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Si el tacto dio preñada, mostrar fecha probable de parto */}
                     {artificialInseminationForm.watch("pregnancyResult") === "prenada" && (
-                      <div className="p-4 border border-primary/20 rounded-lg mb-4">
-                        <h3 className="text-base font-semibold mb-4">Resultado: Preñada</h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-4">
-                          <FormField
-                            control={artificialInseminationForm.control}
-                            name="expectedDeliveryDate"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Fecha Probable de Parto</FormLabel>
-                                <FormControl>
-                                  <Input 
-                                    type="date"
-                                    {...field}
-                                    value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-                                    onChange={(e) => {
-                                      const date = e.target.value ? new Date(e.target.value) : null;
-                                      field.onChange(date);
-                                    }}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                                <FormDescription>
-                                  Calculada automáticamente, pero puede ser modificada
-                                </FormDescription>
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={artificialInseminationForm.control}
-                            name="moveToWinterPasture"
-                            render={({ field }) => (
-                              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                  />
-                                </FormControl>
-                                <div className="space-y-1 leading-none">
-                                  <FormLabel>
-                                    Trasladar a pastura de invierno
-                                  </FormLabel>
-                                  <FormDescription>
-                                    Activar esta opción trasladará el animal a la pastura de invierno
-                                  </FormDescription>
-                                </div>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                      </div>
+                      <FormField
+                        control={artificialInseminationForm.control}
+                        name="expectedDeliveryDate"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Fecha Probable de Parto</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="date"
+                                {...field}
+                                value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                                onChange={(e) => {
+                                  const date = e.target.value ? new Date(e.target.value) : null;
+                                  field.onChange(date);
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                            <FormDescription>
+                              Calculada automáticamente, pero puede ser modificada
+                            </FormDescription>
+                          </FormItem>
+                        )}
+                      />
                     )}
                     
                     <FormField
