@@ -18,6 +18,8 @@ import InvestmentsIndex from "./pages/investments/index";
 import Services from "@/pages/services";
 import Taxes from "@/pages/taxes";
 import Repairs from "@/pages/repairs";
+import Employees from "@/pages/employees/index";
+import Salaries from "@/pages/salaries";
 import AppLayout from "@/components/layouts/AppLayout";
 
 function App() {
@@ -142,6 +144,20 @@ function App() {
         <Route path="/repairs">
           <AppLayout>
             <Repairs />
+          </AppLayout>
+        </Route>
+        
+        {/* Rutas para empleados */}
+        <Route path="/employees">
+          <AppLayout>
+            <Employees />
+          </AppLayout>
+        </Route>
+        
+        {/* Rutas para salarios */}
+        <Route path="/salaries">
+          <AppLayout>
+            <Salaries />
           </AppLayout>
         </Route>
         
