@@ -483,6 +483,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Rutas para inversiones
+  app.get("/api/investments", async (req: Request, res: Response) => {
+    try {
+      const investments = await storage.getInvestments();
+      res.json(investments);
+    } catch (error) {
+      console.error("Error fetching investments:", error);
+      res.status(500).json({ message: "Error fetching investments" });
+    }
+  });
+  
+  app.get("/api/investments/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const investment = await storage.getInvestment(id);
+      
+      if (!investment) {
+        return res.status(404).json({ message: "Investment not found" });
+      }
+      
+      res.json(investment);
+    } catch (error) {
+      console.error("Error fetching investment:", error);
+      res.status(500).json({ message: "Error fetching investment" });
+    }
+  });
+  
+  app.post("/api/investments", async (req: Request, res: Response) => {
+    try {
+      const investmentData = insertInvestmentSchema.parse(req.body);
+      const newInvestment = await storage.createInvestment(investmentData);
+      res.status(201).json(newInvestment);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid investment data", errors: error.errors });
+      }
+      
+      console.error("Error creating investment:", error);
+      res.status(500).json({ message: "Error creating investment" });
+    }
+  });
+  
+  app.delete("/api/investments/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteInvestment(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Investment not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting investment:", error);
+      res.status(500).json({ message: "Error deleting investment" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
