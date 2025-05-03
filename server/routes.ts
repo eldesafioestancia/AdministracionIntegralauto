@@ -444,6 +444,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Error deleting finance record" });
     }
   });
+  
+  // Rutas para eventos reproductivos
+  app.get("/api/animals/:id/reproduction", async (req: Request, res: Response) => {
+    try {
+      const animalId = parseInt(req.params.id);
+      const animal = await storage.getAnimal(animalId);
+      
+      if (!animal) {
+        return res.status(404).json({ message: "Animal not found" });
+      }
+      
+      // Aquí podrías implementar la recuperación de eventos reproductivos
+      // Por ahora, simplemente devolvemos un array vacío
+      res.json([]);
+    } catch (error) {
+      console.error("Error getting reproductive events:", error);
+      res.status(500).json({ message: "Error getting reproductive events" });
+    }
+  });
+  
+  app.post("/api/animals/:id/reproduction", async (req: Request, res: Response) => {
+    try {
+      const animalId = parseInt(req.params.id);
+      const animal = await storage.getAnimal(animalId);
+      
+      if (!animal) {
+        return res.status(404).json({ message: "Animal not found" });
+      }
+      
+      // Aquí podrías implementar la creación de eventos reproductivos
+      // Por ahora, simplemente devolvemos un objeto con estado exitoso
+      res.status(201).json({ success: true, animalId, eventData: req.body });
+    } catch (error) {
+      console.error("Error creating reproductive event:", error);
+      res.status(500).json({ message: "Error creating reproductive event" });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;

@@ -9,6 +9,10 @@ import MachineMaintenance from "@/pages/machines/maintenance";
 import EditMaintenance from "@/pages/machines/maintenance/[id]";
 import AnimalsIndex from "@/pages/animals/index";
 import AnimalDetail from "@/pages/animals/[id]";
+import AnimalEdit from "@/pages/animals/[id]/edit";
+import AnimalWeight from "@/pages/animals/[id]/weight";
+import AnimalVeterinary from "@/pages/animals/[id]/veterinary";
+import AnimalReproduction from "@/pages/animals/[id]/reproduction";
 import AppLayout from "@/components/layouts/AppLayout";
 
 function App() {
@@ -64,6 +68,38 @@ function App() {
           {(params) => (
             <AppLayout>
               <AnimalDetail />
+            </AppLayout>
+          )}
+        </Route>
+        
+        <Route path="/animals/:id/edit">
+          {(params) => (
+            <AppLayout>
+              <AnimalEdit />
+            </AppLayout>
+          )}
+        </Route>
+        
+        <Route path="/animals/:id/weight">
+          {(params) => (
+            <AppLayout>
+              <AnimalWeight />
+            </AppLayout>
+          )}
+        </Route>
+        
+        <Route path="/animals/:id/veterinary">
+          {(params) => (
+            <AppLayout>
+              <AnimalVeterinary />
+            </AppLayout>
+          )}
+        </Route>
+        
+        <Route path="/animals/:id/reproduction">
+          {(params) => (
+            <AppLayout>
+              <AnimalReproduction />
             </AppLayout>
           )}
         </Route>
