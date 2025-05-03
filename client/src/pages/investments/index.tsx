@@ -82,19 +82,42 @@ export default function InvestmentsIndex() {
   // Obtener el tipo de inversión actual para mostrar campos adicionales
   const currentInvestmentType = form.watch("type");
 
+  // Define el tipo de cada campo
+  type FieldConfig = {
+    name: string;
+    type: 'simple' | 'quantity_price';
+  };
+
   // Definir qué campos adicionales mostrar según el tipo
   const getDetailFields = () => {
     switch(currentInvestmentType) {
       case "machinery":
-        return ["marca", "modelo", "año"];
+        return [
+          { name: "marca", type: "simple" },
+          { name: "modelo", type: "simple" },
+          { name: "año", type: "simple" }
+        ];
       case "fencing":
-        return ["mano_de_obra", "alambre", "postes", "horas_topadora"];
+        return [
+          { name: "mano_de_obra", type: "quantity_price" },
+          { name: "alambre", type: "quantity_price" },
+          { name: "postes", type: "quantity_price" },
+          { name: "horas_topadora", type: "quantity_price" }
+        ];
       case "construction":
-        return ["materiales", "mano_de_obra"];
+        return [
+          { name: "materiales", type: "quantity_price" },
+          { name: "mano_de_obra", type: "quantity_price" }
+        ];
       case "clearing":
-        return ["horas_topadora"];
+        return [
+          { name: "horas_topadora", type: "quantity_price" }
+        ];
       case "tools":
-        return ["cantidad", "marca"];
+        return [
+          { name: "cantidad", type: "simple" },
+          { name: "marca", type: "simple" }
+        ];
       default:
         return [];
     }
@@ -292,26 +315,71 @@ export default function InvestmentsIndex() {
                 />
                 
                 {/* Campos dinámicos según el tipo de inversión */}
-                {getDetailFields().map((detailField) => (
-                  <FormField
-                    key={detailField}
-                    control={form.control}
-                    name={`details.${detailField}` as any}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="capitalize">
-                          {detailField.replace(/_/g, ' ')}
-                        </FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder={detailField.replace(/_/g, ' ')}
-                            {...field}
+                {getDetailFields().map((fieldConfig) => (
+                  <div key={fieldConfig.name}>
+                    {fieldConfig.type === 'simple' ? (
+                      <FormField
+                        control={form.control}
+                        name={`details.${fieldConfig.name}` as any}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="capitalize">
+                              {fieldConfig.name.replace(/_/g, ' ')}
+                            </FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder={fieldConfig.name.replace(/_/g, ' ')}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    ) : (
+                      <div className="border rounded-md p-4 mb-4">
+                        <h4 className="font-medium text-sm capitalize mb-3">
+                          {fieldConfig.name.replace(/_/g, ' ')}
+                        </h4>
+                        <div className="grid grid-cols-2 gap-3">
+                          <FormField
+                            control={form.control}
+                            name={`details.${fieldConfig.name}_cantidad` as any}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Cantidad</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    type="number"
+                                    placeholder="0"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
                           />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+                          <FormField
+                            control={form.control}
+                            name={`details.${fieldConfig.name}_precio` as any}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Precio unitario</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    type="number"
+                                    placeholder="$0"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
                     )}
-                  />
+                  </div>
                 ))}
                 
                 <FormField
@@ -461,12 +529,53 @@ export default function InvestmentsIndex() {
                         <div className="border-t border-neutral-200 p-4 bg-gray-50">
                           <h4 className="text-sm font-medium text-neutral-700 mb-2">Detalles adicionales:</h4>
                           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                            {Object.entries(investment.details).map(([key, value]) => (
-                              <div key={key} className="bg-white p-2 rounded border border-neutral-200">
-                                <span className="text-xs text-neutral-500 capitalize">{key.replace(/_/g, ' ')}:</span>
-                                <p className="text-sm font-medium text-neutral-800">{value as string}</p>
-                              </div>
-                            ))}
+                            {Object.entries(investment.details).map(([key, value]) => {
+                              // Verificar si es un campo con cantidad y precio
+                              if (key.endsWith('_cantidad') || key.endsWith('_precio')) {
+                                return null; // No mostrar estos campos individuales
+                              }
+                              
+                              // Buscar si existe el par cantidad/precio para este campo
+                              const baseName = key;
+                              const cantidadKey = `${baseName}_cantidad`;
+                              const precioKey = `${baseName}_precio`;
+                              
+                              if (investment.details[cantidadKey] && investment.details[precioKey]) {
+                                // Es un campo con cantidad y precio
+                                const cantidad = investment.details[cantidadKey];
+                                const precio = investment.details[precioKey];
+                                const subtotal = parseFloat(cantidad as string) * parseFloat(precio as string);
+                                
+                                return (
+                                  <div key={key} className="bg-white p-3 rounded border border-neutral-200">
+                                    <span className="text-xs font-medium text-neutral-600 capitalize block mb-1">
+                                      {key.replace(/_/g, ' ')}
+                                    </span>
+                                    <div className="grid grid-cols-2 gap-2 text-xs mb-1">
+                                      <div>
+                                        <span className="text-neutral-500">Cantidad:</span>
+                                        <span className="ml-1 font-medium">{cantidad as string}</span>
+                                      </div>
+                                      <div>
+                                        <span className="text-neutral-500">Precio unitario:</span>
+                                        <span className="ml-1 font-medium">${precio as string}</span>
+                                      </div>
+                                    </div>
+                                    <div className="text-xs text-neutral-500">
+                                      Subtotal: <span className="font-medium text-blue-600">${subtotal.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
+                                    </div>
+                                  </div>
+                                );
+                              }
+                              
+                              // Es un campo simple
+                              return (
+                                <div key={key} className="bg-white p-2 rounded border border-neutral-200">
+                                  <span className="text-xs text-neutral-500 capitalize">{key.replace(/_/g, ' ')}:</span>
+                                  <p className="text-sm font-medium text-neutral-800">{value as string}</p>
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                       )}
