@@ -13,6 +13,7 @@ import AnimalEdit from "@/pages/animals/[id]/edit";
 import AnimalWeight from "@/pages/animals/[id]/weight";
 import AnimalVeterinary from "@/pages/animals/[id]/veterinary";
 import AnimalReproduction from "@/pages/animals/[id]/reproduction";
+import AnimalFinances from "@/pages/animals/[id]/finances";
 import AppLayout from "@/components/layouts/AppLayout";
 
 function App() {
@@ -100,6 +101,14 @@ function App() {
           {(params) => (
             <AppLayout>
               <AnimalReproduction />
+            </AppLayout>
+          )}
+        </Route>
+        
+        <Route path="/animals/:id/finances">
+          {(params) => (
+            <AppLayout>
+              <AnimalFinances />
             </AppLayout>
           )}
         </Route>
