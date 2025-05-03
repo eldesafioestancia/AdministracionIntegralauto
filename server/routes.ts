@@ -541,6 +541,132 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Rutas para servicios
+  app.get("/api/services", async (req: Request, res: Response) => {
+    try {
+      const services = await storage.getServices();
+      res.json(services);
+    } catch (error) {
+      console.error("Error fetching services:", error);
+      res.status(500).json({ message: "Error fetching services" });
+    }
+  });
+  
+  app.post("/api/services", async (req: Request, res: Response) => {
+    try {
+      const serviceData = insertServiceSchema.parse(req.body);
+      const newService = await storage.createService(serviceData);
+      res.status(201).json(newService);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid service data", errors: error.errors });
+      }
+      
+      console.error("Error creating service:", error);
+      res.status(500).json({ message: "Error creating service" });
+    }
+  });
+  
+  app.delete("/api/services/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteService(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Service not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting service:", error);
+      res.status(500).json({ message: "Error deleting service" });
+    }
+  });
+
+  // Rutas para impuestos
+  app.get("/api/taxes", async (req: Request, res: Response) => {
+    try {
+      const taxes = await storage.getTaxes();
+      res.json(taxes);
+    } catch (error) {
+      console.error("Error fetching taxes:", error);
+      res.status(500).json({ message: "Error fetching taxes" });
+    }
+  });
+  
+  app.post("/api/taxes", async (req: Request, res: Response) => {
+    try {
+      const taxData = insertTaxSchema.parse(req.body);
+      const newTax = await storage.createTax(taxData);
+      res.status(201).json(newTax);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid tax data", errors: error.errors });
+      }
+      
+      console.error("Error creating tax:", error);
+      res.status(500).json({ message: "Error creating tax" });
+    }
+  });
+  
+  app.delete("/api/taxes/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteTax(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Tax not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting tax:", error);
+      res.status(500).json({ message: "Error deleting tax" });
+    }
+  });
+
+  // Rutas para reparaciones
+  app.get("/api/repairs", async (req: Request, res: Response) => {
+    try {
+      const repairs = await storage.getRepairs();
+      res.json(repairs);
+    } catch (error) {
+      console.error("Error fetching repairs:", error);
+      res.status(500).json({ message: "Error fetching repairs" });
+    }
+  });
+  
+  app.post("/api/repairs", async (req: Request, res: Response) => {
+    try {
+      const repairData = insertRepairSchema.parse(req.body);
+      const newRepair = await storage.createRepair(repairData);
+      res.status(201).json(newRepair);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid repair data", errors: error.errors });
+      }
+      
+      console.error("Error creating repair:", error);
+      res.status(500).json({ message: "Error creating repair" });
+    }
+  });
+  
+  app.delete("/api/repairs/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteRepair(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Repair not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting repair:", error);
+      res.status(500).json({ message: "Error deleting repair" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
