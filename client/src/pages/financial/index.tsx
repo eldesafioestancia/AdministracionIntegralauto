@@ -1147,64 +1147,169 @@ export default function FinancialIndex() {
         {/* Sección de Servicios */}
         <TabsContent value="services">
           <div className="bg-white rounded-lg p-6 shadow-sm border border-neutral-200">
-            <h2 className="text-xl font-semibold mb-4">Servicios</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center">
-                    <i className="ri-flashlight-line mr-2 text-yellow-500"></i>
-                    <span>EDESAL</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-neutral-500">
-                    Servicio de electricidad
-                  </p>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center">
-                    <i className="ri-water-flash-line mr-2 text-blue-500"></i>
-                    <span>Consorcio de regantes</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-neutral-500">
-                    Servicios de riego
-                  </p>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center">
-                    <i className="ri-drop-line mr-2 text-blue-400"></i>
-                    <span>Agua potable</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-neutral-500">
-                    Servicio de agua potable
-                  </p>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center">
-                    <i className="ri-wifi-line mr-2 text-green-500"></i>
-                    <span>Internet</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-neutral-500">
-                    Servicio de internet
-                  </p>
-                </CardContent>
-              </Card>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Servicios</h2>
+              <Sheet open={selectedTab === "services" && sheetOpen} onOpenChange={(open) => selectedTab === "services" && setSheetOpen(open)}>
+                <SheetTrigger asChild>
+                  <Button>
+                    <i className="ri-add-line mr-1"></i> Nuevo servicio
+                  </Button>
+                </SheetTrigger>
+                <SheetContent className="sm:max-w-md overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle>Registrar servicio</SheetTitle>
+                    <SheetDescription>
+                      Complete los datos del nuevo servicio
+                    </SheetDescription>
+                  </SheetHeader>
+                  
+                  <Form {...serviceForm}>
+                    <form onSubmit={serviceForm.handleSubmit(onServiceSubmit)} className="space-y-4 py-4">
+                      <FormField
+                        control={serviceForm.control}
+                        name="date"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Fecha</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="date"
+                                {...field}
+                                value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                                onChange={(e) => {
+                                  const date = e.target.value ? new Date(e.target.value) : null;
+                                  field.onChange(date);
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={serviceForm.control}
+                        name="type"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Tipo</FormLabel>
+                            <Select 
+                              onValueChange={field.onChange} 
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Seleccione un tipo" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="edesal">EDESAL</SelectItem>
+                                <SelectItem value="consorcio_regantes">Consorcio de regantes</SelectItem>
+                                <SelectItem value="agua_potable">Agua potable</SelectItem>
+                                <SelectItem value="internet">Internet</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={serviceForm.control}
+                        name="description"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Descripción</FormLabel>
+                            <FormControl>
+                              <Textarea
+                                placeholder="Describa el servicio"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={serviceForm.control}
+                        name="amount"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Monto ($)</FormLabel>
+                            <FormControl>
+                              <Input placeholder="0" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <SheetFooter>
+                        <Button type="submit">Guardar servicio</Button>
+                      </SheetFooter>
+                    </form>
+                  </Form>
+                </SheetContent>
+              </Sheet>
             </div>
+            
+            {servicesLoading ? (
+              <div className="text-center py-8">
+                <p className="text-neutral-500">Cargando servicios...</p>
+              </div>
+            ) : services && services.length > 0 ? (
+              <div className="space-y-4">
+                {services.map((service: any) => (
+                  <Collapsible key={service.id} className="border rounded-lg border-neutral-200">
+                    <div className="flex justify-between items-center p-4">
+                      <div className="flex items-center space-x-2">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center bg-blue-100`}>
+                          {service.type === "edesal" && <i className="ri-flashlight-line text-yellow-500"></i>}
+                          {service.type === "consorcio_regantes" && <i className="ri-water-flash-line text-blue-500"></i>}
+                          {service.type === "agua_potable" && <i className="ri-drop-line text-blue-400"></i>}
+                          {service.type === "internet" && <i className="ri-wifi-line text-green-500"></i>}
+                        </div>
+                        <div>
+                          <h3 className="font-medium">{getServiceTypeLabel(service.type)}</h3>
+                          <p className="text-sm text-neutral-500">
+                            {format(new Date(service.date), 'dd/MM/yyyy')}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <p className="font-medium text-lg">${service.amount}</p>
+                        <CollapsibleTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <i className="ri-arrow-down-s-line"></i>
+                          </Button>
+                        </CollapsibleTrigger>
+                      </div>
+                    </div>
+                    <CollapsibleContent>
+                      <div className="px-4 pb-4 pt-0 border-t border-neutral-200">
+                        <div className="pt-4">
+                          <p className="text-sm text-neutral-600 mb-2">{service.description}</p>
+                        </div>
+                        <div className="flex justify-end mt-2">
+                          <Button 
+                            variant="destructive" 
+                            size="sm" 
+                            onClick={() => handleServiceDelete(service.id)}
+                          >
+                            <i className="ri-delete-bin-line mr-1"></i> Eliminar
+                          </Button>
+                        </div>
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 border rounded-lg border-dashed border-neutral-300">
+                <p className="text-neutral-500">No hay servicios registrados</p>
+              </div>
+            )}
           </div>
         </TabsContent>
         
