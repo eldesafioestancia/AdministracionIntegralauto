@@ -1316,143 +1316,250 @@ export default function FinancialIndex() {
         {/* Sección de Impuestos */}
         <TabsContent value="taxes">
           <div className="bg-white rounded-lg p-6 shadow-sm border border-neutral-200">
-            <h2 className="text-xl font-semibold mb-4">Impuestos</h2>
-            
-            <div className="mb-6">
-              <h3 className="text-lg font-medium mb-2">Municipales</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-md">IIBB</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-neutral-500">
-                      Impuesto a los Ingresos Brutos
-                    </p>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-md">Moratoria</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-neutral-500">
-                      Plan de regularización
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Impuestos</h2>
+              <Sheet open={selectedTab === "taxes" && sheetOpen} onOpenChange={(open) => selectedTab === "taxes" && setSheetOpen(open)}>
+                <SheetTrigger asChild>
+                  <Button>
+                    <i className="ri-add-line mr-1"></i> Nuevo impuesto
+                  </Button>
+                </SheetTrigger>
+                <SheetContent className="sm:max-w-md overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle>Registrar impuesto</SheetTitle>
+                    <SheetDescription>
+                      Complete los datos del nuevo impuesto
+                    </SheetDescription>
+                  </SheetHeader>
+                  
+                  <Form {...taxForm}>
+                    <form onSubmit={taxForm.handleSubmit(onTaxSubmit)} className="space-y-4 py-4">
+                      <FormField
+                        control={taxForm.control}
+                        name="date"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Fecha</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="date"
+                                {...field}
+                                value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                                onChange={(e) => {
+                                  const date = e.target.value ? new Date(e.target.value) : null;
+                                  field.onChange(date);
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={taxForm.control}
+                        name="type"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Tipo</FormLabel>
+                            <Select 
+                              onValueChange={field.onChange} 
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Seleccione un tipo" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="municipal">Municipal</SelectItem>
+                                <SelectItem value="provincial">Provincial</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={taxForm.control}
+                        name="code"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Código (opcional)</FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="Ej: 25-1430-3, IIBB"
+                                {...field}
+                                value={field.value || ""}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={taxForm.control}
+                        name="description"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Descripción</FormLabel>
+                            <FormControl>
+                              <Textarea
+                                placeholder="Describa el impuesto"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={taxForm.control}
+                        name="amount"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Monto ($)</FormLabel>
+                            <FormControl>
+                              <Input placeholder="0" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <SheetFooter>
+                        <Button type="submit">Guardar impuesto</Button>
+                      </SheetFooter>
+                    </form>
+                  </Form>
+                </SheetContent>
+              </Sheet>
             </div>
             
-            <div className="mb-6">
-              <h3 className="text-lg font-medium mb-2">Provinciales</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-md">25-1430-3</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-neutral-500">
-                      Impuesto provincial
-                    </p>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-md">25-1711-6</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-neutral-500">
-                      Impuesto provincial
-                    </p>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-md">19-1047104-4</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-neutral-500">
-                      Impuesto provincial
-                    </p>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-md">19-1047105-2</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-neutral-500">
-                      Impuesto provincial
-                    </p>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-md">19-1047106-a</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-neutral-500">
-                      Impuesto provincial
-                    </p>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-md">19-1047102-8</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-neutral-500">
-                      Impuesto provincial
-                    </p>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-md">Moratoria</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-neutral-500">
-                      Plan de regularización
-                    </p>
-                  </CardContent>
-                </Card>
+            {taxesLoading ? (
+              <div className="text-center py-8">
+                <p className="text-neutral-500">Cargando impuestos...</p>
               </div>
-            </div>
-            
-            <div>
-              <h3 className="text-lg font-medium mb-2">Municipales</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-md">Tasas</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-neutral-500">
-                      Tasas municipales
-                    </p>
-                  </CardContent>
-                </Card>
+            ) : taxes && taxes.length > 0 ? (
+              <div className="space-y-6">
+                <div className="mb-4">
+                  <h3 className="text-lg font-medium mb-2">Municipales</h3>
+                  {taxes.filter((tax: any) => tax.type === "municipal").length > 0 ? (
+                    <div className="space-y-3">
+                      {taxes
+                        .filter((tax: any) => tax.type === "municipal")
+                        .map((tax: any) => (
+                          <Collapsible key={tax.id} className="border rounded-lg border-neutral-200">
+                            <div className="flex justify-between items-center p-4">
+                              <div className="flex items-center space-x-2">
+                                <div className="w-8 h-8 rounded-full flex items-center justify-center bg-orange-100">
+                                  <i className="ri-bank-line text-orange-500"></i>
+                                </div>
+                                <div>
+                                  <h3 className="font-medium">{tax.code || "IIBB"}</h3>
+                                  <p className="text-sm text-neutral-500">
+                                    {format(new Date(tax.date), 'dd/MM/yyyy')}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <p className="font-medium text-lg">${tax.amount}</p>
+                                <CollapsibleTrigger asChild>
+                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                    <i className="ri-arrow-down-s-line"></i>
+                                  </Button>
+                                </CollapsibleTrigger>
+                              </div>
+                            </div>
+                            <CollapsibleContent>
+                              <div className="px-4 pb-4 pt-0 border-t border-neutral-200">
+                                <div className="pt-4">
+                                  <p className="text-sm text-neutral-600 mb-2">{tax.description}</p>
+                                </div>
+                                <div className="flex justify-end mt-2">
+                                  <Button 
+                                    variant="destructive" 
+                                    size="sm" 
+                                    onClick={() => handleTaxDelete(tax.id)}
+                                  >
+                                    <i className="ri-delete-bin-line mr-1"></i> Eliminar
+                                  </Button>
+                                </div>
+                              </div>
+                            </CollapsibleContent>
+                          </Collapsible>
+                        ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-4 border rounded-lg border-dashed border-neutral-300">
+                      <p className="text-neutral-500">No hay impuestos municipales registrados</p>
+                    </div>
+                  )}
+                </div>
                 
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-md">Moratoria</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-neutral-500">
-                      Plan de regularización
-                    </p>
-                  </CardContent>
-                </Card>
+                <div>
+                  <h3 className="text-lg font-medium mb-2">Provinciales</h3>
+                  {taxes.filter((tax: any) => tax.type === "provincial").length > 0 ? (
+                    <div className="space-y-3">
+                      {taxes
+                        .filter((tax: any) => tax.type === "provincial")
+                        .map((tax: any) => (
+                          <Collapsible key={tax.id} className="border rounded-lg border-neutral-200">
+                            <div className="flex justify-between items-center p-4">
+                              <div className="flex items-center space-x-2">
+                                <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-100">
+                                  <i className="ri-government-line text-blue-500"></i>
+                                </div>
+                                <div>
+                                  <h3 className="font-medium">{tax.code || "Impuesto provincial"}</h3>
+                                  <p className="text-sm text-neutral-500">
+                                    {format(new Date(tax.date), 'dd/MM/yyyy')}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <p className="font-medium text-lg">${tax.amount}</p>
+                                <CollapsibleTrigger asChild>
+                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                    <i className="ri-arrow-down-s-line"></i>
+                                  </Button>
+                                </CollapsibleTrigger>
+                              </div>
+                            </div>
+                            <CollapsibleContent>
+                              <div className="px-4 pb-4 pt-0 border-t border-neutral-200">
+                                <div className="pt-4">
+                                  <p className="text-sm text-neutral-600 mb-2">{tax.description}</p>
+                                </div>
+                                <div className="flex justify-end mt-2">
+                                  <Button 
+                                    variant="destructive" 
+                                    size="sm" 
+                                    onClick={() => handleTaxDelete(tax.id)}
+                                  >
+                                    <i className="ri-delete-bin-line mr-1"></i> Eliminar
+                                  </Button>
+                                </div>
+                              </div>
+                            </CollapsibleContent>
+                          </Collapsible>
+                        ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-4 border rounded-lg border-dashed border-neutral-300">
+                      <p className="text-neutral-500">No hay impuestos provinciales registrados</p>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="text-center py-8 border rounded-lg border-dashed border-neutral-300">
+                <p className="text-neutral-500">No hay impuestos registrados</p>
+              </div>
+            )}
           </div>
         </TabsContent>
         
