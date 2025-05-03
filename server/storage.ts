@@ -102,6 +102,20 @@ export interface IStorage {
   createCapital(capital: InsertCapital): Promise<Capital>;
   deleteCapital(id: number): Promise<boolean>;
   
+  // Natural Services (Reproductive - Monta Natural)
+  getNaturalServices(animalId?: number): Promise<NaturalService[]>;
+  getNaturalService(id: number): Promise<NaturalService | undefined>;
+  createNaturalService(service: InsertNaturalService): Promise<NaturalService>;
+  updateNaturalService(id: number, service: Partial<InsertNaturalService>): Promise<NaturalService | undefined>;
+  deleteNaturalService(id: number): Promise<boolean>;
+  
+  // Artificial Services (Reproductive - Inseminación Artificial)
+  getArtificialServices(animalId?: number): Promise<ArtificialService[]>;
+  getArtificialService(id: number): Promise<ArtificialService | undefined>;
+  createArtificialService(service: InsertArtificialService): Promise<ArtificialService>;
+  updateArtificialService(id: number, service: Partial<InsertArtificialService>): Promise<ArtificialService | undefined>;
+  deleteArtificialService(id: number): Promise<boolean>;
+  
   // Dashboard
   getDashboardStats(): Promise<{
     machineCount: number;
@@ -129,6 +143,8 @@ export class MemStorage implements IStorage {
   private repairs: Map<number, Repair>;
   private salaries: Map<number, Salary>;
   private capitals: Map<number, Capital>;
+  private naturalServices: Map<number, NaturalService>;
+  private artificialServices: Map<number, ArtificialService>;
 
   private currentIds: {
     user: number;
@@ -164,6 +180,8 @@ export class MemStorage implements IStorage {
     this.repairs = new Map();
     this.salaries = new Map();
     this.capitals = new Map();
+    this.naturalServices = new Map();
+    this.artificialServices = new Map();
 
     this.currentIds = {
       user: 1,
@@ -181,6 +199,8 @@ export class MemStorage implements IStorage {
       repair: 1,
       salary: 1,
       capital: 1,
+      naturalService: 1,
+      artificialService: 1,
     };
 
     // Initialize with a default admin user
