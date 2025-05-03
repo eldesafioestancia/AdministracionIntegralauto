@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -97,7 +97,7 @@ export default function InvestmentsIndex() {
   const unitValue = form.watch("unitValue");
 
   // Calcula el monto total automáticamente
-  React.useEffect(() => {
+  useEffect(() => {
     if (quantity && unitValue) {
       const total = (parseFloat(quantity) * parseFloat(unitValue)).toString();
       form.setValue("amount", total);
