@@ -78,6 +78,9 @@ export default function AnimalsIndex() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [transferSheetOpen, setTransferSheetOpen] = useState(false);
+  const [selectedAnimal, setSelectedAnimal] = useState<any>(null);
+  const [transferLocation, setTransferLocation] = useState("");
   const { toast } = useToast();
   
   const { data: animals, isLoading, error } = useQuery({
@@ -187,6 +190,47 @@ export default function AnimalsIndex() {
       case "ternera":
         return "ri-gamepad-line";
       default: return "ri-cow-line";
+    }
+  };
+  
+  const openTransferSheet = (animal: any) => {
+    setSelectedAnimal(animal);
+    setTransferLocation(animal.location || "");
+    setTransferSheetOpen(true);
+  };
+  
+  const handleTransfer = async () => {
+    if (!selectedAnimal) return;
+    
+    try {
+      await apiRequest("PUT", `/api/animals/${selectedAnimal.id}`, {
+        location: transferLocation
+      });
+      
+      // Invalidate animals query to refresh the list
+      queryClient.invalidateQueries({ queryKey: ["/api/animals"] });
+      
+      // Add a veterinary event for the transfer
+      await apiRequest("POST", "/api/animal-veterinary", {
+        animalId: selectedAnimal.id,
+        date: new Date(),
+        type: "transfer",
+        description: `Traslado a: ${transferLocation}`
+      });
+      
+      toast({
+        title: "Animal trasladado",
+        description: `El animal ha sido trasladado a ${transferLocation}`,
+      });
+      
+      setTransferSheetOpen(false);
+    } catch (error) {
+      console.error("Error transferring animal:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo trasladar el animal",
+        variant: "destructive",
+      });
     }
   };
 
@@ -834,6 +878,14 @@ export default function AnimalsIndex() {
                           Parto: {format(new Date(animal.expectedDeliveryDate), "dd/MM/yyyy")}
                         </span>
                       )}
+                      
+                      {/* Ubicación del animal */}
+                      {animal.location && (
+                        <span className="flex items-center text-blue-600">
+                          <i className="ri-map-pin-line mr-1"></i>
+                          {animal.location}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </Link>
@@ -862,12 +914,87 @@ export default function AnimalsIndex() {
                       <i className="ri-scales-line text-lg"></i>
                     </Link>
                   </Button>
+                  
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-9 w-9" 
+                    title="Trasladar animal"
+                    onClick={() => openTransferSheet(animal)}
+                  >
+                    <i className="ri-arrow-left-right-line text-lg"></i>
+                  </Button>
+                  
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    asChild 
+                    className="h-9 w-9" 
+                    title="Finanzas"
+                  >
+                    <Link href={`/animals/${animal.id}/finances`}>
+                      <i className="ri-money-dollar-circle-line text-lg"></i>
+                    </Link>
+                  </Button>
                 </div>
               </div>
             </Card>
           ))}
         </div>
       )}
+      
+      {/* Transfer Sheet */}
+      <Sheet open={transferSheetOpen} onOpenChange={setTransferSheetOpen}>
+        <SheetContent className="sm:max-w-md">
+          <SheetHeader>
+            <SheetTitle>Trasladar animal #{selectedAnimal?.cartagena}</SheetTitle>
+            <SheetDescription>
+              Indique la nueva ubicación del animal
+            </SheetDescription>
+          </SheetHeader>
+          
+          <div className="py-6 space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="location" className="text-sm font-medium">
+                Ubicación
+              </label>
+              <Input
+                id="location"
+                placeholder="Ej: Potrero 1, Corral 3, etc."
+                value={transferLocation}
+                onChange={(e) => setTransferLocation(e.target.value)}
+              />
+              
+              {/* Sugerencias de ubicación según estado reproductivo */}
+              {selectedAnimal?.reproductiveStatus === "prenada" && (
+                <div className="mt-2 text-sm text-green-600 bg-green-50 p-2 rounded-md">
+                  <i className="ri-information-line mr-1"></i>
+                  Sugerencia: Ubicar en potreros para invernada.
+                </div>
+              )}
+              
+              {(selectedAnimal?.reproductiveStatus === "vacia" || selectedAnimal?.reproductiveStatus === "servicio") && (
+                <div className="mt-2 text-sm text-yellow-600 bg-yellow-50 p-2 rounded-md">
+                  <i className="ri-information-line mr-1"></i>
+                  Sugerencia: Ubicar en área para inseminación artificial.
+                </div>
+              )}
+            </div>
+            
+            {selectedAnimal && selectedAnimal.location && (
+              <div className="text-sm text-neutral-500">
+                Ubicación actual: <span className="font-medium">{selectedAnimal.location}</span>
+              </div>
+            )}
+          </div>
+          
+          <SheetFooter>
+            <Button type="button" onClick={handleTransfer} disabled={!transferLocation.trim()}>
+              Trasladar animal
+            </Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
