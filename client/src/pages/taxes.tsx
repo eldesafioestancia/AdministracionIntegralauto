@@ -180,12 +180,14 @@ export default function Taxes() {
   }
 
   // Filtrar impuestos según la pestaña activa
-  const filteredTaxes = taxes ? taxes.filter((tax: any) => {
-    if (activeTab === "all") return true;
-    
-    // Verificar si el tipo comienza con el valor de activeTab
-    return tax.type.startsWith(activeTab);
-  }) : [];
+  const filteredTaxes = taxes && Array.isArray(taxes) 
+    ? taxes.filter((tax: any) => {
+        if (activeTab === "all") return true;
+        
+        // Verificar si el tipo comienza con el valor de activeTab
+        return tax.type.startsWith(activeTab);
+      }) 
+    : [];
 
   // Agrupar impuestos por categoría y subcategoría
   const groupedTaxes = filteredTaxes.reduce((acc: any, tax: any) => {
@@ -214,30 +216,34 @@ export default function Taxes() {
   }, {});
 
   // Calcular total de impuestos
-  const totalTaxes = taxes ? taxes.reduce((acc: number, tax: any) => {
-    return acc + parseFloat(tax.amount);
-  }, 0) : 0;
+  const totalTaxes = taxes && Array.isArray(taxes)
+    ? taxes.reduce((acc: number, tax: any) => {
+        return acc + parseFloat(tax.amount);
+      }, 0) 
+    : 0;
 
   // Calcular totales por tipo
-  const taxesByCategory = taxes ? taxes.reduce((acc: any, tax: any) => {
-    let category = "";
-    
-    // Determinar la categoría basada en el tipo
-    if (tax.type.startsWith("25-") || tax.type.startsWith("19-") || tax.type === "moratoria_provincial") {
-      category = "provincial";
-    } else if (tax.type === "tasas" || tax.type === "moratoria_municipal") {
-      category = "municipal";
-    } else if (tax.type === "iibb_regular" || tax.type === "moratoria_iibb") {
-      category = "iibb";
-    }
-    
-    if (!acc[category]) {
-      acc[category] = 0;
-    }
-    
-    acc[category] += parseFloat(tax.amount);
-    return acc;
-  }, {}) : {};
+  const taxesByCategory = taxes && Array.isArray(taxes)
+    ? taxes.reduce((acc: any, tax: any) => {
+        let category = "";
+        
+        // Determinar la categoría basada en el tipo
+        if (tax.type.startsWith("25-") || tax.type.startsWith("19-") || tax.type === "moratoria_provincial") {
+          category = "provincial";
+        } else if (tax.type === "tasas" || tax.type === "moratoria_municipal") {
+          category = "municipal";
+        } else if (tax.type === "iibb_regular" || tax.type === "moratoria_iibb") {
+          category = "iibb";
+        }
+        
+        if (!acc[category]) {
+          acc[category] = 0;
+        }
+        
+        acc[category] += parseFloat(tax.amount);
+        return acc;
+      }, {}) 
+    : {};
 
   // Obtener etiqueta para categoría de impuesto
   const getCategoryLabel = (category: string) => {

@@ -121,24 +121,30 @@ export default function Services() {
   }
 
   // Filtrar servicios según la pestaña activa
-  const filteredServices = services ? services.filter((service: any) => {
-    if (activeTab === "all") return true;
-    return service.type === activeTab;
-  }) : [];
+  const filteredServices = services && Array.isArray(services) 
+    ? services.filter((service: any) => {
+        if (activeTab === "all") return true;
+        return service.type === activeTab;
+      }) 
+    : [];
 
   // Calcular total de servicios
-  const totalServices = services ? services.reduce((acc: number, service: any) => {
-    return acc + parseFloat(service.amount);
-  }, 0) : 0;
+  const totalServices = services && Array.isArray(services)
+    ? services.reduce((acc: number, service: any) => {
+        return acc + parseFloat(service.amount);
+      }, 0) 
+    : 0;
 
   // Calcular totales por tipo
-  const servicesByType = services ? services.reduce((acc: any, service: any) => {
-    if (!acc[service.type]) {
-      acc[service.type] = 0;
-    }
-    acc[service.type] += parseFloat(service.amount);
-    return acc;
-  }, {}) : {};
+  const servicesByType = services && Array.isArray(services)
+    ? services.reduce((acc: any, service: any) => {
+        if (!acc[service.type]) {
+          acc[service.type] = 0;
+        }
+        acc[service.type] += parseFloat(service.amount);
+        return acc;
+      }, {}) 
+    : {};
 
   // Obtener etiqueta para tipo de servicio
   const getServiceTypeLabel = (type: string) => {

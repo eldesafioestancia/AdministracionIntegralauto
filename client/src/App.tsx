@@ -15,6 +15,8 @@ import AnimalVeterinary from "@/pages/animals/[id]/veterinary";
 import AnimalReproduction from "@/pages/animals/[id]/reproduction";
 import AnimalFinances from "@/pages/animals/[id]/finances";
 import InvestmentsIndex from "./pages/investments/index";
+import Services from "@/pages/services";
+import Taxes from "@/pages/taxes";
 import AppLayout from "@/components/layouts/AppLayout";
 
 function App() {
@@ -118,6 +120,20 @@ function App() {
         <Route path="/investments">
           <AppLayout>
             <InvestmentsIndex />
+          </AppLayout>
+        </Route>
+        
+        {/* Rutas para servicios */}
+        <Route path="/services">
+          <AppLayout>
+            <Services />
+          </AppLayout>
+        </Route>
+        
+        {/* Rutas para impuestos */}
+        <Route path="/taxes">
+          <AppLayout>
+            <Taxes />
           </AppLayout>
         </Route>
         
