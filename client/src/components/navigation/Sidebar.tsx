@@ -86,21 +86,87 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                 Pasturas
               </Link>
               <Link 
-                href="/financial"
+                href="/investments"
                 className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                  isActive("/financial")
+                  isActive("/investments")
                     ? "bg-primary-light bg-opacity-10 text-primary"
                     : "text-neutral-500 hover:bg-neutral-100"
                 }`}
                 onClick={closeSidebar}
               >
                 <i className="ri-funds-line mr-3 text-lg"></i>
-                Gestión Financiera
+                Inversiones
               </Link>
             </div>
           </div>
 
-
+          <div className="pt-2">
+            <p className="px-3 text-xs font-semibold text-neutral-400 uppercase tracking-wider">
+              Gestión financiera
+            </p>
+            <div className="mt-1 space-y-1">
+              <Link 
+                href="/services"
+                className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  isActive("/services")
+                    ? "bg-primary-light bg-opacity-10 text-primary"
+                    : "text-neutral-500 hover:bg-neutral-100"
+                }`}
+                onClick={closeSidebar}
+              >
+                <i className="ri-service-line mr-3 text-lg"></i>
+                Servicios
+              </Link>
+              <Link 
+                href="/taxes"
+                className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  isActive("/taxes")
+                    ? "bg-primary-light bg-opacity-10 text-primary"
+                    : "text-neutral-500 hover:bg-neutral-100"
+                }`}
+                onClick={closeSidebar}
+              >
+                <i className="ri-bank-line mr-3 text-lg"></i>
+                Impuestos
+              </Link>
+              <Link 
+                href="/repairs"
+                className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  isActive("/repairs")
+                    ? "bg-primary-light bg-opacity-10 text-primary"
+                    : "text-neutral-500 hover:bg-neutral-100"
+                }`}
+                onClick={closeSidebar}
+              >
+                <i className="ri-tools-line mr-3 text-lg"></i>
+                Reparaciones
+              </Link>
+              <Link 
+                href="/salaries"
+                className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  isActive("/salaries")
+                    ? "bg-primary-light bg-opacity-10 text-primary"
+                    : "text-neutral-500 hover:bg-neutral-100"
+                }`}
+                onClick={closeSidebar}
+              >
+                <i className="ri-user-star-line mr-3 text-lg"></i>
+                Sueldos
+              </Link>
+              <Link 
+                href="/capital"
+                className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  isActive("/capital")
+                    ? "bg-primary-light bg-opacity-10 text-primary"
+                    : "text-neutral-500 hover:bg-neutral-100"
+                }`}
+                onClick={closeSidebar}
+              >
+                <i className="ri-money-dollar-circle-line mr-3 text-lg"></i>
+                Capital
+              </Link>
+            </div>
+          </div>
 
           <div className="pt-2">
             <p className="px-3 text-xs font-semibold text-neutral-400 uppercase tracking-wider">
