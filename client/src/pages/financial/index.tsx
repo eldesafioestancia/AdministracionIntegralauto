@@ -132,6 +132,21 @@ export default function FinancialIndex() {
     queryKey: ["/api/investments"],
   });
 
+  // Consultar los servicios
+  const { data: services, isLoading: servicesLoading } = useQuery({
+    queryKey: ["/api/services"],
+  });
+
+  // Consultar los impuestos
+  const { data: taxes, isLoading: taxesLoading } = useQuery({
+    queryKey: ["/api/taxes"],
+  });
+
+  // Consultar las reparaciones
+  const { data: repairs, isLoading: repairsLoading } = useQuery({
+    queryKey: ["/api/repairs"],
+  });
+
   // Filtrar inversiones según la pestaña activa
   const filteredInvestments = investments ? investments.filter((investment: any) => {
     if (investmentTab === "all") return true;
@@ -265,6 +280,159 @@ export default function FinancialIndex() {
       toast({
         title: "Error",
         description: "No se pudo eliminar la inversión",
+        variant: "destructive",
+      });
+    }
+  }
+
+  // Función para manejar el envío del formulario de servicios
+  async function onServiceSubmit(values: ServiceFormValues) {
+    try {
+      await apiRequest("POST", "/api/services", values);
+
+      // Invalidar consulta de servicios
+      queryClient.invalidateQueries({ queryKey: ["/api/services"] });
+      
+      toast({
+        title: "Servicio registrado",
+        description: "El servicio ha sido registrado exitosamente",
+      });
+      
+      setSheetOpen(false);
+      serviceForm.reset();
+      
+    } catch (error) {
+      console.error("Error creating service:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo registrar el servicio",
+        variant: "destructive",
+      });
+    }
+  }
+
+  // Función para manejar la eliminación de servicios
+  async function handleServiceDelete(serviceId: number) {
+    if (!confirm("¿Está seguro de eliminar este servicio?")) return;
+    
+    try {
+      await apiRequest("DELETE", `/api/services/${serviceId}`, {});
+      
+      // Invalidar consulta de servicios
+      queryClient.invalidateQueries({ queryKey: ["/api/services"] });
+      
+      toast({
+        title: "Servicio eliminado",
+        description: "El servicio ha sido eliminado exitosamente",
+      });
+      
+    } catch (error) {
+      console.error("Error deleting service:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar el servicio",
+        variant: "destructive",
+      });
+    }
+  }
+
+  // Función para manejar el envío del formulario de impuestos
+  async function onTaxSubmit(values: TaxFormValues) {
+    try {
+      await apiRequest("POST", "/api/taxes", values);
+
+      // Invalidar consulta de impuestos
+      queryClient.invalidateQueries({ queryKey: ["/api/taxes"] });
+      
+      toast({
+        title: "Impuesto registrado",
+        description: "El impuesto ha sido registrado exitosamente",
+      });
+      
+      setSheetOpen(false);
+      taxForm.reset();
+      
+    } catch (error) {
+      console.error("Error creating tax:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo registrar el impuesto",
+        variant: "destructive",
+      });
+    }
+  }
+
+  // Función para manejar la eliminación de impuestos
+  async function handleTaxDelete(taxId: number) {
+    if (!confirm("¿Está seguro de eliminar este impuesto?")) return;
+    
+    try {
+      await apiRequest("DELETE", `/api/taxes/${taxId}`, {});
+      
+      // Invalidar consulta de impuestos
+      queryClient.invalidateQueries({ queryKey: ["/api/taxes"] });
+      
+      toast({
+        title: "Impuesto eliminado",
+        description: "El impuesto ha sido eliminado exitosamente",
+      });
+      
+    } catch (error) {
+      console.error("Error deleting tax:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar el impuesto",
+        variant: "destructive",
+      });
+    }
+  }
+
+  // Función para manejar el envío del formulario de reparaciones
+  async function onRepairSubmit(values: RepairFormValues) {
+    try {
+      await apiRequest("POST", "/api/repairs", values);
+
+      // Invalidar consulta de reparaciones
+      queryClient.invalidateQueries({ queryKey: ["/api/repairs"] });
+      
+      toast({
+        title: "Reparación registrada",
+        description: "La reparación ha sido registrada exitosamente",
+      });
+      
+      setSheetOpen(false);
+      repairForm.reset();
+      
+    } catch (error) {
+      console.error("Error creating repair:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo registrar la reparación",
+        variant: "destructive",
+      });
+    }
+  }
+
+  // Función para manejar la eliminación de reparaciones
+  async function handleRepairDelete(repairId: number) {
+    if (!confirm("¿Está seguro de eliminar esta reparación?")) return;
+    
+    try {
+      await apiRequest("DELETE", `/api/repairs/${repairId}`, {});
+      
+      // Invalidar consulta de reparaciones
+      queryClient.invalidateQueries({ queryKey: ["/api/repairs"] });
+      
+      toast({
+        title: "Reparación eliminada",
+        description: "La reparación ha sido eliminada exitosamente",
+      });
+      
+    } catch (error) {
+      console.error("Error deleting repair:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar la reparación",
         variant: "destructive",
       });
     }
