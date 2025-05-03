@@ -63,75 +63,7 @@ export default function MobileMenu({ open, setOpen }: MobileMenuProps) {
             </a>
           </Link>
 
-          <Link href="/services">
-            <a
-              className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-neutral-100"
-              onClick={() => setOpen(false)}
-            >
-              <div className="w-12 h-12 bg-accent bg-opacity-10 rounded-full flex items-center justify-center mb-2">
-                <i className="ri-service-line text-xl text-accent"></i>
-              </div>
-              <span className="text-xs text-neutral-500 text-center">
-                Servicios
-              </span>
-            </a>
-          </Link>
 
-          <Link href="/taxes">
-            <a
-              className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-neutral-100"
-              onClick={() => setOpen(false)}
-            >
-              <div className="w-12 h-12 bg-info bg-opacity-10 rounded-full flex items-center justify-center mb-2">
-                <i className="ri-bank-line text-xl text-info"></i>
-              </div>
-              <span className="text-xs text-neutral-500 text-center">
-                Impuestos
-              </span>
-            </a>
-          </Link>
-
-          <Link href="/repairs">
-            <a
-              className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-neutral-100"
-              onClick={() => setOpen(false)}
-            >
-              <div className="w-12 h-12 bg-warning bg-opacity-10 rounded-full flex items-center justify-center mb-2">
-                <i className="ri-tools-line text-xl text-warning"></i>
-              </div>
-              <span className="text-xs text-neutral-500 text-center">
-                Reparaciones
-              </span>
-            </a>
-          </Link>
-
-          <Link href="/salaries">
-            <a
-              className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-neutral-100"
-              onClick={() => setOpen(false)}
-            >
-              <div className="w-12 h-12 bg-success bg-opacity-10 rounded-full flex items-center justify-center mb-2">
-                <i className="ri-user-star-line text-xl text-success"></i>
-              </div>
-              <span className="text-xs text-neutral-500 text-center">
-                Sueldos
-              </span>
-            </a>
-          </Link>
-
-          <Link href="/capital">
-            <a
-              className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-neutral-100"
-              onClick={() => setOpen(false)}
-            >
-              <div className="w-12 h-12 bg-error bg-opacity-10 rounded-full flex items-center justify-center mb-2">
-                <i className="ri-money-dollar-circle-line text-xl text-error"></i>
-              </div>
-              <span className="text-xs text-neutral-500 text-center">
-                Capital
-              </span>
-            </a>
-          </Link>
 
           <Link href="/reports">
             <a
