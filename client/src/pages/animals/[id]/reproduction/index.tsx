@@ -116,10 +116,11 @@ export default function AnimalReproduction() {
         artificialInseminationForm.setValue("pregnancyCheckDate", checkDate);
       }
       
-      if (name === "pregnancyResult" && value.pregnancyResult === "vacia" && value.bullExitDate) {
+      if (name === "pregnancyResult" && value.pregnancyResult === "vacia" && value.pregnancyCheckDate) {
         // Si el resultado del tacto es "vacía", configurar las fechas de inseminación
-        const exitDate = new Date(value.bullExitDate);
-        const deviceDate = addDays(exitDate, 7); // 7 días después para colocación del dispositivo
+        // La fecha de colocación del dispositivo es la misma que la fecha del tacto
+        const checkDate = new Date(value.pregnancyCheckDate);
+        const deviceDate = checkDate; // Misma fecha que el tacto
         const removalDate = addDays(deviceDate, 7); // 7 días después para retiro del dispositivo
         const insemDate = addDays(removalDate, 2); // 2 días después para la inseminación
         
@@ -637,7 +638,7 @@ export default function AnimalReproduction() {
                                 </FormControl>
                                 <FormMessage />
                                 <FormDescription>
-                                  Calculada automáticamente (7 días después del tacto)
+                                  La colocación del dispositivo se realiza el mismo día del tacto
                                 </FormDescription>
                               </FormItem>
                             )}
