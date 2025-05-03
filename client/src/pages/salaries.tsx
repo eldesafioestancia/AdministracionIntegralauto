@@ -98,12 +98,34 @@ export default function Salaries() {
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const { toast } = useToast();
 
+  // Definición de tipos para los datos de la API
+  interface Employee {
+    id: number;
+    name: string;
+    position: string | null;
+    fixedSalary: string;
+    active: boolean;
+    createdAt: string;
+  }
+
+  interface Salary {
+    id: number;
+    date: string;
+    employeeId: number;
+    employeeName: string;
+    salaryType: string;
+    amount: string;
+    description: string | null;
+    period: string | null;
+    createdAt: string;
+  }
+
   // Consultas para empleados y pagos de sueldos
-  const { data: employees, isLoading: isLoadingEmployees } = useQuery({
+  const { data: employees = [], isLoading: isLoadingEmployees } = useQuery<Employee[]>({
     queryKey: ["/api/employees"],
   });
 
-  const { data: salaries, isLoading: isLoadingSalaries } = useQuery({
+  const { data: salaries = [], isLoading: isLoadingSalaries } = useQuery<Salary[]>({
     queryKey: ["/api/salaries"],
   });
 
@@ -142,7 +164,7 @@ export default function Salaries() {
     setSelectedEmployee(null);
   };
 
-  const editEmployee = (employee: any) => {
+  const editEmployee = (employee: Employee) => {
     setSelectedEmployee(employee);
     employeeForm.reset({
       name: employee.name,
@@ -154,7 +176,7 @@ export default function Salaries() {
   };
 
   const setupSalaryPayment = (employeeId: string, employeeName: string) => {
-    const employee = employees?.find((e: any) => e.id === parseInt(employeeId));
+    const employee = employees.find((e) => e.id === parseInt(employeeId));
     const fixedAmount = employee?.fixedSalary || "0";
     
     salaryPaymentForm.reset({
@@ -207,7 +229,7 @@ export default function Salaries() {
   async function onSubmitSalaryPayment(values: SalaryPaymentValues) {
     try {
       // Obtener nombre del empleado para referencia
-      const employee = employees?.find((e: any) => e.id === parseInt(values.employeeId));
+      const employee = employees.find((e) => e.id === parseInt(values.employeeId));
       if (!employee) {
         throw new Error("Empleado no encontrado");
       }
@@ -290,50 +312,42 @@ export default function Salaries() {
   }
 
   // Cálculos de totales
-  const totalMonthlySalaries = salaries && Array.isArray(salaries)
-    ? salaries.reduce((acc: number, salary: any) => {
-        const salaryDate = new Date(salary.date);
-        const currentMonth = new Date().getMonth();
-        const currentYear = new Date().getFullYear();
-        
-        if (salaryDate.getMonth() === currentMonth && salaryDate.getFullYear() === currentYear) {
-          return acc + parseFloat(salary.amount);
-        }
-        return acc;
-      }, 0)
-    : 0;
-
-  const totalYearlySalaries = salaries && Array.isArray(salaries)
-    ? salaries.reduce((acc: number, salary: any) => {
-        const salaryDate = new Date(salary.date);
-        const currentYear = new Date().getFullYear();
-        
-        if (salaryDate.getFullYear() === currentYear) {
-          return acc + parseFloat(salary.amount);
-        }
-        return acc;
-      }, 0)
-    : 0;
+  const totalMonthlySalaries = salaries.reduce((acc: number, salary: Salary) => {
+    const salaryDate = new Date(salary.date);
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
     
-  const activeEmployeesCount = employees && Array.isArray(employees)
-    ? employees.filter((employee: any) => employee.active).length
-    : 0;
+    if (salaryDate.getMonth() === currentMonth && salaryDate.getFullYear() === currentYear) {
+      return acc + parseFloat(salary.amount);
+    }
+    return acc;
+  }, 0);
+
+  const totalYearlySalaries = salaries.reduce((acc: number, salary: Salary) => {
+    const salaryDate = new Date(salary.date);
+    const currentYear = new Date().getFullYear();
+    
+    if (salaryDate.getFullYear() === currentYear) {
+      return acc + parseFloat(salary.amount);
+    }
+    return acc;
+  }, 0);
+    
+  const activeEmployeesCount = employees.filter((employee: Employee) => employee.active).length;
 
   // Filtrar empleados según estado activo/inactivo
-  const filteredEmployees = employees && Array.isArray(employees)
-    ? employees.sort((a: any, b: any) => {
-        // Ordenar por estado (activos primero) y luego por nombre
-        if (a.active === b.active) {
-          return a.name.localeCompare(b.name);
-        }
-        return a.active ? -1 : 1;
-      })
-    : [];
+  const filteredEmployees = [...employees].sort((a: Employee, b: Employee) => {
+    // Ordenar por estado (activos primero) y luego por nombre
+    if (a.active === b.active) {
+      return a.name.localeCompare(b.name);
+    }
+    return a.active ? -1 : 1;
+  });
 
   // Filtrar salarios por empleados y ordenar por fecha (más recientes primero)
-  const filteredSalaries = salaries && Array.isArray(salaries)
-    ? salaries.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    : [];
+  const filteredSalaries = [...salaries].sort((a: Salary, b: Salary) => 
+    new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
 
   if (isLoadingEmployees || isLoadingSalaries) {
     return <div className="py-10 text-center">Cargando datos...</div>;
@@ -503,8 +517,8 @@ export default function Salaries() {
                           </FormControl>
                           <SelectContent>
                             {filteredEmployees
-                              .filter((employee: any) => employee.active)
-                              .map((employee: any) => (
+                              .filter((employee) => employee.active)
+                              .map((employee) => (
                                 <SelectItem 
                                   key={employee.id} 
                                   value={employee.id.toString()}
@@ -538,7 +552,7 @@ export default function Salaries() {
                             // Si cambia a sueldo fijo, actualizar con el valor del empleado seleccionado
                             if (value === "fixed") {
                               const employeeId = salaryPaymentForm.getValues("employeeId");
-                              const employee = employees?.find((e: any) => e.id === parseInt(employeeId));
+                              const employee = employees.find((e) => e.id === parseInt(employeeId));
                               if (employee) {
                                 salaryPaymentForm.setValue("amount", employee.fixedSalary.toString());
                               }
@@ -688,7 +702,7 @@ export default function Salaries() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredEmployees.map((employee: any) => (
+                  {filteredEmployees.map((employee: Employee) => (
                     <TableRow key={employee.id} className={!employee.active ? "bg-gray-50" : ""}>
                       <TableCell className="font-medium">{employee.name}</TableCell>
                       <TableCell>{employee.position || "-"}</TableCell>
@@ -751,7 +765,7 @@ export default function Salaries() {
             </div>
           ) : (
             <div className="space-y-4">
-              {filteredSalaries.map((salary: any) => (
+              {filteredSalaries.map((salary: Salary) => (
                 <Card key={salary.id} className="overflow-hidden">
                   <div className="flex flex-col md:flex-row md:items-center p-4">
                     <div className="flex-1">
@@ -760,10 +774,9 @@ export default function Salaries() {
                           <h3 className="font-medium text-neutral-800">
                             {salary.employeeName}
                           </h3>
-                          <Badge className="ml-2" variant={
+                          <Badge className={`ml-2 ${salary.salaryType === "bonus" ? "bg-green-100 text-green-700 hover:bg-green-100" : ""}`} variant={
                             salary.salaryType === "fixed" ? "default" :
-                            salary.salaryType === "variable" ? "secondary" :
-                            salary.salaryType === "bonus" ? "success" : "outline"
+                            salary.salaryType === "variable" ? "secondary" : "outline"
                           }>
                             {salary.salaryType === "fixed" ? "Fijo" :
                              salary.salaryType === "variable" ? "Variable" :
