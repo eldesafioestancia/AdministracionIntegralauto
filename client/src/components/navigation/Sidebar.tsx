@@ -85,6 +85,14 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                 <i className="ri-plant-line mr-3 text-lg"></i>
                 Pasturas
               </Link>
+            </div>
+          </div>
+
+          <div className="pt-2">
+            <p className="px-3 text-xs font-semibold text-neutral-400 uppercase tracking-wider">
+              Gestión financiera
+            </p>
+            <div className="mt-1 space-y-1">
               <Link 
                 href="/investments"
                 className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
@@ -97,14 +105,6 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                 <i className="ri-funds-line mr-3 text-lg"></i>
                 Inversiones
               </Link>
-            </div>
-          </div>
-
-          <div className="pt-2">
-            <p className="px-3 text-xs font-semibold text-neutral-400 uppercase tracking-wider">
-              Gestión financiera
-            </p>
-            <div className="mt-1 space-y-1">
               <Link 
                 href="/services"
                 className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${

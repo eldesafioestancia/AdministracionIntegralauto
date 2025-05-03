@@ -49,20 +49,6 @@ export default function MobileMenu({ open, setOpen }: MobileMenuProps) {
             </a>
           </Link>
 
-          <Link href="/investments">
-            <a
-              className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-neutral-100"
-              onClick={() => setOpen(false)}
-            >
-              <div className="w-12 h-12 bg-secondary bg-opacity-10 rounded-full flex items-center justify-center mb-2">
-                <i className="ri-funds-line text-xl text-secondary"></i>
-              </div>
-              <span className="text-xs text-neutral-500 text-center">
-                Inversiones
-              </span>
-            </a>
-          </Link>
-
           <Link href="/services">
             <a
               className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-neutral-100"
@@ -73,6 +59,20 @@ export default function MobileMenu({ open, setOpen }: MobileMenuProps) {
               </div>
               <span className="text-xs text-neutral-500 text-center">
                 Servicios
+              </span>
+            </a>
+          </Link>
+          
+          <Link href="/investments">
+            <a
+              className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-neutral-100"
+              onClick={() => setOpen(false)}
+            >
+              <div className="w-12 h-12 bg-secondary bg-opacity-10 rounded-full flex items-center justify-center mb-2">
+                <i className="ri-funds-line text-xl text-secondary"></i>
+              </div>
+              <span className="text-xs text-neutral-500 text-center">
+                Inversiones
               </span>
             </a>
           </Link>
