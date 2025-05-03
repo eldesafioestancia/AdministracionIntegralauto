@@ -790,13 +790,25 @@ export default function AnimalsIndex() {
                 <Link href={`/animals/${animal.id}`} className="flex-1 px-4 py-3">
                   <div className="flex flex-col">
                     <div className="flex items-center">
-                      <h3 className="font-medium text-neutral-800">{getRaceLabel(animal.race)}</h3>
+                      <h3 className="font-medium text-neutral-800">#{animal.cartagena}</h3>
                       <Badge className="ml-2 px-2 py-0 h-5">{getCategoryLabel(animal.category)}</Badge>
                     </div>
-                    <div className="text-sm text-neutral-500 flex items-center space-x-3">
-                      <span className="flex items-center">
-                        <i className="ri-price-tag-3-line mr-1"></i> #{animal.cartagena}
-                      </span>
+                    <div className="text-sm text-neutral-500 flex flex-wrap items-center gap-3">
+                      {/* Peso */}
+                      {animal.currentWeight && (
+                        <span className="flex items-center">
+                          <i className="ri-scales-line mr-1"></i> {animal.currentWeight} kg
+                        </span>
+                      )}
+                      
+                      {/* Ubicación */}
+                      {animal.location && (
+                        <span className="flex items-center">
+                          <i className="ri-map-pin-line mr-1"></i> {animal.location}
+                        </span>
+                      )}
+                      
+                      {/* Estado reproductivo */}
                       {animal.reproductiveStatus && animal.reproductiveStatus !== "no_aplica" && (
                         <span className="flex items-center">
                           {animal.reproductiveStatus === "prenada" ? (
@@ -809,11 +821,14 @@ export default function AnimalsIndex() {
                             <i className="ri-heart-line mr-1"></i>
                           )}
                           {getReproductiveStatusLabel(animal.reproductiveStatus)}
-                          {animal.reproductiveStatus === "prenada" && animal.expectedDeliveryDate && (
-                            <span className="ml-1">
-                              (Parto: {format(new Date(animal.expectedDeliveryDate), "dd/MM/yyyy")})
-                            </span>
-                          )}
+                        </span>
+                      )}
+                      
+                      {/* Fecha de parto aproximada */}
+                      {animal.reproductiveStatus === "prenada" && animal.expectedDeliveryDate && (
+                        <span className="flex items-center text-red-600">
+                          <i className="ri-calendar-event-line mr-1"></i>
+                          Parto: {format(new Date(animal.expectedDeliveryDate), "dd/MM/yyyy")}
                         </span>
                       )}
                     </div>
@@ -827,9 +842,15 @@ export default function AnimalsIndex() {
                     </Link>
                   </Button>
                   
-                  <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Registrar evento">
+                  <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Evento veterinario">
                     <Link href={`/animals/${animal.id}/veterinary`}>
                       <i className="ri-stethoscope-line text-lg"></i>
+                    </Link>
+                  </Button>
+                  
+                  <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Evento reproductivo">
+                    <Link href={`/animals/${animal.id}/reproduction`}>
+                      <i className="ri-heart-pulse-line text-lg"></i>
                     </Link>
                   </Button>
                   
