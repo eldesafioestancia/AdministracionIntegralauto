@@ -13,9 +13,7 @@ import {
   taxes, Tax, InsertTax,
   repairs, Repair, InsertRepair,
   salaries, Salary, InsertSalary,
-  capital, Capital, InsertCapital,
-  naturalServices, NaturalService, InsertNaturalService,
-  artificialServices, ArtificialService, InsertArtificialService
+  capital, Capital, InsertCapital
 } from "@shared/schema";
 
 export interface IStorage {
@@ -104,20 +102,6 @@ export interface IStorage {
   createCapital(capital: InsertCapital): Promise<Capital>;
   deleteCapital(id: number): Promise<boolean>;
   
-  // Natural Services (Reproductive - Monta Natural)
-  getNaturalServices(animalId?: number): Promise<NaturalService[]>;
-  getNaturalService(id: number): Promise<NaturalService | undefined>;
-  createNaturalService(service: InsertNaturalService): Promise<NaturalService>;
-  updateNaturalService(id: number, service: Partial<InsertNaturalService>): Promise<NaturalService | undefined>;
-  deleteNaturalService(id: number): Promise<boolean>;
-  
-  // Artificial Services (Reproductive - Inseminación Artificial)
-  getArtificialServices(animalId?: number): Promise<ArtificialService[]>;
-  getArtificialService(id: number): Promise<ArtificialService | undefined>;
-  createArtificialService(service: InsertArtificialService): Promise<ArtificialService>;
-  updateArtificialService(id: number, service: Partial<InsertArtificialService>): Promise<ArtificialService | undefined>;
-  deleteArtificialService(id: number): Promise<boolean>;
-  
   // Dashboard
   getDashboardStats(): Promise<{
     machineCount: number;
@@ -145,8 +129,6 @@ export class MemStorage implements IStorage {
   private repairs: Map<number, Repair>;
   private salaries: Map<number, Salary>;
   private capitals: Map<number, Capital>;
-  private naturalServices: Map<number, NaturalService>;
-  private artificialServices: Map<number, ArtificialService>;
 
   private currentIds: {
     user: number;
@@ -164,8 +146,6 @@ export class MemStorage implements IStorage {
     repair: number;
     salary: number;
     capital: number;
-    naturalService: number;
-    artificialService: number;
   };
 
   constructor() {
@@ -184,8 +164,6 @@ export class MemStorage implements IStorage {
     this.repairs = new Map();
     this.salaries = new Map();
     this.capitals = new Map();
-    this.naturalServices = new Map();
-    this.artificialServices = new Map();
 
     this.currentIds = {
       user: 1,
@@ -203,8 +181,6 @@ export class MemStorage implements IStorage {
       repair: 1,
       salary: 1,
       capital: 1,
-      naturalService: 1, 
-      artificialService: 1,
     };
 
     // Initialize with a default admin user
@@ -593,84 +569,6 @@ export class MemStorage implements IStorage {
 
   async deleteCapital(id: number): Promise<boolean> {
     return this.capitals.delete(id);
-  }
-  
-  // Natural Services (Reproductive - Monta Natural)
-  async getNaturalServices(animalId?: number): Promise<NaturalService[]> {
-    const services = Array.from(this.naturalServices.values());
-    if (animalId) {
-      return services.filter(s => s.animalId === animalId);
-    }
-    return services;
-  }
-  
-  async getNaturalService(id: number): Promise<NaturalService | undefined> {
-    return this.naturalServices.get(id);
-  }
-  
-  async createNaturalService(insertService: InsertNaturalService): Promise<NaturalService> {
-    const id = this.currentIds.naturalService++;
-    const now = new Date();
-    const service: NaturalService = { ...insertService, id, createdAt: now, updatedAt: now };
-    this.naturalServices.set(id, service);
-    return service;
-  }
-  
-  async updateNaturalService(id: number, updateData: Partial<InsertNaturalService>): Promise<NaturalService | undefined> {
-    const service = this.naturalServices.get(id);
-    if (!service) return undefined;
-    
-    const updatedService: NaturalService = {
-      ...service,
-      ...updateData,
-      updatedAt: new Date(),
-    };
-    
-    this.naturalServices.set(id, updatedService);
-    return updatedService;
-  }
-  
-  async deleteNaturalService(id: number): Promise<boolean> {
-    return this.naturalServices.delete(id);
-  }
-  
-  // Artificial Services (Reproductive - Inseminación Artificial)
-  async getArtificialServices(animalId?: number): Promise<ArtificialService[]> {
-    const services = Array.from(this.artificialServices.values());
-    if (animalId) {
-      return services.filter(s => s.animalId === animalId);
-    }
-    return services;
-  }
-  
-  async getArtificialService(id: number): Promise<ArtificialService | undefined> {
-    return this.artificialServices.get(id);
-  }
-  
-  async createArtificialService(insertService: InsertArtificialService): Promise<ArtificialService> {
-    const id = this.currentIds.artificialService++;
-    const now = new Date();
-    const service: ArtificialService = { ...insertService, id, createdAt: now, updatedAt: now };
-    this.artificialServices.set(id, service);
-    return service;
-  }
-  
-  async updateArtificialService(id: number, updateData: Partial<InsertArtificialService>): Promise<ArtificialService | undefined> {
-    const service = this.artificialServices.get(id);
-    if (!service) return undefined;
-    
-    const updatedService: ArtificialService = {
-      ...service,
-      ...updateData,
-      updatedAt: new Date(),
-    };
-    
-    this.artificialServices.set(id, updatedService);
-    return updatedService;
-  }
-  
-  async deleteArtificialService(id: number): Promise<boolean> {
-    return this.artificialServices.delete(id);
   }
 
   // Dashboard

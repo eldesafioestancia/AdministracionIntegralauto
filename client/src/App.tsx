@@ -9,7 +9,6 @@ import MachineMaintenance from "@/pages/machines/maintenance";
 import EditMaintenance from "@/pages/machines/maintenance/[id]";
 import AnimalsIndex from "@/pages/animals/index";
 import AnimalDetail from "@/pages/animals/[id]";
-import AnimalReproductive from "@/pages/animals/reproductive";
 import AppLayout from "@/components/layouts/AppLayout";
 
 function App() {
@@ -58,12 +57,6 @@ function App() {
         <Route path="/animals">
           <AppLayout>
             <AnimalsIndex />
-          </AppLayout>
-        </Route>
-        
-        <Route path="/animals/reproductive">
-          <AppLayout>
-            <AnimalReproductive />
           </AppLayout>
         </Route>
         
