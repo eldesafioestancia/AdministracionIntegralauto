@@ -541,6 +541,112 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Rutas para empleados
+  app.get("/api/employees", async (req: Request, res: Response) => {
+    try {
+      const employees = await storage.getEmployees();
+      res.json(employees);
+    } catch (error) {
+      console.error("Error fetching employees:", error);
+      res.status(500).json({ error: "Failed to fetch employees" });
+    }
+  });
+  
+  app.get("/api/employees/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const employee = await storage.getEmployee(id);
+      
+      if (employee) {
+        res.json(employee);
+      } else {
+        res.status(404).json({ error: "Employee not found" });
+      }
+    } catch (error) {
+      console.error("Error fetching employee:", error);
+      res.status(500).json({ error: "Failed to fetch employee" });
+    }
+  });
+  
+  app.post("/api/employees", async (req: Request, res: Response) => {
+    try {
+      const newEmployee = await storage.createEmployee(req.body);
+      res.status(201).json(newEmployee);
+    } catch (error) {
+      console.error("Error creating employee:", error);
+      res.status(500).json({ error: "Failed to create employee" });
+    }
+  });
+  
+  app.put("/api/employees/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updatedEmployee = await storage.updateEmployee(id, req.body);
+      
+      if (updatedEmployee) {
+        res.json(updatedEmployee);
+      } else {
+        res.status(404).json({ error: "Employee not found" });
+      }
+    } catch (error) {
+      console.error("Error updating employee:", error);
+      res.status(500).json({ error: "Failed to update employee" });
+    }
+  });
+  
+  app.delete("/api/employees/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteEmployee(id);
+      
+      if (success) {
+        res.status(200).json({ message: "Employee deleted successfully" });
+      } else {
+        res.status(404).json({ error: "Employee not found" });
+      }
+    } catch (error) {
+      console.error("Error deleting employee:", error);
+      res.status(500).json({ error: "Failed to delete employee" });
+    }
+  });
+  
+  // Rutas para salarios
+  app.get("/api/salaries", async (req: Request, res: Response) => {
+    try {
+      const salaries = await storage.getSalaries();
+      res.json(salaries);
+    } catch (error) {
+      console.error("Error fetching salaries:", error);
+      res.status(500).json({ error: "Failed to fetch salaries" });
+    }
+  });
+  
+  app.post("/api/salaries", async (req: Request, res: Response) => {
+    try {
+      const newSalary = await storage.createSalary(req.body);
+      res.status(201).json(newSalary);
+    } catch (error) {
+      console.error("Error creating salary:", error);
+      res.status(500).json({ error: "Failed to create salary" });
+    }
+  });
+  
+  app.delete("/api/salaries/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteSalary(id);
+      
+      if (success) {
+        res.status(200).json({ message: "Salary deleted successfully" });
+      } else {
+        res.status(404).json({ error: "Salary not found" });
+      }
+    } catch (error) {
+      console.error("Error deleting salary:", error);
+      res.status(500).json({ error: "Failed to delete salary" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

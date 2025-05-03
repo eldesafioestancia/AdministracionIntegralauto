@@ -12,6 +12,7 @@ import {
   services, Service, InsertService,
   taxes, Tax, InsertTax,
   repairs, Repair, InsertRepair,
+  employees, Employee, InsertEmployee,
   salaries, Salary, InsertSalary,
   capital, Capital, InsertCapital
 } from "@shared/schema";
@@ -92,6 +93,13 @@ export interface IStorage {
   createRepair(repair: InsertRepair): Promise<Repair>;
   deleteRepair(id: number): Promise<boolean>;
   
+  // Employees
+  getEmployees(): Promise<Employee[]>;
+  getEmployee(id: number): Promise<Employee | undefined>;
+  createEmployee(employee: InsertEmployee): Promise<Employee>;
+  updateEmployee(id: number, employee: Partial<InsertEmployee>): Promise<Employee | undefined>;
+  deleteEmployee(id: number): Promise<boolean>;
+  
   // Salaries
   getSalaries(): Promise<Salary[]>;
   createSalary(salary: InsertSalary): Promise<Salary>;
@@ -127,6 +135,7 @@ export class MemStorage implements IStorage {
   private services: Map<number, Service>;
   private taxes: Map<number, Tax>;
   private repairs: Map<number, Repair>;
+  private employees: Map<number, Employee>;
   private salaries: Map<number, Salary>;
   private capitals: Map<number, Capital>;
 
@@ -144,6 +153,7 @@ export class MemStorage implements IStorage {
     service: number;
     tax: number;
     repair: number;
+    employee: number;
     salary: number;
     capital: number;
   };
@@ -162,6 +172,7 @@ export class MemStorage implements IStorage {
     this.services = new Map();
     this.taxes = new Map();
     this.repairs = new Map();
+    this.employees = new Map();
     this.salaries = new Map();
     this.capitals = new Map();
 
@@ -179,6 +190,7 @@ export class MemStorage implements IStorage {
       service: 1,
       tax: 1,
       repair: 1,
+      employee: 1,
       salary: 1,
       capital: 1,
     };
