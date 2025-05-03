@@ -122,16 +122,45 @@ export default function AnimalReproduction() {
   };
   
   // Cuando cambia el resultado del tacto, actualizar la fecha probable de parto si es preñada
+  // y manejar la lógica de traslado según resultado
   const handlePregnancyResultChange = (value: string, form: any, serviceDate: Date | null) => {
     form.setValue("pregnancyResult", value);
     
+    // Si está preñada, calcular fecha probable de parto
     if (value === "prenada" && serviceDate) {
       const expectedDate = calculateExpectedDeliveryDate(serviceDate);
       form.setValue("expectedDeliveryDate", expectedDate);
+      
+      // Actualizar mensaje de traslado para preñadas
+      setTactoResultAction({
+        show: true,
+        type: "success",
+        message: "Animal preñado: Trasladar a potrero de invernada",
+        destination: "Potrero de Invernada"
+      });
+    } else if (value === "vacia" || value === "duda") {
+      form.setValue("expectedDeliveryDate", null);
+      
+      // Actualizar mensaje de traslado para vacías o en duda
+      setTactoResultAction({
+        show: true,
+        type: value === "vacia" ? "error" : "warning",
+        message: `Animal ${value === "vacia" ? "vacío" : "en duda"}: Derivar a inseminación artificial`,
+        destination: "Área de Inseminación Artificial"
+      });
     } else {
       form.setValue("expectedDeliveryDate", null);
+      setTactoResultAction({ show: false, type: "", message: "", destination: "" });
     }
   };
+  
+  // Estado para mostrar mensajes de acción basados en el resultado del tacto
+  const [tactoResultAction, setTactoResultAction] = useState({
+    show: false,
+    type: "",
+    message: "",
+    destination: ""
+  });
   
   async function onSubmitNaturalService(values: NaturalServiceFormValues) {
     await submitReproductiveEvent(values);
@@ -158,6 +187,16 @@ export default function AnimalReproduction() {
       // Si está preñada, también actualizar la fecha probable de parto
       if (reproductiveStatus === "prenada" && values.expectedDeliveryDate) {
         updates.expectedDeliveryDate = values.expectedDeliveryDate;
+        
+        // Trasladar a potrero de invernada si está preñada
+        if (values.type === "natural") {
+          updates.location = "Potrero de Invernada";
+        }
+      }
+      
+      // Si está vacía o en duda después de monta natural, trasladar a inseminación artificial
+      if (values.type === "natural" && (reproductiveStatus === "vacia" || reproductiveStatus === "duda")) {
+        updates.location = "Área de Inseminación Artificial";
       }
       
       await apiRequest("PUT", `/api/animals/${animalId}`, updates);
@@ -167,9 +206,15 @@ export default function AnimalReproduction() {
       queryClient.invalidateQueries({ queryKey: [`/api/animals/${animalId}`] });
       queryClient.invalidateQueries({ queryKey: [`/api/animals/${animalId}/reproduction`] });
       
+      // Mensaje con información de traslado si es aplicable
+      let toastDescription = "Los datos del evento han sido registrados exitosamente";
+      if (updates.location) {
+        toastDescription += `. El animal ha sido trasladado a: ${updates.location}`;
+      }
+      
       toast({
         title: "Evento reproductivo registrado",
-        description: "Los datos del evento han sido registrados exitosamente",
+        description: toastDescription,
       });
       
       // Navegar a la página de detalle
@@ -454,6 +499,39 @@ export default function AnimalReproduction() {
                           </FormItem>
                         )}
                       />
+                    )}
+                    
+                    {/* Mostrar mensaje de acción según resultado del tacto */}
+                    {tactoResultAction.show && naturalServiceForm.watch("pregnancyResult") && (
+                      <div className={`p-4 rounded-lg border mt-4 ${
+                        tactoResultAction.type === "success" 
+                          ? "bg-green-50 border-green-200 text-green-800" 
+                          : tactoResultAction.type === "warning"
+                            ? "bg-yellow-50 border-yellow-200 text-yellow-800"
+                            : "bg-red-50 border-red-200 text-red-800"
+                      }`}>
+                        <div className="flex items-center">
+                          <div className={`mr-3 flex-shrink-0 ${
+                            tactoResultAction.type === "success" 
+                              ? "text-green-600" 
+                              : tactoResultAction.type === "warning"
+                                ? "text-yellow-600"
+                                : "text-red-600"
+                          }`}>
+                            {tactoResultAction.type === "success" 
+                              ? "✓" 
+                              : tactoResultAction.type === "warning"
+                                ? "⚠"
+                                : "×"}
+                          </div>
+                          <div>
+                            <p className="font-medium">{tactoResultAction.message}</p>
+                            <p className="text-sm mt-1">
+                              Destino recomendado: <strong>{tactoResultAction.destination}</strong>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     )}
                     
                     <FormField

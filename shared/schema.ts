@@ -211,6 +211,7 @@ export const animals = pgTable("animals", {
   lastServiceType: text("last_service_type"), // tipo del último servicio
   expectedDeliveryDate: timestamp("expected_delivery_date"), // fecha probable de parto  
   color: text("color"),
+  location: text("location"), // Ubicación del animal (potrero, corral, etc.)
   status: text("status").default("active").notNull(), // active, sold, dead
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
