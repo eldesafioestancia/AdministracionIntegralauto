@@ -85,10 +85,19 @@ const maintenanceFormSchema = z.object({
   // Campos originales para cambio de aceite y filtros
   motorOil: z.boolean().default(false),
   motorOilQuantity: z.string().optional(),
+  motorOilProduct: z.number().optional(), // ID del producto seleccionado
+  motorOilName: z.string().optional(), // Nombre del producto seleccionado
+  
   hydraulicOil: z.boolean().default(false),
   hydraulicOilQuantity: z.string().optional(),
+  hydraulicOilProduct: z.number().optional(), // ID del producto seleccionado
+  hydraulicOilName: z.string().optional(), // Nombre del producto seleccionado
+  
   coolant: z.boolean().default(false),
   coolantQuantity: z.string().optional(),
+  coolantProduct: z.number().optional(), // ID del producto seleccionado
+  coolantName: z.string().optional(), // Nombre del producto seleccionado
+  
   oilFilter: z.boolean().default(false),
   hydraulicFilter: z.boolean().default(false),
   fuelFilter: z.boolean().default(false),
@@ -179,10 +188,19 @@ export default function MachineMaintenance() {
       // Campos para cambio de aceite y filtros
       motorOil: false,
       motorOilQuantity: "",
+      motorOilProduct: undefined,
+      motorOilName: "",
+      
       hydraulicOil: false,
       hydraulicOilQuantity: "",
+      hydraulicOilProduct: undefined,
+      hydraulicOilName: "",
+      
       coolant: false,
       coolantQuantity: "",
+      coolantProduct: undefined,
+      coolantName: "",
+      
       oilFilter: false,
       hydraulicFilter: false,
       fuelFilter: false,
@@ -199,6 +217,7 @@ export default function MachineMaintenance() {
 
   async function onSubmit(values: MaintenanceFormValues) {
     try {
+      // Primero registrar el mantenimiento
       await apiRequest("POST", "/api/maintenance", {
         ...values,
         machineId: numericId
@@ -206,6 +225,48 @@ export default function MachineMaintenance() {
 
       // Invalidate maintenance query to refresh the list
       queryClient.invalidateQueries({ queryKey: [`/api/maintenance?machineId=${id}`] });
+      
+      // Actualizar el inventario del depósito si se usaron productos
+      const productsToUpdate = [];
+      
+      // Verificar si se usó aceite de motor
+      if (values.motorOil && values.motorOilProduct && values.motorOilQuantity) {
+        productsToUpdate.push({
+          productId: values.motorOilProduct,
+          quantity: parseFloat(values.motorOilQuantity)
+        });
+      }
+      
+      // Verificar si se usó aceite hidráulico
+      if (values.hydraulicOil && values.hydraulicOilProduct && values.hydraulicOilQuantity) {
+        productsToUpdate.push({
+          productId: values.hydraulicOilProduct,
+          quantity: parseFloat(values.hydraulicOilQuantity)
+        });
+      }
+      
+      // Verificar si se usó refrigerante
+      if (values.coolant && values.coolantProduct && values.coolantQuantity) {
+        productsToUpdate.push({
+          productId: values.coolantProduct,
+          quantity: parseFloat(values.coolantQuantity)
+        });
+      }
+      
+      // Actualizar el stock para cada producto
+      if (productsToUpdate.length > 0) {
+        for (const product of productsToUpdate) {
+          try {
+            await apiRequest("POST", "/api/warehouse/products/remove-stock", product);
+          } catch (err) {
+            console.error("Error updating product stock:", err);
+            // Continuar con el siguiente producto incluso si hay error
+          }
+        }
+        
+        // Invalidar la cache de productos para refrescar la lista
+        queryClient.invalidateQueries({ queryKey: ['/api/warehouse/products'] });
+      }
 
       toast({
         title: "Mantenimiento registrado",
@@ -1134,7 +1195,30 @@ export default function MachineMaintenance() {
                         />
                       </div>
                       {motorOilChecked && (
-                        <div className="ml-6 mt-2">
+                        <div className="ml-6 mt-2 space-y-3">
+                          {fluidProducts && fluidProducts.length > 0 ? (
+                            <Select 
+                              onValueChange={(value) => {
+                                const selectedProduct = fluidProducts.find((p: any) => p.id.toString() === value);
+                                if (selectedProduct) {
+                                  form.setValue("motorOilProduct", selectedProduct.id);
+                                  form.setValue("motorOilName", selectedProduct.name);
+                                }
+                              }}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Seleccionar producto" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {fluidProducts.map((product: any) => (
+                                  <SelectItem key={product.id} value={product.id.toString()}>
+                                    {product.name} ({product.quantity} {product.unit})
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : null}
+                          
                           <FormField
                             control={form.control}
                             name="motorOilQuantity"
@@ -1180,7 +1264,30 @@ export default function MachineMaintenance() {
                         />
                       </div>
                       {hydraulicOilChecked && (
-                        <div className="ml-6 mt-2">
+                        <div className="ml-6 mt-2 space-y-3">
+                          {fluidProducts && fluidProducts.length > 0 ? (
+                            <Select 
+                              onValueChange={(value) => {
+                                const selectedProduct = fluidProducts.find((p: any) => p.id.toString() === value);
+                                if (selectedProduct) {
+                                  form.setValue("hydraulicOilProduct", selectedProduct.id);
+                                  form.setValue("hydraulicOilName", selectedProduct.name);
+                                }
+                              }}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Seleccionar producto" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {fluidProducts.map((product: any) => (
+                                  <SelectItem key={product.id} value={product.id.toString()}>
+                                    {product.name} ({product.quantity} {product.unit})
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : null}
+                          
                           <FormField
                             control={form.control}
                             name="hydraulicOilQuantity"
@@ -1226,7 +1333,30 @@ export default function MachineMaintenance() {
                         />
                       </div>
                       {coolantChecked && (
-                        <div className="ml-6 mt-2">
+                        <div className="ml-6 mt-2 space-y-3">
+                          {fluidProducts && fluidProducts.length > 0 ? (
+                            <Select 
+                              onValueChange={(value) => {
+                                const selectedProduct = fluidProducts.find((p: any) => p.id.toString() === value);
+                                if (selectedProduct) {
+                                  form.setValue("coolantProduct", selectedProduct.id);
+                                  form.setValue("coolantName", selectedProduct.name);
+                                }
+                              }}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Seleccionar producto" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {fluidProducts.map((product: any) => (
+                                  <SelectItem key={product.id} value={product.id.toString()}>
+                                    {product.name} ({product.quantity} {product.unit})
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : null}
+                          
                           <FormField
                             control={form.control}
                             name="coolantQuantity"
