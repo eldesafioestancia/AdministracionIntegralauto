@@ -10,6 +10,8 @@ import {
   insertAnimalSchema,
   insertAnimalVeterinarySchema,
   insertAnimalFinanceSchema,
+  insertPastureSchema,
+  insertPastureFinanceSchema,
   insertInvestmentSchema,
   insertCapitalSchema,
 } from "@shared/schema";

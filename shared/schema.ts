@@ -298,6 +298,10 @@ export const pastures = pgTable("pastures", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   area: decimal("area").notNull(), // in hectares
+  location: text("location"), // ubicación
+  soilType: text("soil_type"), // tipo de suelo: arcilloso, arenoso, limoso, etc.
+  waterSource: text("water_source"), // disponibilidad de agua
+  status: text("status").default("active"), // activa, barbecho, en preparación, inactiva
   description: text("description"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
