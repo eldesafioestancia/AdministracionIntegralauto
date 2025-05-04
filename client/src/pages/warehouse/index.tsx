@@ -577,7 +577,7 @@ export default function Warehouse() {
                           setRemoveStockOpen(true);
                         }}
                       >
-                        <i className="ri-subtract-circle-line text-orange-500 text-base"></i>
+                        <i className="ri-indeterminate-circle-line text-black text-base font-bold"></i>
                       </Button>
                       <Button
                         variant="ghost"
