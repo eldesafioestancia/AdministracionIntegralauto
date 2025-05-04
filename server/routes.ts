@@ -11,6 +11,7 @@ import {
   insertAnimalVeterinarySchema,
   insertAnimalFinanceSchema,
   insertInvestmentSchema,
+  insertCapitalSchema,
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -538,6 +539,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting investment:", error);
       res.status(500).json({ message: "Error deleting investment" });
+    }
+  });
+
+  // Capital routes
+  app.get("/api/capital", async (req: Request, res: Response) => {
+    try {
+      const capital = await storage.getCapital();
+      res.json(capital);
+    } catch (error) {
+      console.error("Error fetching capital records:", error);
+      res.status(500).json({ message: "Error fetching capital records" });
+    }
+  });
+  
+  app.post("/api/capital", async (req: Request, res: Response) => {
+    try {
+      const capitalData = insertCapitalSchema.parse(req.body);
+      const newRecord = await storage.createCapital(capitalData);
+      res.status(201).json(newRecord);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid capital data", errors: error.errors });
+      }
+      
+      console.error("Error creating capital record:", error);
+      res.status(500).json({ message: "Error creating capital record" });
+    }
+  });
+  
+  app.delete("/api/capital/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteCapital(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Capital record not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting capital record:", error);
+      res.status(500).json({ message: "Error deleting capital record" });
     }
   });
 
