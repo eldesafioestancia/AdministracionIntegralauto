@@ -813,6 +813,122 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Products/Warehouse routes
+  app.get("/api/warehouse/products", async (req: Request, res: Response) => {
+    try {
+      const category = req.query.category as string | undefined;
+      const products = await storage.getProducts();
+      
+      // Filter by category if specified
+      const filteredProducts = category 
+        ? products.filter(product => product.category === category)
+        : products;
+      
+      res.json(filteredProducts);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      res.status(500).json({ message: "Error fetching products" });
+    }
+  });
+
+  app.get("/api/warehouse/products/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const product = await storage.getProduct(id);
+      
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      
+      res.json(product);
+    } catch (error) {
+      console.error("Error fetching product:", error);
+      res.status(500).json({ message: "Error fetching product" });
+    }
+  });
+
+  app.post("/api/warehouse/products", async (req: Request, res: Response) => {
+    try {
+      const productData = insertProductSchema.parse(req.body);
+      const newProduct = await storage.createProduct(productData);
+      res.status(201).json(newProduct);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid product data", errors: error.errors });
+      }
+      
+      console.error("Error creating product:", error);
+      res.status(500).json({ message: "Error creating product" });
+    }
+  });
+
+  app.put("/api/warehouse/products/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const productData = insertProductSchema.partial().parse(req.body);
+      
+      const updatedProduct = await storage.updateProduct(id, productData);
+      
+      if (!updatedProduct) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      
+      res.json(updatedProduct);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid product data", errors: error.errors });
+      }
+      
+      console.error("Error updating product:", error);
+      res.status(500).json({ message: "Error updating product" });
+    }
+  });
+
+  app.delete("/api/warehouse/products/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteProduct(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      res.status(500).json({ message: "Error deleting product" });
+    }
+  });
+
+  // Endpoint para descontar productos del stock
+  app.post("/api/warehouse/products/remove-stock", async (req: Request, res: Response) => {
+    try {
+      const { productId, quantity } = req.body;
+      
+      if (!productId || !quantity) {
+        return res.status(400).json({ message: "Product ID and quantity are required" });
+      }
+      
+      const product = await storage.getProduct(productId);
+      
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      
+      // Convertir quantity a negativo para reducir el stock
+      const updatedProduct = await storage.updateProductStock(productId, -quantity);
+      
+      if (!updatedProduct) {
+        return res.status(400).json({ message: "Failed to update product stock" });
+      }
+      
+      res.json(updatedProduct);
+    } catch (error) {
+      console.error("Error updating product stock:", error);
+      res.status(500).json({ message: "Error updating product stock" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

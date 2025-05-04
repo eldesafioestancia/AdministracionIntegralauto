@@ -99,9 +99,20 @@ const maintenanceFormSchema = z.object({
   coolantName: z.string().optional(), // Nombre del producto seleccionado
   
   oilFilter: z.boolean().default(false),
+  oilFilterProduct: z.number().optional(), // ID del filtro seleccionado
+  oilFilterName: z.string().optional(), // Nombre del filtro seleccionado
+  
   hydraulicFilter: z.boolean().default(false),
+  hydraulicFilterProduct: z.number().optional(), // ID del filtro seleccionado
+  hydraulicFilterName: z.string().optional(), // Nombre del filtro seleccionado
+  
   fuelFilter: z.boolean().default(false),
+  fuelFilterProduct: z.number().optional(), // ID del filtro seleccionado
+  fuelFilterName: z.string().optional(), // Nombre del filtro seleccionado
+  
   airFilter: z.boolean().default(false),
+  airFilterProduct: z.number().optional(), // ID del filtro seleccionado
+  airFilterName: z.string().optional(), // Nombre del filtro seleccionado,
 });
 
 type MaintenanceFormValues = z.infer<typeof maintenanceFormSchema>;
@@ -206,9 +217,20 @@ export default function MachineMaintenance() {
       coolantName: "",
       
       oilFilter: false,
+      oilFilterProduct: undefined,
+      oilFilterName: "",
+      
       hydraulicFilter: false,
+      hydraulicFilterProduct: undefined,
+      hydraulicFilterName: "",
+      
       fuelFilter: false,
+      fuelFilterProduct: undefined,
+      fuelFilterName: "",
+      
       airFilter: false,
+      airFilterProduct: undefined,
+      airFilterName: "",
     },
   });
 
