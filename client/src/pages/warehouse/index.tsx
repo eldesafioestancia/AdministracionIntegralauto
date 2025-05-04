@@ -133,6 +133,7 @@ const mockProducts = [
 
 export default function Warehouse() {
   const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editProduct, setEditProduct] = useState<any>(null);
   const [addStockOpen, setAddStockOpen] = useState(false);
@@ -332,11 +333,18 @@ export default function Warehouse() {
     setSheetOpen(true);
   };
 
-  // Filtra productos por término de búsqueda
+  // Obtener categorías únicas para el filtro
+  const categories = products 
+    ? Array.from(new Set(products.map((product: any) => product.category)))
+    : [];
+
+  // Filtra productos por término de búsqueda y categoría
   const filteredProducts = products
-    ? products.filter((product: any) =>
-        product.name.toLowerCase().includes(search.toLowerCase())
-      )
+    ? products.filter((product: any) => {
+        const matchesSearch = product.name.toLowerCase().includes(search.toLowerCase());
+        const matchesCategory = categoryFilter ? product.category === categoryFilter : true;
+        return matchesSearch && matchesCategory;
+      })
     : [];
 
   if (isLoading) {
@@ -523,7 +531,7 @@ export default function Warehouse() {
         </Sheet>
       </div>
       
-      {/* Filtro de búsqueda */}
+      {/* Filtros de búsqueda */}
       <div className="flex flex-col sm:flex-row gap-4">
         <Input
           placeholder="Buscar producto..."
@@ -531,6 +539,31 @@ export default function Warehouse() {
           onChange={(e) => setSearch(e.target.value)}
           className="sm:max-w-xs"
         />
+        
+        <Select value={categoryFilter || "all"} onValueChange={(value) => setCategoryFilter(value === "all" ? null : value)}>
+          <SelectTrigger className="sm:max-w-xs">
+            <SelectValue placeholder="Filtrar por categoría" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas las categorías</SelectItem>
+            {categories.map((category) => (
+              <SelectItem key={category} value={category}>
+                {category.charAt(0).toUpperCase() + category.slice(1)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        
+        {categoryFilter && (
+          <Button 
+            variant="outline" 
+            onClick={() => setCategoryFilter(null)}
+            className="sm:w-auto"
+          >
+            <i className="ri-filter-off-line mr-1"></i>
+            Limpiar filtro
+          </Button>
+        )}
       </div>
       
       {/* Tabla de productos */}
@@ -539,6 +572,7 @@ export default function Warehouse() {
           <TableHeader>
             <TableRow>
               <TableHead>Producto</TableHead>
+              <TableHead>Categoría</TableHead>
               <TableHead>Cantidad</TableHead>
               <TableHead>Valor Unitario</TableHead>
               <TableHead>Valor Total</TableHead>
@@ -550,6 +584,11 @@ export default function Warehouse() {
               filteredProducts.map((product: any) => (
                 <TableRow key={product.id}>
                   <TableCell className="font-medium">{product.name}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="capitalize">
+                      {product.category}
+                    </Badge>
+                  </TableCell>
                   <TableCell>{product.quantity} {product.unit}</TableCell>
                   <TableCell>${product.unitPrice.toLocaleString()}</TableCell>
                   <TableCell>${product.totalPrice.toLocaleString()}</TableCell>
@@ -606,7 +645,7 @@ export default function Warehouse() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="text-center h-24 text-neutral-400">
+                <TableCell colSpan={6} className="text-center h-24 text-neutral-400">
                   No se encontraron productos
                 </TableCell>
               </TableRow>
