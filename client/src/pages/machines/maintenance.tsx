@@ -14,6 +14,7 @@ import { z } from "zod";
 import { format } from "date-fns";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 
 // Maintenance form schema
 const maintenanceFormSchema = z.object({
@@ -105,6 +106,12 @@ export default function MachineMaintenance() {
   // Get machine details
   const { data: machine, isLoading: machineLoading, error: machineError } = useQuery({
     queryKey: [`/api/machines/${id}`],
+  });
+  
+  // Obtener productos de fluidos para mantenimiento
+  const { data: fluidProducts, isLoading: fluidProductsLoading } = useQuery({
+    queryKey: ['/api/warehouse/products'],
+    select: (data) => data.filter((product: any) => product.category === 'fluidos'),
   });
 
   const form = useForm<MaintenanceFormValues>({
@@ -1081,6 +1088,29 @@ export default function MachineMaintenance() {
               {maintenanceType === "oil_filter_change" && (
                 <div className="border rounded-md p-4">
                   <h3 className="font-medium text-neutral-500 mb-4">Tareas realizadas</h3>
+                  
+                  {fluidProductsLoading ? (
+                    <div className="text-center py-4">Cargando productos disponibles...</div>
+                  ) : !fluidProducts || fluidProducts.length === 0 ? (
+                    <div className="bg-amber-50 border border-amber-200 rounded-md p-3 mb-4">
+                      <p className="text-amber-600 text-sm flex items-center">
+                        <i className="ri-information-line mr-1"></i>
+                        No hay productos de tipo fluido disponibles en el depósito.
+                        Para agregar nuevos productos vaya a la sección de Depósito.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="mb-4">
+                      <h4 className="text-sm font-medium text-neutral-500 mb-2">Fluidos disponibles en depósito:</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {fluidProducts.map((product: any) => (
+                          <Badge key={product.id} variant="outline" className="text-xs">
+                            {product.name} ({product.quantity} {product.unit})
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
                     <div>
