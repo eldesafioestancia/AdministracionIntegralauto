@@ -91,6 +91,42 @@ const mockProducts = [
     unitPrice: 0,
     totalPrice: 0,
   },
+  {
+    id: 8,
+    name: "Mecánico",
+    category: "servicios",
+    quantity: 0,
+    unit: "horas",
+    unitPrice: 0,
+    totalPrice: 0,
+  },
+  {
+    id: 9,
+    name: "Rollo",
+    category: "forraje",
+    quantity: 0,
+    unit: "unidades",
+    unitPrice: 0,
+    totalPrice: 0,
+  },
+  {
+    id: 10,
+    name: "Maíz",
+    category: "forraje",
+    quantity: 0,
+    unit: "kg",
+    unitPrice: 0,
+    totalPrice: 0,
+  },
+  {
+    id: 11,
+    name: "Hilo para rollos",
+    category: "insumos",
+    quantity: 0,
+    unit: "rollos",
+    unitPrice: 0,
+    totalPrice: 0,
+  },
 ];
 
 export default function Warehouse() {
@@ -227,6 +263,8 @@ export default function Warehouse() {
                           <SelectItem value="repuestos">Repuestos</SelectItem>
                           <SelectItem value="herramientas">Herramientas</SelectItem>
                           <SelectItem value="insumos">Insumos agrícolas</SelectItem>
+                          <SelectItem value="servicios">Mecánico</SelectItem>
+                          <SelectItem value="forraje">Forraje (Rollos/Maíz)</SelectItem>
                           <SelectItem value="otros">Otros</SelectItem>
                         </SelectContent>
                       </Select>
@@ -271,6 +309,8 @@ export default function Warehouse() {
                             <SelectItem value="kg">Kilogramos</SelectItem>
                             <SelectItem value="metros">Metros</SelectItem>
                             <SelectItem value="pares">Pares</SelectItem>
+                            <SelectItem value="rollos">Rollos</SelectItem>
+                            <SelectItem value="horas">Horas</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
