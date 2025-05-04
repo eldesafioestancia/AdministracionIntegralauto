@@ -302,15 +302,25 @@ export const pastures = pgTable("pastures", {
   soilType: text("soil_type"), // tipo de suelo: arcilloso, arenoso, limoso, etc.
   waterSource: text("water_source"), // disponibilidad de agua
   status: text("status").default("active"), // activa, barbecho, en preparación, inactiva
-  description: text("description"),
+  latitude: text("latitude"), // latitud (coordenadas)
+  longitude: text("longitude"), // longitud (coordenadas)
+  acquisitionDate: timestamp("acquisition_date"), // fecha de adquisición
+  acquisitionValue: decimal("acquisition_value"), // valor de adquisición
+  description: text("description"), // observaciones
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertPastureSchema = createInsertSchema(pastures).omit({
+const basePastureSchema = createInsertSchema(pastures).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+});
+
+export const insertPastureSchema = basePastureSchema.extend({
+  acquisitionDate: z.string().or(z.date()).transform(val => 
+    typeof val === 'string' ? new Date(val) : val
+  ).optional().nullable(),
 });
 
 // Pasture Financial Records

@@ -36,6 +36,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import {
   Select,
@@ -49,6 +50,17 @@ import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import { CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { Textarea } from "@/components/ui/textarea";
 
 // Esquema para el formulario de pasturas
 const pastureFormSchema = z.object({
@@ -62,11 +74,15 @@ const pastureFormSchema = z.object({
   }).min(1, {
     message: "La superficie es requerida"
   }),
-  description: z.string().optional(),
   location: z.string().optional(),
   soilType: z.string().optional(),
   waterSource: z.string().optional(),
   status: z.string().optional().default("active"),
+  latitude: z.string().optional(),
+  longitude: z.string().optional(),
+  acquisitionDate: z.date().optional(),
+  acquisitionValue: z.string().optional(),
+  description: z.string().optional(),
 });
 
 type PastureFormValues = z.infer<typeof pastureFormSchema>;
@@ -86,11 +102,14 @@ export default function PasturesIndex() {
     defaultValues: {
       name: "",
       area: "",
-      description: "",
       location: "",
       soilType: "",
       waterSource: "",
       status: "active",
+      latitude: "",
+      longitude: "",
+      acquisitionValue: "",
+      description: "",
     },
   });
 
@@ -361,15 +380,118 @@ export default function PasturesIndex() {
                     )}
                   />
                   
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="latitude"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Latitud</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Ej: -34.603722"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Coordenada geográfica
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="longitude"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Longitud</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Ej: -58.381592"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Coordenada geográfica
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <FormField
+                    control={form.control}
+                    name="acquisitionDate"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>Fecha de Adquisición</FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                className={cn(
+                                  "w-full pl-3 text-left font-normal",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                {field.value ? (
+                                  format(field.value, "dd/MM/yyyy", { locale: es })
+                                ) : (
+                                  <span>dd/mm/aaaa</span>
+                                )}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              disabled={(date) =>
+                                date > new Date() || date < new Date("1900-01-01")
+                              }
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="acquisitionValue"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Valor de Adquisición</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="Ej: 100000.00"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
                   <FormField
                     control={form.control}
                     name="description"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Descripción (opcional)</FormLabel>
+                        <FormLabel>Observaciones</FormLabel>
                         <FormControl>
-                          <Input
-                            placeholder="Descripción o detalles adicionales"
+                          <Textarea
+                            placeholder="Detalles adicionales y observaciones"
+                            className="min-h-[100px]"
                             {...field}
                           />
                         </FormControl>
