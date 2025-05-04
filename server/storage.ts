@@ -204,6 +204,71 @@ export class MemStorage implements IStorage {
       role: "admin",
     });
 
+    // Inicializar productos de ejemplo
+    this.createProduct({
+      name: "Aceite de motor 15W-40",
+      category: "fluidos",
+      quantity: "200",
+      unit: "litros",
+      price: "4500"
+    });
+
+    this.createProduct({
+      name: "Aceite hidráulico HLP 46",
+      category: "fluidos",
+      quantity: "150",
+      unit: "litros",
+      price: "3800"
+    });
+
+    this.createProduct({
+      name: "Refrigerante",
+      category: "fluidos",
+      quantity: "75",
+      unit: "litros",
+      price: "2500"
+    });
+
+    this.createProduct({
+      name: "Filtro de aceite P550779",
+      category: "filtros",
+      quantity: "15",
+      unit: "unidades",
+      price: "3200"
+    });
+
+    this.createProduct({
+      name: "Filtro de combustible FF5612",
+      category: "filtros",
+      quantity: "10",
+      unit: "unidades",
+      price: "4100"
+    });
+
+    this.createProduct({
+      name: "Filtro de aire PA2805",
+      category: "filtros",
+      quantity: "8",
+      unit: "unidades",
+      price: "5200"
+    });
+
+    this.createProduct({
+      name: "Grasa multipropósito",
+      category: "fluidos",
+      quantity: "25",
+      unit: "kg",
+      price: "1800"
+    });
+
+    this.createProduct({
+      name: "Correa de ventilador",
+      category: "repuestos",
+      quantity: "5",
+      unit: "unidades",
+      price: "2900"
+    });
+
     // Initialize animals
     for (let i = 1; i <= 243; i++) {
       this.createAnimal({
@@ -582,6 +647,67 @@ export class MemStorage implements IStorage {
 
   async deleteCapital(id: number): Promise<boolean> {
     return this.capitals.delete(id);
+  }
+
+  // Products
+  async getProducts(): Promise<Product[]> {
+    return Array.from(this.products.values());
+  }
+
+  async getProduct(id: number): Promise<Product | undefined> {
+    return this.products.get(id);
+  }
+
+  async createProduct(insertProduct: InsertProduct): Promise<Product> {
+    const id = this.currentIds.product++;
+    const now = new Date();
+    const product: Product = { 
+      ...insertProduct, 
+      id, 
+      createdAt: now, 
+      updatedAt: now 
+    };
+    this.products.set(id, product);
+    return product;
+  }
+
+  async updateProduct(id: number, updateData: Partial<InsertProduct>): Promise<Product | undefined> {
+    const product = this.products.get(id);
+    if (!product) return undefined;
+    
+    const updatedProduct: Product = {
+      ...product,
+      ...updateData,
+      updatedAt: new Date(),
+    };
+    
+    this.products.set(id, updatedProduct);
+    return updatedProduct;
+  }
+
+  async deleteProduct(id: number): Promise<boolean> {
+    return this.products.delete(id);
+  }
+
+  async updateProductStock(id: number, quantity: number): Promise<Product | undefined> {
+    const product = this.products.get(id);
+    if (!product) return undefined;
+    
+    // Convertir a número antes de operar
+    const currentQuantity = parseFloat(product.quantity.toString());
+    const newQuantity = currentQuantity + quantity;
+    
+    // No permitir cantidades negativas
+    if (newQuantity < 0) return undefined;
+    
+    const updatedProduct: Product = {
+      ...product,
+      quantity: newQuantity.toString(),
+      updatedAt: new Date(),
+    };
+    
+    this.products.set(id, updatedProduct);
+    return updatedProduct;
   }
 
   // Dashboard

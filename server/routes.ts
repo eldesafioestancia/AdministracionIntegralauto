@@ -14,6 +14,7 @@ import {
   insertPastureFinanceSchema,
   insertInvestmentSchema,
   insertCapitalSchema,
+  insertProductSchema,
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -566,6 +567,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Product/Warehouse routes
+  app.get("/api/warehouse/products", async (req: Request, res: Response) => {
+    try {
+      const products = await storage.getProducts();
+      res.json(products);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      res.status(500).json({ message: "Error fetching products" });
+    }
+  });
+  
+  app.get("/api/warehouse/products/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const product = await storage.getProduct(id);
+      
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      
+      res.json(product);
+    } catch (error) {
+      console.error("Error fetching product:", error);
+      res.status(500).json({ message: "Error fetching product" });
+    }
+  });
+  
+  app.post("/api/warehouse/products", async (req: Request, res: Response) => {
+    try {
+      const productData = insertProductSchema.parse(req.body);
+      const newProduct = await storage.createProduct(productData);
+      res.status(201).json(newProduct);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid product data", errors: error.errors });
+      }
+      
+      console.error("Error creating product:", error);
+      res.status(500).json({ message: "Error creating product" });
+    }
+  });
+  
+  app.put("/api/warehouse/products/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const productData = insertProductSchema.partial().parse(req.body);
+      
+      const updatedProduct = await storage.updateProduct(id, productData);
+      
+      if (!updatedProduct) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      
+      res.json(updatedProduct);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid product data", errors: error.errors });
+      }
+      
+      console.error("Error updating product:", error);
+      res.status(500).json({ message: "Error updating product" });
+    }
+  });
+  
+  app.delete("/api/warehouse/products/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteProduct(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      res.status(500).json({ message: "Error deleting product" });
+    }
+  });
+  
+  // Actualizar el stock de un producto
+  app.post("/api/warehouse/products/:id/stock", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { quantity } = req.body;
+      
+      if (typeof quantity !== 'number') {
+        return res.status(400).json({ message: "Quantity must be a number" });
+      }
+      
+      const updatedProduct = await storage.updateProductStock(id, quantity);
+      
+      if (!updatedProduct) {
+        return res.status(404).json({ message: "Product not found or operation would result in negative stock" });
+      }
+      
+      res.json(updatedProduct);
+    } catch (error) {
+      console.error("Error updating product stock:", error);
+      res.status(500).json({ message: "Error updating product stock" });
+    }
+  });
+
   // Pasture Finance routes
   app.get("/api/pasture-finances", async (req: Request, res: Response) => {
     try {
