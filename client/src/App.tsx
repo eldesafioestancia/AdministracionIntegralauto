@@ -24,6 +24,7 @@ import Salaries from "@/pages/salaries";
 import Capital from "@/pages/capital";
 import Warehouse from "@/pages/warehouse/index";
 import Reports from "@/pages/reports/index";
+import Settings from "@/pages/settings/index";
 import AppLayout from "@/components/layouts/AppLayout";
 
 function App() {
@@ -190,6 +191,13 @@ function App() {
         <Route path="/reports">
           <AppLayout>
             <Reports />
+          </AppLayout>
+        </Route>
+        
+        {/* Ruta para configuración */}
+        <Route path="/settings">
+          <AppLayout>
+            <Settings />
           </AppLayout>
         </Route>
         
