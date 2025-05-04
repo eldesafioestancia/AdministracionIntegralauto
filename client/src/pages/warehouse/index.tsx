@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -559,47 +558,47 @@ export default function Warehouse() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        className="h-8 w-8 flex items-center justify-center"
                         title="Agregar stock"
                         onClick={() => {
                           setSelectedProductId(product.id);
                           setAddStockOpen(true);
                         }}
                       >
-                        <i className="ri-add-circle-line text-green-500"></i>
+                        <i className="ri-add-circle-line text-green-500 text-base"></i>
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        className="h-8 w-8 flex items-center justify-center"
                         title="Quitar stock"
                         onClick={() => {
                           setSelectedProductId(product.id);
                           setRemoveStockOpen(true);
                         }}
                       >
-                        <i className="ri-subtract-circle-line text-amber-500"></i>
+                        <i className="ri-subtract-circle-line text-orange-500 text-base"></i>
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        className="h-8 w-8 flex items-center justify-center"
                         title="Editar"
                         onClick={() => openEditDialog(product)}
                       >
-                        <i className="ri-pencil-line text-blue-500"></i>
+                        <i className="ri-pencil-line text-blue-500 text-base"></i>
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        className="h-8 w-8 flex items-center justify-center"
                         title="Eliminar"
                         onClick={() => {
                           setSelectedProductId(product.id);
                           setDeleteConfirmOpen(true);
                         }}
                       >
-                        <i className="ri-delete-bin-line text-red-500"></i>
+                        <i className="ri-delete-bin-line text-red-500 text-base"></i>
                       </Button>
                     </div>
                   </TableCell>
@@ -628,7 +627,7 @@ export default function Warehouse() {
           
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="add-quantity">Cantidad a agregar</Label>
+              <FormLabel htmlFor="add-quantity">Cantidad a agregar</FormLabel>
               <Input
                 id="add-quantity"
                 type="number"
@@ -659,7 +658,7 @@ export default function Warehouse() {
           
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="remove-quantity">Cantidad a quitar</Label>
+              <FormLabel htmlFor="remove-quantity">Cantidad a quitar</FormLabel>
               <Input
                 id="remove-quantity"
                 type="number"
