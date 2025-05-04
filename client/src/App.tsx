@@ -22,6 +22,7 @@ import Repairs from "@/pages/repairs";
 import Employees from "@/pages/employees/index";
 import Salaries from "@/pages/salaries";
 import Capital from "@/pages/capital";
+import Warehouse from "@/pages/warehouse/index";
 import AppLayout from "@/components/layouts/AppLayout";
 
 function App() {
