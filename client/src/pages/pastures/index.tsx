@@ -234,28 +234,31 @@ export default function PasturesIndex() {
                 <i className="ri-add-line mr-1"></i> Nueva Parcela
               </Button>
             </SheetTrigger>
-            <SheetContent className="sm:max-w-md">
+            <SheetContent className="sm:max-w-md overflow-y-auto h-full max-h-screen pb-24">
               <SheetHeader>
-                <SheetTitle>Registrar nueva parcela</SheetTitle>
+                <SheetTitle>Nueva Parcela</SheetTitle>
                 <SheetDescription>
-                  Complete los datos de la parcela
+                  Complete la información de la parcela. Todos los campos marcados con * son obligatorios.
                 </SheetDescription>
               </SheetHeader>
               
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4 overflow-y-auto">
                   <FormField
                     control={form.control}
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Nombre</FormLabel>
+                        <FormLabel>Nombre *</FormLabel>
                         <FormControl>
                           <Input 
                             placeholder="Ej: Lote Norte"
                             {...field}
                           />
                         </FormControl>
+                        <FormDescription>
+                          Nombre descriptivo de la parcela.
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -266,14 +269,18 @@ export default function PasturesIndex() {
                     name="area"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Superficie (Ha)</FormLabel>
+                        <FormLabel>Superficie (Ha) *</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
-                            placeholder="0"
+                            placeholder="150.5"
+                            step="0.01"
                             {...field}
                           />
                         </FormControl>
+                        <FormDescription>
+                          Superficie en hectáreas.
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -287,10 +294,13 @@ export default function PasturesIndex() {
                         <FormLabel>Ubicación</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="Ej: Sector Norte, Camino Rural km 5"
+                            placeholder="Ej: Sector Norte, km 5"
                             {...field}
                           />
                         </FormControl>
+                        <FormDescription>
+                          Descripción general de la ubicación
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -329,7 +339,7 @@ export default function PasturesIndex() {
                     name="waterSource"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Agua</FormLabel>
+                        <FormLabel>Disponibilidad de Agua</FormLabel>
                         <Select 
                           onValueChange={field.onChange} 
                           defaultValue={field.value}
@@ -347,6 +357,9 @@ export default function PasturesIndex() {
                             ))}
                           </SelectContent>
                         </Select>
+                        <FormDescription>
+                          ¿La parcela cuenta con disponibilidad de agua para riego?
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -500,9 +513,9 @@ export default function PasturesIndex() {
                     )}
                   />
                   
-                  <SheetFooter>
-                    <Button type="submit">Guardar Parcela</Button>
-                  </SheetFooter>
+                  <div className="pt-6 pb-8">
+                    <Button type="submit" className="w-full">Guardar Parcela</Button>
+                  </div>
                 </form>
               </Form>
             </SheetContent>
