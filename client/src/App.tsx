@@ -20,6 +20,7 @@ import Taxes from "@/pages/taxes";
 import Repairs from "@/pages/repairs";
 import Employees from "@/pages/employees/index";
 import Salaries from "@/pages/salaries";
+import Capital from "@/pages/capital";
 import AppLayout from "@/components/layouts/AppLayout";
 
 function App() {
@@ -158,6 +159,13 @@ function App() {
         <Route path="/salaries">
           <AppLayout>
             <Salaries />
+          </AppLayout>
+        </Route>
+        
+        {/* Rutas para capital */}
+        <Route path="/capital">
+          <AppLayout>
+            <Capital />
           </AppLayout>
         </Route>
         
