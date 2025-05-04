@@ -486,6 +486,129 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Pasture routes
+  app.get("/api/pastures", async (req: Request, res: Response) => {
+    try {
+      const pastures = await storage.getPastures();
+      res.json(pastures);
+    } catch (error) {
+      console.error("Error fetching pastures:", error);
+      res.status(500).json({ message: "Error fetching pastures" });
+    }
+  });
+  
+  app.get("/api/pastures/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const pasture = await storage.getPasture(id);
+      
+      if (!pasture) {
+        return res.status(404).json({ message: "Pasture not found" });
+      }
+      
+      res.json(pasture);
+    } catch (error) {
+      console.error("Error fetching pasture:", error);
+      res.status(500).json({ message: "Error fetching pasture" });
+    }
+  });
+  
+  app.post("/api/pastures", async (req: Request, res: Response) => {
+    try {
+      const pastureData = insertPastureSchema.parse(req.body);
+      const newPasture = await storage.createPasture(pastureData);
+      res.status(201).json(newPasture);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid pasture data", errors: error.errors });
+      }
+      
+      console.error("Error creating pasture:", error);
+      res.status(500).json({ message: "Error creating pasture" });
+    }
+  });
+  
+  app.put("/api/pastures/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const pastureData = insertPastureSchema.partial().parse(req.body);
+      
+      const updatedPasture = await storage.updatePasture(id, pastureData);
+      
+      if (!updatedPasture) {
+        return res.status(404).json({ message: "Pasture not found" });
+      }
+      
+      res.json(updatedPasture);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid pasture data", errors: error.errors });
+      }
+      
+      console.error("Error updating pasture:", error);
+      res.status(500).json({ message: "Error updating pasture" });
+    }
+  });
+  
+  app.delete("/api/pastures/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deletePasture(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Pasture not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting pasture:", error);
+      res.status(500).json({ message: "Error deleting pasture" });
+    }
+  });
+  
+  // Pasture Finance routes
+  app.get("/api/pasture-finances", async (req: Request, res: Response) => {
+    try {
+      const pastureId = req.query.pastureId ? parseInt(req.query.pastureId as string) : undefined;
+      const finances = await storage.getPastureFinances(pastureId);
+      res.json(finances);
+    } catch (error) {
+      console.error("Error fetching pasture finances:", error);
+      res.status(500).json({ message: "Error fetching pasture finances" });
+    }
+  });
+  
+  app.post("/api/pasture-finances", async (req: Request, res: Response) => {
+    try {
+      const financeData = insertPastureFinanceSchema.parse(req.body);
+      const newFinance = await storage.createPastureFinance(financeData);
+      res.status(201).json(newFinance);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid finance data", errors: error.errors });
+      }
+      
+      console.error("Error creating pasture finance:", error);
+      res.status(500).json({ message: "Error creating pasture finance" });
+    }
+  });
+  
+  app.delete("/api/pasture-finances/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deletePastureFinance(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Finance record not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting finance record:", error);
+      res.status(500).json({ message: "Error deleting finance record" });
+    }
+  });
+
   // Rutas para inversiones
   app.get("/api/investments", async (req: Request, res: Response) => {
     try {
