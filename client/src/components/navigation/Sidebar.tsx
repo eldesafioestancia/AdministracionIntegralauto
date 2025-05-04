@@ -141,18 +141,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                 <i className="ri-tools-line mr-3 text-lg"></i>
                 Reparaciones
               </Link>
-              <Link 
-                href="/employees"
-                className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                  isActive("/employees")
-                    ? "bg-primary-light bg-opacity-10 text-primary"
-                    : "text-neutral-500 hover:bg-neutral-100"
-                }`}
-                onClick={closeSidebar}
-              >
-                <i className="ri-team-line mr-3 text-lg"></i>
-                Empleados
-              </Link>
+
               <Link 
                 href="/salaries"
                 className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
