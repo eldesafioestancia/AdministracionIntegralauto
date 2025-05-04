@@ -13,10 +13,19 @@ import {
   taxes, Tax, InsertTax,
   repairs, Repair, InsertRepair,
   salaries, Salary, InsertSalary,
-  capital, Capital, InsertCapital
+  capital, Capital, InsertCapital,
+  products, Product, InsertProduct
 } from "@shared/schema";
 
 export interface IStorage {
+  // Products
+  getProducts(): Promise<Product[]>;
+  getProduct(id: number): Promise<Product | undefined>;
+  createProduct(product: InsertProduct): Promise<Product>;
+  updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product | undefined>;
+  deleteProduct(id: number): Promise<boolean>;
+  updateProductStock(id: number, quantity: number): Promise<Product | undefined>;
+
   // Users
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
@@ -129,6 +138,7 @@ export class MemStorage implements IStorage {
   private repairs: Map<number, Repair>;
   private salaries: Map<number, Salary>;
   private capitals: Map<number, Capital>;
+  private products: Map<number, Product>;
 
   private currentIds: {
     user: number;
@@ -146,6 +156,7 @@ export class MemStorage implements IStorage {
     repair: number;
     salary: number;
     capital: number;
+    product: number;
   };
 
   constructor() {
@@ -164,6 +175,7 @@ export class MemStorage implements IStorage {
     this.repairs = new Map();
     this.salaries = new Map();
     this.capitals = new Map();
+    this.products = new Map();
 
     this.currentIds = {
       user: 1,
@@ -181,6 +193,7 @@ export class MemStorage implements IStorage {
       repair: 1,
       salary: 1,
       capital: 1,
+      product: 1,
     };
 
     // Initialize with a default admin user

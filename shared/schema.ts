@@ -475,3 +475,24 @@ export type InsertSalary = z.infer<typeof insertSalarySchema>;
 
 export type Capital = typeof capital.$inferSelect;
 export type InsertCapital = z.infer<typeof insertCapitalSchema>;
+
+// Product Table
+export const products = pgTable("products", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  category: text("category").notNull(), // fluidos, repuestos, herramientas, etc.
+  quantity: decimal("quantity").notNull(),
+  unit: text("unit").notNull(), // litros, unidades, kg, etc.
+  price: decimal("price").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertProductSchema = createInsertSchema(products).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type Product = typeof products.$inferSelect;
+export type InsertProduct = z.infer<typeof insertProductSchema>;
