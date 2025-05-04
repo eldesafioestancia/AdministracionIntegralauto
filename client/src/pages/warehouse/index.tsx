@@ -1,12 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -132,6 +135,13 @@ const mockProducts = [
 export default function Warehouse() {
   const [search, setSearch] = useState("");
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [editProduct, setEditProduct] = useState<any>(null);
+  const [addStockOpen, setAddStockOpen] = useState(false);
+  const [removeStockOpen, setRemoveStockOpen] = useState(false);
+  const [stockQuantity, setStockQuantity] = useState("");
+  const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  
   const { toast } = useToast();
 
   // Usar datos reales cuando tengamos la API conectada
@@ -140,7 +150,7 @@ export default function Warehouse() {
   // });
   
   // Usando datos simulados por ahora
-  const products = mockProducts;
+  const [products, setProducts] = useState(mockProducts);
   const isLoading = false;
   const error = null;
 
@@ -156,30 +166,174 @@ export default function Warehouse() {
     },
   });
 
+  // Configuración del formulario para editar productos
+  useEffect(() => {
+    if (editProduct) {
+      form.reset({
+        name: editProduct.name,
+        category: editProduct.category,
+        quantity: String(editProduct.quantity),
+        unit: editProduct.unit,
+        unitPrice: String(editProduct.unitPrice),
+        notes: editProduct.notes || "",
+      });
+    } else {
+      form.reset({
+        name: "",
+        category: "fluidos",
+        quantity: "",
+        unit: "litros",
+        unitPrice: "",
+        notes: "",
+      });
+    }
+  }, [editProduct, form]);
+
+  // Función para agregar un nuevo producto
   async function onSubmit(values: ProductFormValues) {
     try {
-      // Implementar cuando tengamos la API
-      // await apiRequest("POST", "/api/warehouse/products", values);
-      // queryClient.invalidateQueries({ queryKey: ["/api/warehouse/products"] });
-      
-      toast({
-        title: "Producto agregado",
-        description: "El producto ha sido agregado al inventario",
-      });
+      // Si estamos editando un producto existente
+      if (editProduct) {
+        // Actualizar el producto existente
+        const updatedProducts = products.map(product => 
+          product.id === editProduct.id 
+            ? { 
+                ...product, 
+                name: values.name,
+                category: values.category,
+                quantity: Number(values.quantity),
+                unit: values.unit,
+                unitPrice: Number(values.unitPrice),
+                totalPrice: Number(values.quantity) * Number(values.unitPrice),
+                notes: values.notes
+              } 
+            : product
+        );
+        
+        setProducts(updatedProducts);
+        
+        toast({
+          title: "Producto actualizado",
+          description: "El producto ha sido actualizado correctamente",
+        });
+      } else {
+        // Crear un nuevo producto
+        const newProduct = {
+          id: Math.max(0, ...products.map((p: any) => p.id)) + 1,
+          name: values.name,
+          category: values.category,
+          quantity: Number(values.quantity),
+          unit: values.unit,
+          unitPrice: Number(values.unitPrice),
+          totalPrice: Number(values.quantity) * Number(values.unitPrice),
+          notes: values.notes
+        };
+        
+        setProducts([...products, newProduct]);
+        
+        toast({
+          title: "Producto agregado",
+          description: "El producto ha sido agregado al inventario",
+        });
+      }
       
       setSheetOpen(false);
+      setEditProduct(null);
       form.reset();
       
     } catch (error) {
-      console.error("Error creating product:", error);
+      console.error("Error al guardar producto:", error);
       toast({
         title: "Error",
-        description: "No se pudo agregar el producto",
+        description: "No se pudo guardar el producto",
         variant: "destructive",
       });
     }
   }
 
+  // Función para agregar stock a un producto
+  const handleAddStock = () => {
+    if (!selectedProductId || !stockQuantity) return;
+    
+    const productIndex = products.findIndex((p: any) => p.id === selectedProductId);
+    if (productIndex === -1) return;
+    
+    const updatedProducts = [...products];
+    const product = {...updatedProducts[productIndex]};
+    const addQuantity = Number(stockQuantity);
+    
+    product.quantity = product.quantity + addQuantity;
+    product.totalPrice = product.quantity * product.unitPrice;
+    updatedProducts[productIndex] = product;
+    
+    setProducts(updatedProducts);
+    setAddStockOpen(false);
+    setStockQuantity("");
+    setSelectedProductId(null);
+    
+    toast({
+      title: "Stock actualizado",
+      description: `Se han añadido ${addQuantity} ${product.unit} al producto ${product.name}`,
+    });
+  };
+
+  // Función para quitar stock de un producto
+  const handleRemoveStock = () => {
+    if (!selectedProductId || !stockQuantity) return;
+    
+    const productIndex = products.findIndex((p: any) => p.id === selectedProductId);
+    if (productIndex === -1) return;
+    
+    const updatedProducts = [...products];
+    const product = {...updatedProducts[productIndex]};
+    const removeQuantity = Number(stockQuantity);
+    
+    if (removeQuantity > product.quantity) {
+      toast({
+        title: "Error",
+        description: `No puede quitar más de ${product.quantity} ${product.unit} disponibles`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    product.quantity = product.quantity - removeQuantity;
+    product.totalPrice = product.quantity * product.unitPrice;
+    updatedProducts[productIndex] = product;
+    
+    setProducts(updatedProducts);
+    setRemoveStockOpen(false);
+    setStockQuantity("");
+    setSelectedProductId(null);
+    
+    toast({
+      title: "Stock actualizado",
+      description: `Se han quitado ${removeQuantity} ${product.unit} del producto ${product.name}`,
+    });
+  };
+
+  // Función para eliminar un producto
+  const handleDeleteProduct = () => {
+    if (!selectedProductId) return;
+    
+    const updatedProducts = products.filter((p: any) => p.id !== selectedProductId);
+    setProducts(updatedProducts);
+    setDeleteConfirmOpen(false);
+    setSelectedProductId(null);
+    
+    toast({
+      title: "Producto eliminado",
+      description: "El producto ha sido eliminado del inventario",
+    });
+  };
+
+  // Función para abrir el cuadro de diálogo de edición
+  const openEditDialog = (product: any) => {
+    setEditProduct(product);
+    setSheetOpen(true);
+  };
+
+  // Filtra productos por término de búsqueda
   const filteredProducts = products
     ? products.filter((product: any) =>
         product.name.toLowerCase().includes(search.toLowerCase())
@@ -407,6 +561,10 @@ export default function Warehouse() {
                         size="icon"
                         className="h-8 w-8"
                         title="Agregar stock"
+                        onClick={() => {
+                          setSelectedProductId(product.id);
+                          setAddStockOpen(true);
+                        }}
                       >
                         <i className="ri-add-circle-line text-green-500"></i>
                       </Button>
@@ -415,6 +573,10 @@ export default function Warehouse() {
                         size="icon"
                         className="h-8 w-8"
                         title="Quitar stock"
+                        onClick={() => {
+                          setSelectedProductId(product.id);
+                          setRemoveStockOpen(true);
+                        }}
                       >
                         <i className="ri-subtract-circle-line text-amber-500"></i>
                       </Button>
@@ -423,6 +585,7 @@ export default function Warehouse() {
                         size="icon"
                         className="h-8 w-8"
                         title="Editar"
+                        onClick={() => openEditDialog(product)}
                       >
                         <i className="ri-pencil-line text-blue-500"></i>
                       </Button>
@@ -431,6 +594,10 @@ export default function Warehouse() {
                         size="icon"
                         className="h-8 w-8"
                         title="Eliminar"
+                        onClick={() => {
+                          setSelectedProductId(product.id);
+                          setDeleteConfirmOpen(true);
+                        }}
                       >
                         <i className="ri-delete-bin-line text-red-500"></i>
                       </Button>
@@ -448,6 +615,86 @@ export default function Warehouse() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Diálogo para agregar stock */}
+      <Dialog open={addStockOpen} onOpenChange={setAddStockOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Agregar stock</DialogTitle>
+            <DialogDescription>
+              Ingrese la cantidad a agregar al inventario
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="add-quantity">Cantidad a agregar</Label>
+              <Input
+                id="add-quantity"
+                type="number"
+                min="1"
+                placeholder="Ej: 5"
+                value={stockQuantity}
+                onChange={(e) => setStockQuantity(e.target.value)}
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddStockOpen(false)}>Cancelar</Button>
+            <Button onClick={handleAddStock}>Agregar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Diálogo para quitar stock */}
+      <Dialog open={removeStockOpen} onOpenChange={setRemoveStockOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Quitar stock</DialogTitle>
+            <DialogDescription>
+              Ingrese la cantidad a quitar del inventario
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="remove-quantity">Cantidad a quitar</Label>
+              <Input
+                id="remove-quantity"
+                type="number"
+                min="1"
+                placeholder="Ej: 2"
+                value={stockQuantity}
+                onChange={(e) => setStockQuantity(e.target.value)}
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRemoveStockOpen(false)}>Cancelar</Button>
+            <Button variant="destructive" onClick={handleRemoveStock}>Quitar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Diálogo de confirmación para eliminar producto */}
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Está seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción eliminará permanentemente el producto del inventario y no puede ser deshecha.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteConfirmOpen(false)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteProduct} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
