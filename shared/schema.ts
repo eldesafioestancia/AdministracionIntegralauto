@@ -130,17 +130,37 @@ export const maintenance = pgTable("maintenance", {
   cleaning: boolean("cleaning").default(false), // Limpiar
   generalCheck: boolean("general_check").default(false), // Chequeo general y reporte de fallas
   
-  // Campos originales para cambio de aceite y filtros
+  // Campos para cambio de aceite y filtros
   motorOil: boolean("motor_oil").default(false),
+  motorOilProduct: integer("motor_oil_product"), // ID del producto seleccionado del depósito
+  motorOilName: text("motor_oil_name"), // Nombre del producto para referencia
   motorOilQuantity: decimal("motor_oil_quantity").default("0"),
+  
   hydraulicOil: boolean("hydraulic_oil").default(false),
+  hydraulicOilProduct: integer("hydraulic_oil_product"), // ID del producto seleccionado del depósito
+  hydraulicOilName: text("hydraulic_oil_name"), // Nombre del producto para referencia
   hydraulicOilQuantity: decimal("hydraulic_oil_quantity").default("0"),
+  
   coolant: boolean("coolant").default(false),
+  coolantProduct: integer("coolant_product"), // ID del producto seleccionado del depósito
+  coolantName: text("coolant_name"), // Nombre del producto para referencia
   coolantQuantity: decimal("coolant_quantity").default("0"),
+  
   oilFilter: boolean("oil_filter").default(false),
+  oilFilterProduct: integer("oil_filter_product"), // ID del filtro seleccionado
+  oilFilterName: text("oil_filter_name"), // Nombre del filtro para referencia
+  
   hydraulicFilter: boolean("hydraulic_filter").default(false),
+  hydraulicFilterProduct: integer("hydraulic_filter_product"), // ID del filtro seleccionado
+  hydraulicFilterName: text("hydraulic_filter_name"), // Nombre del filtro para referencia
+  
   fuelFilter: boolean("fuel_filter").default(false),
+  fuelFilterProduct: integer("fuel_filter_product"), // ID del filtro seleccionado
+  fuelFilterName: text("fuel_filter_name"), // Nombre del filtro para referencia
+  
   airFilter: boolean("air_filter").default(false),
+  airFilterProduct: integer("air_filter_product"), // ID del filtro seleccionado
+  airFilterName: text("air_filter_name"), // Nombre del filtro para referencia
   
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
