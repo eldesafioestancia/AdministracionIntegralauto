@@ -637,9 +637,15 @@ export default function MachinesIndex() {
                     </Link>
                   </Button>
                   
-                  <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Registrar trabajo">
+                  <Button variant="outline" size="sm" asChild className="h-8" title="Trabajos">
                     <Link href={`/machines/${machine.id}/work`}>
-                      <i className="ri-truck-line text-lg"></i>
+                      <i className="ri-truck-line mr-1"></i> Trabajos
+                    </Link>
+                  </Button>
+                  
+                  <Button variant="outline" size="sm" asChild className="h-8 ml-1" title="Finanzas">
+                    <Link href={`/machines/${machine.id}/finances`}>
+                      <i className="ri-money-dollar-circle-line mr-1"></i> Finanzas
                     </Link>
                   </Button>
                 </div>
