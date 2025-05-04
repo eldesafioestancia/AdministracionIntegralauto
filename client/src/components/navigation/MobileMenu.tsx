@@ -49,6 +49,20 @@ export default function MobileMenu({ open, setOpen }: MobileMenuProps) {
             </a>
           </Link>
 
+          <Link href="/warehouse">
+            <a
+              className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-neutral-100"
+              onClick={() => setOpen(false)}
+            >
+              <div className="w-12 h-12 bg-amber-500 bg-opacity-10 rounded-full flex items-center justify-center mb-2">
+                <i className="ri-store-2-line text-xl text-amber-500"></i>
+              </div>
+              <span className="text-xs text-neutral-500 text-center">
+                Depósito
+              </span>
+            </a>
+          </Link>
+
           <Link href="/services">
             <a
               className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-neutral-100"

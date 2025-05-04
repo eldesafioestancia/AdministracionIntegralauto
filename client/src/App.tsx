@@ -136,6 +136,13 @@ function App() {
           </AppLayout>
         </Route>
         
+        {/* Ruta para depósito */}
+        <Route path="/warehouse">
+          <AppLayout>
+            <Warehouse />
+          </AppLayout>
+        </Route>
+        
         {/* Rutas para servicios */}
         <Route path="/services">
           <AppLayout>
