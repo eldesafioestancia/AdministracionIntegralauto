@@ -14,9 +14,9 @@ import { z } from "zod";
 import { format } from "date-fns";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import * as React from "react";
 
 // Maintenance form schema
-// Usamos .passthrough() para permitir campos dinámicos (para fluidos del depósito)
 const maintenanceFormSchema = z.object({
   date: z.date({
     required_error: "La fecha es requerida",
@@ -25,78 +25,107 @@ const maintenanceFormSchema = z.object({
   type: z.enum(["pre_start_check", "oil_filter_change", "maintenance_repair"], {
     required_error: "El tipo de mantenimiento es requerido",
   }),
-  driver: z.string().optional(), // Chofer
+  driver: z.string().optional(),
   notes: z.string().optional(),
   isModified: z.boolean().default(false),
   modifiedAt: z.date().optional(),
   
-  // Información del taller para mantenimiento y reparación
-  workshopName: z.string().optional(), // Nombre del taller
-  workshopAddress: z.string().optional(), // Dirección del taller
-  workshopPhone: z.string().optional(), // Teléfono del taller
+  // Taller
+  workshopName: z.string().optional(),
+  workshopAddress: z.string().optional(),
+  workshopPhone: z.string().optional(),
   
-  // Campos para mantenimiento y reparación
-  electricalSystem: z.boolean().default(false), // Eléctrico
-  mechanicalSystem: z.boolean().default(false), // Mecánico
-  frontAxle: z.boolean().default(false), // Tren delantero
-  gearbox: z.boolean().default(false), // Caja
-  differential: z.boolean().default(false), // Diferencial
-  hydraulicSystem: z.boolean().default(false), // Hidráulico
-  brakes: z.boolean().default(false), // Frenos
-  diagnosis: z.string().optional(), // Diagnóstico
+  // Mantenimiento
+  electricalSystem: z.boolean().default(false),
+  mechanicalSystem: z.boolean().default(false),
+  frontAxle: z.boolean().default(false),
+  gearbox: z.boolean().default(false),
+  differential: z.boolean().default(false),
+  hydraulicSystem: z.boolean().default(false),
+  brakes: z.boolean().default(false),
+  diagnosis: z.string().optional(),
   
-  // Costos de mantenimiento y reparación
-  spareParts: z.string().optional(), // Descripción de repuestos
-  sparePartsCost: z.string().optional(), // Costo total de repuestos en pesos
-  labor: z.string().optional(), // Descripción de mano de obra
-  laborCost: z.string().optional(), // Costo total de mano de obra en pesos
-  totalCost: z.string().optional(), // Costo total
+  // Costos
+  spareParts: z.string().optional(),
+  sparePartsCost: z.string().optional(),
+  labor: z.string().optional(),
+  laborCost: z.string().optional(),
+  totalCost: z.string().optional(),
   
   // Previo al arranque
-  gearboxOilLevel: z.boolean().default(false), // Chequear nivel aceite de caja
-  engineOilLevel: z.boolean().default(false), // Chequear nivel aceite de motor
-  fuelLevel: z.boolean().default(false), // Combustible
-  batteryWater: z.boolean().default(false), // Agua de batería
-  airPressure: z.boolean().default(false), // Presión de aire
-  airFilterCleaning: z.boolean().default(false), // Limpiar filtro de aire
-  oilBathAirFilter: z.boolean().default(false), // Limpiar filtro de aire baño aceite
-  differentialVent: z.boolean().default(false), // Limpiar venteo de diferencial
-  greasing: z.boolean().default(false), // Engrasar
+  gearboxOilLevel: z.boolean().default(false),
+  engineOilLevel: z.boolean().default(false),
+  fuelLevel: z.boolean().default(false),
+  batteryWater: z.boolean().default(false),
+  airPressure: z.boolean().default(false),
+  airFilterCleaning: z.boolean().default(false),
+  oilBathAirFilter: z.boolean().default(false),
+  differentialVent: z.boolean().default(false),
+  greasing: z.boolean().default(false),
   
   // Después del arranque
-  fuelLeaks: z.boolean().default(false), // Posibles pérdidas de combustible
-  engineOilLeaks: z.boolean().default(false), // Posibles pérdidas de aceite: Motor
-  gearboxOilLeaks: z.boolean().default(false), // Posibles pérdidas de aceite: Caja
-  differentialOilLeaks: z.boolean().default(false), // Posibles pérdidas de aceite: Diferencial
-  hydraulicOilLeaks: z.boolean().default(false), // Posibles pérdidas de aceite: Hidráulico
-  oilPressureTemp: z.boolean().default(false), // Presión de aceite y temperatura
+  fuelLeaks: z.boolean().default(false),
+  engineOilLeaks: z.boolean().default(false),
+  gearboxOilLeaks: z.boolean().default(false),
+  differentialOilLeaks: z.boolean().default(false),
+  hydraulicOilLeaks: z.boolean().default(false),
+  oilPressureTemp: z.boolean().default(false),
   
-  // Agregar aceite/combustible
-  addOil: z.boolean().default(false), // Agregar aceite
-  addOilQuantity: z.string().optional(), // Cantidad de aceite agregado
-  addFuel: z.boolean().default(false), // Agregar combustible
-  addFuelQuantity: z.string().optional(), // Cantidad de combustible agregado
+  // Aceite/combustible
+  addOil: z.boolean().default(false),
+  addOilQuantity: z.string().optional(),
+  addFuel: z.boolean().default(false),
+  addFuelQuantity: z.string().optional(),
   
-  // Terminado el turno
-  cutoffSwitch: z.boolean().default(false), // Llave de corte
-  cleaning: z.boolean().default(false), // Limpiar
-  generalCheck: z.boolean().default(false), // Chequeo general y reporte de fallas
+  // Turno
+  cutoffSwitch: z.boolean().default(false),
+  cleaning: z.boolean().default(false),
+  generalCheck: z.boolean().default(false),
   
-  // Campos para filtros
+  // Filtros
   oilFilter: z.boolean().default(false),
   hydraulicFilter: z.boolean().default(false),
   fuelFilter: z.boolean().default(false),
   airFilter: z.boolean().default(false),
-  
-  // Los campos para fluidos se manejan con passthrough para permitir campos dinámicos
-  // basados en los productos del depósito
-}).passthrough();
 
-// Definimos un tipo que extiende el tipo base con propiedades dinámicas
-type MaintenanceFormValues = z.infer<typeof maintenanceFormSchema> & {
-  [key: `fluid_${number}`]: boolean;
-  [key: `fluid_quantity_${number}`]: string;
-};
+  // Aceites del depósito - Estos campos son fijos
+  motorOil: z.boolean().default(false),
+  motorOilQuantity: z.string().optional(),
+  hydraulicOil: z.boolean().default(false),
+  hydraulicOilQuantity: z.string().optional(),
+  transmissionOil: z.boolean().default(false),
+  transmissionOilQuantity: z.string().optional(),
+  differentialOil: z.boolean().default(false),
+  differentialOilQuantity: z.string().optional(),
+  coolant: z.boolean().default(false),
+  coolantQuantity: z.string().optional(),
+});
+
+type MaintenanceFormValues = z.infer<typeof maintenanceFormSchema>;
+
+interface Machine {
+  id: number;
+  brand: string;
+  model: string;
+  serialNumber: string;
+  hours: number;
+  year: number;
+  status: string;
+  type: string;
+  notes: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface WarehouseProduct {
+  id: number;
+  name: string;
+  category: string;
+  quantity: number;
+  unit: string;
+  unitPrice: number;
+  totalPrice: number;
+}
 
 export default function MachineMaintenance() {
   const { id } = useParams<{ id: string }>();
@@ -104,36 +133,11 @@ export default function MachineMaintenance() {
   const { toast } = useToast();
   const numericId = parseInt(id);
 
-  interface Machine {
-    id: number;
-    brand: string;
-    model: string;
-    serialNumber: string;
-    hours: number;
-    year: number;
-    status: string;
-    type: string;
-    notes: string;
-    createdAt: string;
-    updatedAt: string;
-  }
-
   // Get machine details
   const { data: machine, isLoading: machineLoading, error: machineError } = useQuery<Machine>({
     queryKey: [`/api/machines/${id}`],
   });
   
-  // Definir interfaz para productos de depósito
-  interface WarehouseProduct {
-    id: number;
-    name: string;
-    category: string;
-    quantity: number;
-    unit: string;
-    unitPrice: number;
-    totalPrice: number;
-  }
-
   // Get warehouse fluid products for maintenance options
   const { data: warehouseProducts, isLoading: productsLoading } = useQuery<WarehouseProduct[]>({
     queryKey: ["/api/warehouse/products"],
@@ -193,9 +197,9 @@ export default function MachineMaintenance() {
     }
   });
 
-  // Preparar los valores predeterminados para el formulario
-  const getDefaultValues = () => {
-    const defaults: Record<string, any> = {
+  const form = useForm<MaintenanceFormValues>({
+    resolver: zodResolver(maintenanceFormSchema),
+    defaultValues: {
       date: new Date(),
       time: format(new Date(), "HH:mm"),
       type: "pre_start_check",
@@ -203,12 +207,12 @@ export default function MachineMaintenance() {
       notes: "",
       isModified: false,
       
-      // Información del taller para mantenimiento y reparación
+      // Taller
       workshopName: "",
       workshopAddress: "",
       workshopPhone: "",
       
-      // Campos para mantenimiento y reparación
+      // Mantenimiento
       electricalSystem: false,
       mechanicalSystem: false,
       frontAxle: false,
@@ -218,14 +222,14 @@ export default function MachineMaintenance() {
       brakes: false,
       diagnosis: "",
       
-      // Costos de mantenimiento y reparación
+      // Costos
       spareParts: "",
       sparePartsCost: "",
       labor: "",
       laborCost: "",
       totalCost: "",
       
-      // Previo al arranque
+      // Previo
       gearboxOilLevel: false,
       engineOilLevel: false,
       fuelLevel: false,
@@ -236,7 +240,7 @@ export default function MachineMaintenance() {
       differentialVent: false,
       greasing: false,
       
-      // Después del arranque
+      // Después
       fuelLeaks: false,
       engineOilLeaks: false,
       gearboxOilLeaks: false,
@@ -244,43 +248,41 @@ export default function MachineMaintenance() {
       hydraulicOilLeaks: false,
       oilPressureTemp: false,
       
-      // Agregar aceite/combustible
+      // Aceite
       addOil: false,
       addOilQuantity: "",
       addFuel: false,
       addFuelQuantity: "",
       
-      // Terminado el turno
+      // Turno
       cutoffSwitch: false,
       cleaning: false,
       generalCheck: false,
       
-      // Campos para filtros
+      // Filtros
       oilFilter: false,
       hydraulicFilter: false,
       fuelFilter: false,
       airFilter: false,
-    };
 
-    // Agregar valores predeterminados para los campos dinámicos de fluidos
-    // Esto se puede hacer solo después de cargar los productos
-    if (warehouseProducts) {
-      warehouseProducts.forEach(product => {
-        defaults[`fluid_${product.id}`] = false;
-        defaults[`fluid_quantity_${product.id}`] = "";
-      });
-    }
-    
-    return defaults;
-  };
-
-  const form = useForm<MaintenanceFormValues>({
-    resolver: zodResolver(maintenanceFormSchema),
-    defaultValues: getDefaultValues(),
+      // Aceites - Depósito
+      motorOil: false,
+      motorOilQuantity: "",
+      hydraulicOil: false,
+      hydraulicOilQuantity: "",
+      transmissionOil: false,
+      transmissionOilQuantity: "",
+      differentialOil: false,
+      differentialOilQuantity: "",
+      coolant: false,
+      coolantQuantity: "",
+    },
   });
 
   const motorOilChecked = form.watch("motorOil");
   const hydraulicOilChecked = form.watch("hydraulicOil");
+  const transmissionOilChecked = form.watch("transmissionOil");
+  const differentialOilChecked = form.watch("differentialOil");
   const coolantChecked = form.watch("coolant");
   const addOilChecked = form.watch("addOil");
   const addFuelChecked = form.watch("addFuel");
@@ -437,6 +439,435 @@ export default function MachineMaintenance() {
                   )}
                 />
               </div>
+
+              {/* Sección para Control previo puesta en marcha */}
+              {maintenanceType === "pre_start_check" && (
+                <div className="space-y-6">
+                  <div className="border rounded-md p-4">
+                    <h3 className="font-medium text-neutral-500 mb-4">Previo al arranque</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-y-4 gap-x-6">
+                      <FormField
+                        control={form.control}
+                        name="gearboxOilLevel"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Nivel de aceite de caja</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="engineOilLevel"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Nivel de aceite de motor</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="fuelLevel"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Combustible</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="batteryWater"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Agua de batería</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="airPressure"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Presión de aire</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="airFilterCleaning"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Limpiar filtro de aire</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="oilBathAirFilter"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Filtro aire baño aceite</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="differentialVent"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Venteo de diferencial</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="greasing"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Engrasar</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="border rounded-md p-4">
+                    <h3 className="font-medium text-neutral-500 mb-4">Después del arranque</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-y-4 gap-x-6">
+                      <FormField
+                        control={form.control}
+                        name="fuelLeaks"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Pérdidas de combustible</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="engineOilLeaks"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Pérdidas de aceite: Motor</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="gearboxOilLeaks"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Pérdidas de aceite: Caja</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="differentialOilLeaks"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Pérdidas de aceite: Diferencial</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="hydraulicOilLeaks"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Pérdidas de aceite: Hidráulico</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="oilPressureTemp"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Presión de aceite y temperatura</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="border rounded-md p-4">
+                    <h3 className="font-medium text-neutral-500 mb-4">Agregar aceite/combustible</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
+                      <div>
+                        <FormField
+                          control={form.control}
+                          name="addOil"
+                          render={({ field }) => (
+                            <FormItem className="flex items-start space-x-2 space-y-0">
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                              <div className="space-y-1">
+                                <FormLabel>Agregar aceite</FormLabel>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+                        {addOilChecked && (
+                          <div className="ml-6 mt-2">
+                            <FormField
+                              control={form.control}
+                              name="addOilQuantity"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <div className="flex items-center space-x-2">
+                                    <FormControl>
+                                      <Input
+                                        {...field}
+                                        type="number"
+                                        placeholder="0"
+                                        className="w-20"
+                                      />
+                                    </FormControl>
+                                    <span className="text-sm text-neutral-500">litros</span>
+                                  </div>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      <div>
+                        <FormField
+                          control={form.control}
+                          name="addFuel"
+                          render={({ field }) => (
+                            <FormItem className="flex items-start space-x-2 space-y-0">
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                              <div className="space-y-1">
+                                <FormLabel>Agregar combustible</FormLabel>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+                        {addFuelChecked && (
+                          <div className="ml-6 mt-2">
+                            <FormField
+                              control={form.control}
+                              name="addFuelQuantity"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <div className="flex items-center space-x-2">
+                                    <FormControl>
+                                      <Input
+                                        {...field}
+                                        type="number"
+                                        placeholder="0"
+                                        className="w-20"
+                                      />
+                                    </FormControl>
+                                    <span className="text-sm text-neutral-500">litros</span>
+                                  </div>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border rounded-md p-4">
+                    <h3 className="font-medium text-neutral-500 mb-4">Terminado el turno</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-y-4 gap-x-6">
+                      <FormField
+                        control={form.control}
+                        name="cutoffSwitch"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Llave de corte</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="cleaning"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Limpiar</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="generalCheck"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Chequeo general y reporte de fallas</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Sección para Mantenimiento y Reparación */}
               {maintenanceType === "maintenance_repair" && (
@@ -616,58 +1047,58 @@ export default function MachineMaintenance() {
                   </div>
 
                   {/* Diagnóstico */}
-                  <div className="border rounded-md p-4">
-                    <h3 className="font-medium text-neutral-500 mb-4">Diagnóstico</h3>
-                    <FormField
-                      control={form.control}
-                      name="diagnosis"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Describa el diagnóstico realizado"
-                              className="min-h-[100px] resize-y"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="diagnosis"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Diagnóstico y trabajo realizado</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Descripción del diagnóstico y trabajo realizado"
+                            {...field}
+                            rows={4}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   {/* Costos */}
                   <div className="border rounded-md p-4">
                     <h3 className="font-medium text-neutral-500 mb-4">Costos</h3>
                     <div className="space-y-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="col-span-1 md:col-span-2">
-                          <FormField
-                            control={form.control}
-                            name="spareParts"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Repuestos</FormLabel>
-                                <FormControl>
-                                  <Textarea 
-                                    placeholder="Detalle de repuestos utilizados"
-                                    className="min-h-[80px] resize-y"
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
+                        <FormField
+                          control={form.control}
+                          name="spareParts"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Descripción de repuestos</FormLabel>
+                              <FormControl>
+                                <Textarea
+                                  placeholder="Listado de repuestos utilizados"
+                                  {...field}
+                                  rows={3}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                         <FormField
                           control={form.control}
                           name="sparePartsCost"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Costo repuestos ($)</FormLabel>
+                              <FormLabel>Costo de repuestos</FormLabel>
                               <FormControl>
-                                <Input placeholder="0.00" {...field} />
+                                <Input
+                                  placeholder="Costo total en pesos"
+                                  {...field}
+                                  type="number"
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -676,33 +1107,35 @@ export default function MachineMaintenance() {
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="col-span-1 md:col-span-2">
-                          <FormField
-                            control={form.control}
-                            name="labor"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Mano de obra</FormLabel>
-                                <FormControl>
-                                  <Textarea 
-                                    placeholder="Detalle de la mano de obra realizada"
-                                    className="min-h-[80px] resize-y"
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
+                        <FormField
+                          control={form.control}
+                          name="labor"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Descripción de mano de obra</FormLabel>
+                              <FormControl>
+                                <Textarea
+                                  placeholder="Detalle de mano de obra"
+                                  {...field}
+                                  rows={3}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                         <FormField
                           control={form.control}
                           name="laborCost"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Costo mano de obra ($)</FormLabel>
+                              <FormLabel>Costo de mano de obra</FormLabel>
                               <FormControl>
-                                <Input placeholder="0.00" {...field} />
+                                <Input
+                                  placeholder="Costo total en pesos"
+                                  {...field}
+                                  type="number"
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -715,456 +1148,15 @@ export default function MachineMaintenance() {
                         name="totalCost"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Costo total ($)</FormLabel>
+                            <FormLabel>Costo total</FormLabel>
                             <FormControl>
-                              <Input placeholder="0.00" {...field} />
+                              <Input
+                                placeholder="Costo total en pesos"
+                                {...field}
+                                type="number"
+                              />
                             </FormControl>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Sección para Control previo puesta en marcha */}
-              {maintenanceType === "pre_start_check" && (
-                <div className="space-y-6">
-                  {/* Sección de inspección previa al arranque */}
-                  <div className="border rounded-md p-4">
-                    <h3 className="font-medium text-neutral-500 mb-4">Controles previos al arranque</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
-                      <FormField
-                        control={form.control}
-                        name="gearboxOilLevel"
-                        render={({ field }) => (
-                          <FormItem className="flex items-start space-x-2 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <div className="space-y-1">
-                              <FormLabel>Nivel de aceite de caja</FormLabel>
-                            </div>
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="engineOilLevel"
-                        render={({ field }) => (
-                          <FormItem className="flex items-start space-x-2 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <div className="space-y-1">
-                              <FormLabel>Nivel de aceite de motor</FormLabel>
-                            </div>
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="fuelLevel"
-                        render={({ field }) => (
-                          <FormItem className="flex items-start space-x-2 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <div className="space-y-1">
-                              <FormLabel>Nivel de combustible</FormLabel>
-                            </div>
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="batteryWater"
-                        render={({ field }) => (
-                          <FormItem className="flex items-start space-x-2 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <div className="space-y-1">
-                              <FormLabel>Agua de batería</FormLabel>
-                            </div>
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="airPressure"
-                        render={({ field }) => (
-                          <FormItem className="flex items-start space-x-2 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <div className="space-y-1">
-                              <FormLabel>Presión de aire</FormLabel>
-                            </div>
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="airFilterCleaning"
-                        render={({ field }) => (
-                          <FormItem className="flex items-start space-x-2 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <div className="space-y-1">
-                              <FormLabel>Limpieza filtro de aire</FormLabel>
-                            </div>
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="oilBathAirFilter"
-                        render={({ field }) => (
-                          <FormItem className="flex items-start space-x-2 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <div className="space-y-1">
-                              <FormLabel>Filtro de aire baño aceite</FormLabel>
-                            </div>
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="differentialVent"
-                        render={({ field }) => (
-                          <FormItem className="flex items-start space-x-2 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <div className="space-y-1">
-                              <FormLabel>Venteo de diferencial</FormLabel>
-                            </div>
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="greasing"
-                        render={({ field }) => (
-                          <FormItem className="flex items-start space-x-2 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <div className="space-y-1">
-                              <FormLabel>Engrasar</FormLabel>
-                            </div>
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Sección de inspección después del arranque */}
-                  <div className="border rounded-md p-4">
-                    <h3 className="font-medium text-neutral-500 mb-4">Controles después del arranque</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
-                      <FormField
-                        control={form.control}
-                        name="fuelLeaks"
-                        render={({ field }) => (
-                          <FormItem className="flex items-start space-x-2 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <div className="space-y-1">
-                              <FormLabel>Pérdidas de combustible</FormLabel>
-                            </div>
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="engineOilLeaks"
-                        render={({ field }) => (
-                          <FormItem className="flex items-start space-x-2 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <div className="space-y-1">
-                              <FormLabel>Pérdidas de aceite: Motor</FormLabel>
-                            </div>
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="gearboxOilLeaks"
-                        render={({ field }) => (
-                          <FormItem className="flex items-start space-x-2 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <div className="space-y-1">
-                              <FormLabel>Pérdidas de aceite: Caja</FormLabel>
-                            </div>
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="differentialOilLeaks"
-                        render={({ field }) => (
-                          <FormItem className="flex items-start space-x-2 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <div className="space-y-1">
-                              <FormLabel>Pérdidas de aceite: Diferencial</FormLabel>
-                            </div>
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="hydraulicOilLeaks"
-                        render={({ field }) => (
-                          <FormItem className="flex items-start space-x-2 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <div className="space-y-1">
-                              <FormLabel>Pérdidas de aceite: Hidráulico</FormLabel>
-                            </div>
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="oilPressureTemp"
-                        render={({ field }) => (
-                          <FormItem className="flex items-start space-x-2 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <div className="space-y-1">
-                              <FormLabel>Presión de aceite y temperatura</FormLabel>
-                            </div>
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Sección de adición de aceite/combustible */}
-                  <div className="border rounded-md p-4">
-                    <h3 className="font-medium text-neutral-500 mb-4">Adición de aceite/combustible</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
-                      <div>
-                        <div className="flex items-start space-x-2">
-                          <FormField
-                            control={form.control}
-                            name="addOil"
-                            render={({ field }) => (
-                              <FormItem className="flex items-start space-x-2 space-y-0">
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                  />
-                                </FormControl>
-                                <div className="space-y-1">
-                                  <FormLabel>Agregar aceite</FormLabel>
-                                </div>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        {addOilChecked && (
-                          <div className="ml-6 mt-2">
-                            <FormField
-                              control={form.control}
-                              name="addOilQuantity"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <div className="flex items-center space-x-2">
-                                    <FormControl>
-                                      <Input
-                                        {...field}
-                                        type="number"
-                                        placeholder="0"
-                                        className="w-20"
-                                      />
-                                    </FormControl>
-                                    <span className="text-sm text-neutral-500">litros</span>
-                                  </div>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                        )}
-                      </div>
-
-                      <div>
-                        <div className="flex items-start space-x-2">
-                          <FormField
-                            control={form.control}
-                            name="addFuel"
-                            render={({ field }) => (
-                              <FormItem className="flex items-start space-x-2 space-y-0">
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                  />
-                                </FormControl>
-                                <div className="space-y-1">
-                                  <FormLabel>Agregar combustible</FormLabel>
-                                </div>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        {addFuelChecked && (
-                          <div className="ml-6 mt-2">
-                            <FormField
-                              control={form.control}
-                              name="addFuelQuantity"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <div className="flex items-center space-x-2">
-                                    <FormControl>
-                                      <Input
-                                        {...field}
-                                        type="number"
-                                        placeholder="0"
-                                        className="w-20"
-                                      />
-                                    </FormControl>
-                                    <span className="text-sm text-neutral-500">litros</span>
-                                  </div>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Sección de terminado el turno */}
-                  <div className="border rounded-md p-4">
-                    <h3 className="font-medium text-neutral-500 mb-4">Terminado el turno</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
-                      <FormField
-                        control={form.control}
-                        name="cutoffSwitch"
-                        render={({ field }) => (
-                          <FormItem className="flex items-start space-x-2 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <div className="space-y-1">
-                              <FormLabel>Llave de corte</FormLabel>
-                            </div>
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="cleaning"
-                        render={({ field }) => (
-                          <FormItem className="flex items-start space-x-2 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <div className="space-y-1">
-                              <FormLabel>Limpiar</FormLabel>
-                            </div>
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="generalCheck"
-                        render={({ field }) => (
-                          <FormItem className="flex items-start space-x-2 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <div className="space-y-1">
-                              <FormLabel>Chequeo general y reporte de fallas</FormLabel>
-                            </div>
                           </FormItem>
                         )}
                       />
@@ -1186,66 +1178,295 @@ export default function MachineMaintenance() {
                       <div>
                         <h4 className="text-sm font-medium text-neutral-500 mb-3">Fluidos</h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
-                          {/* Mostrar productos de la categoría fluidos */}
-                          {warehouseProducts && warehouseProducts
-                            .filter(product => product.category === "fluidos")
-                            .map((product) => (
-                              <div key={product.id}>
-                                <div className="flex items-start space-x-2">
-                                  <FormField
-                                    control={form.control}
-                                    name={`fluid_${product.id}` as any}
-                                    render={({ field }) => (
-                                      <FormItem className="flex items-start space-x-2 space-y-0">
+                          {/* Aceite de motor */}
+                          <div>
+                            <div className="flex items-start space-x-2">
+                              <FormField
+                                control={form.control}
+                                name="motorOil"
+                                render={({ field }) => (
+                                  <FormItem className="flex items-start space-x-2 space-y-0">
+                                    <FormControl>
+                                      <Checkbox
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                      />
+                                    </FormControl>
+                                    <div className="space-y-1">
+                                      <FormLabel>Aceite motor</FormLabel>
+                                    </div>
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                            {motorOilChecked && (
+                              <div className="ml-6 mt-2">
+                                <FormField
+                                  control={form.control}
+                                  name="motorOilQuantity"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <div className="flex items-center space-x-2">
                                         <FormControl>
-                                          <Checkbox
-                                            checked={field.value as boolean}
-                                            onCheckedChange={field.onChange}
+                                          <Input
+                                            {...field}
+                                            type="number"
+                                            placeholder="0"
+                                            className="w-20"
                                           />
                                         </FormControl>
-                                        <div className="space-y-1">
-                                          <FormLabel>{product.name}</FormLabel>
-                                        </div>
-                                      </FormItem>
-                                    )}
-                                  />
-                                </div>
-                                {form.watch(`fluid_${product.id}` as any) && (
-                                  <div className="ml-6 mt-2">
-                                    <FormField
-                                      control={form.control}
-                                      name={`fluid_quantity_${product.id}` as any}
-                                      render={({ field }) => (
-                                        <FormItem>
-                                          <div className="flex items-center space-x-2">
-                                            <FormControl>
-                                              <Input
-                                                {...field}
-                                                type="number"
-                                                placeholder="0"
-                                                className="w-20"
-                                                value={field.value as string}
-                                              />
-                                            </FormControl>
-                                            <span className="text-sm text-neutral-500">{product.unit}</span>
-                                            {product.quantity > 0 ? (
-                                              <span className="text-xs text-green-600">
-                                                (Disponible: {product.quantity} {product.unit})
-                                              </span>
-                                            ) : (
-                                              <span className="text-xs text-red-600">
-                                                (Sin stock)
-                                              </span>
-                                            )}
-                                          </div>
-                                          <FormMessage />
-                                        </FormItem>
-                                      )}
-                                    />
-                                  </div>
-                                )}
+                                        <span className="text-sm text-neutral-500">litros</span>
+                                        {warehouseProducts && warehouseProducts.find(p => p.name === "Aceite de motor") && (
+                                          warehouseProducts.find(p => p.name === "Aceite de motor")!.quantity > 0 ? (
+                                            <span className="text-xs text-green-600">
+                                              (Disponible: {warehouseProducts.find(p => p.name === "Aceite de motor")!.quantity} litros)
+                                            </span>
+                                          ) : (
+                                            <span className="text-xs text-red-600">
+                                              (Sin stock)
+                                            </span>
+                                          )
+                                        )}
+                                      </div>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
                               </div>
-                            ))}
+                            )}
+                          </div>
+
+                          {/* Aceite hidráulico */}
+                          <div>
+                            <div className="flex items-start space-x-2">
+                              <FormField
+                                control={form.control}
+                                name="hydraulicOil"
+                                render={({ field }) => (
+                                  <FormItem className="flex items-start space-x-2 space-y-0">
+                                    <FormControl>
+                                      <Checkbox
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                      />
+                                    </FormControl>
+                                    <div className="space-y-1">
+                                      <FormLabel>Aceite hidráulico</FormLabel>
+                                    </div>
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                            {hydraulicOilChecked && (
+                              <div className="ml-6 mt-2">
+                                <FormField
+                                  control={form.control}
+                                  name="hydraulicOilQuantity"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <div className="flex items-center space-x-2">
+                                        <FormControl>
+                                          <Input
+                                            {...field}
+                                            type="number"
+                                            placeholder="0"
+                                            className="w-20"
+                                          />
+                                        </FormControl>
+                                        <span className="text-sm text-neutral-500">litros</span>
+                                        {warehouseProducts && warehouseProducts.find(p => p.name === "Aceite hidráulico") && (
+                                          warehouseProducts.find(p => p.name === "Aceite hidráulico")!.quantity > 0 ? (
+                                            <span className="text-xs text-green-600">
+                                              (Disponible: {warehouseProducts.find(p => p.name === "Aceite hidráulico")!.quantity} litros)
+                                            </span>
+                                          ) : (
+                                            <span className="text-xs text-red-600">
+                                              (Sin stock)
+                                            </span>
+                                          )
+                                        )}
+                                      </div>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Aceite de transmisión */}
+                          <div>
+                            <div className="flex items-start space-x-2">
+                              <FormField
+                                control={form.control}
+                                name="transmissionOil"
+                                render={({ field }) => (
+                                  <FormItem className="flex items-start space-x-2 space-y-0">
+                                    <FormControl>
+                                      <Checkbox
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                      />
+                                    </FormControl>
+                                    <div className="space-y-1">
+                                      <FormLabel>Aceite de caja</FormLabel>
+                                    </div>
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                            {transmissionOilChecked && (
+                              <div className="ml-6 mt-2">
+                                <FormField
+                                  control={form.control}
+                                  name="transmissionOilQuantity"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <div className="flex items-center space-x-2">
+                                        <FormControl>
+                                          <Input
+                                            {...field}
+                                            type="number"
+                                            placeholder="0"
+                                            className="w-20"
+                                          />
+                                        </FormControl>
+                                        <span className="text-sm text-neutral-500">litros</span>
+                                        {warehouseProducts && warehouseProducts.find(p => p.name === "Aceite de caja") && (
+                                          warehouseProducts.find(p => p.name === "Aceite de caja")!.quantity > 0 ? (
+                                            <span className="text-xs text-green-600">
+                                              (Disponible: {warehouseProducts.find(p => p.name === "Aceite de caja")!.quantity} litros)
+                                            </span>
+                                          ) : (
+                                            <span className="text-xs text-red-600">
+                                              (Sin stock)
+                                            </span>
+                                          )
+                                        )}
+                                      </div>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Aceite de diferencial */}
+                          <div>
+                            <div className="flex items-start space-x-2">
+                              <FormField
+                                control={form.control}
+                                name="differentialOil"
+                                render={({ field }) => (
+                                  <FormItem className="flex items-start space-x-2 space-y-0">
+                                    <FormControl>
+                                      <Checkbox
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                      />
+                                    </FormControl>
+                                    <div className="space-y-1">
+                                      <FormLabel>Aceite diferencial</FormLabel>
+                                    </div>
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                            {differentialOilChecked && (
+                              <div className="ml-6 mt-2">
+                                <FormField
+                                  control={form.control}
+                                  name="differentialOilQuantity"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <div className="flex items-center space-x-2">
+                                        <FormControl>
+                                          <Input
+                                            {...field}
+                                            type="number"
+                                            placeholder="0"
+                                            className="w-20"
+                                          />
+                                        </FormControl>
+                                        <span className="text-sm text-neutral-500">litros</span>
+                                        {warehouseProducts && warehouseProducts.find(p => p.name === "Aceite de diferencial") && (
+                                          warehouseProducts.find(p => p.name === "Aceite de diferencial")!.quantity > 0 ? (
+                                            <span className="text-xs text-green-600">
+                                              (Disponible: {warehouseProducts.find(p => p.name === "Aceite de diferencial")!.quantity} litros)
+                                            </span>
+                                          ) : (
+                                            <span className="text-xs text-red-600">
+                                              (Sin stock)
+                                            </span>
+                                          )
+                                        )}
+                                      </div>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Refrigerante */}
+                          <div>
+                            <div className="flex items-start space-x-2">
+                              <FormField
+                                control={form.control}
+                                name="coolant"
+                                render={({ field }) => (
+                                  <FormItem className="flex items-start space-x-2 space-y-0">
+                                    <FormControl>
+                                      <Checkbox
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                      />
+                                    </FormControl>
+                                    <div className="space-y-1">
+                                      <FormLabel>Refrigerante</FormLabel>
+                                    </div>
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                            {coolantChecked && (
+                              <div className="ml-6 mt-2">
+                                <FormField
+                                  control={form.control}
+                                  name="coolantQuantity"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <div className="flex items-center space-x-2">
+                                        <FormControl>
+                                          <Input
+                                            {...field}
+                                            type="number"
+                                            placeholder="0"
+                                            className="w-20"
+                                          />
+                                        </FormControl>
+                                        <span className="text-sm text-neutral-500">litros</span>
+                                        {warehouseProducts && warehouseProducts.find(p => p.name === "Refrigerante") && (
+                                          warehouseProducts.find(p => p.name === "Refrigerante")!.quantity > 0 ? (
+                                            <span className="text-xs text-green-600">
+                                              (Disponible: {warehouseProducts.find(p => p.name === "Refrigerante")!.quantity} litros)
+                                            </span>
+                                          ) : (
+                                            <span className="text-xs text-red-600">
+                                              (Sin stock)
+                                            </span>
+                                          )
+                                        )}
+                                      </div>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
 
