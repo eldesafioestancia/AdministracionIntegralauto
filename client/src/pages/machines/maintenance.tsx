@@ -92,7 +92,11 @@ const maintenanceFormSchema = z.object({
   // basados en los productos del depósito
 }).passthrough();
 
-type MaintenanceFormValues = z.infer<typeof maintenanceFormSchema>;
+// Definimos un tipo que extiende el tipo base con propiedades dinámicas
+type MaintenanceFormValues = z.infer<typeof maintenanceFormSchema> & {
+  [key: `fluid_${number}`]: boolean;
+  [key: `fluid_quantity_${number}`]: string;
+};
 
 export default function MachineMaintenance() {
   const { id } = useParams<{ id: string }>();
@@ -100,8 +104,22 @@ export default function MachineMaintenance() {
   const { toast } = useToast();
   const numericId = parseInt(id);
 
+  interface Machine {
+    id: number;
+    brand: string;
+    model: string;
+    serialNumber: string;
+    hours: number;
+    year: number;
+    status: string;
+    type: string;
+    notes: string;
+    createdAt: string;
+    updatedAt: string;
+  }
+
   // Get machine details
-  const { data: machine, isLoading: machineLoading, error: machineError } = useQuery({
+  const { data: machine, isLoading: machineLoading, error: machineError } = useQuery<Machine>({
     queryKey: [`/api/machines/${id}`],
   });
   
@@ -1176,12 +1194,12 @@ export default function MachineMaintenance() {
                                 <div className="flex items-start space-x-2">
                                   <FormField
                                     control={form.control}
-                                    name={`fluid_${product.id}`}
+                                    name={`fluid_${product.id}` as any}
                                     render={({ field }) => (
                                       <FormItem className="flex items-start space-x-2 space-y-0">
                                         <FormControl>
                                           <Checkbox
-                                            checked={field.value}
+                                            checked={field.value as boolean}
                                             onCheckedChange={field.onChange}
                                           />
                                         </FormControl>
@@ -1192,11 +1210,11 @@ export default function MachineMaintenance() {
                                     )}
                                   />
                                 </div>
-                                {form.watch(`fluid_${product.id}`) && (
+                                {form.watch(`fluid_${product.id}` as any) && (
                                   <div className="ml-6 mt-2">
                                     <FormField
                                       control={form.control}
-                                      name={`fluid_quantity_${product.id}`}
+                                      name={`fluid_quantity_${product.id}` as any}
                                       render={({ field }) => (
                                         <FormItem>
                                           <div className="flex items-center space-x-2">
@@ -1206,6 +1224,7 @@ export default function MachineMaintenance() {
                                                 type="number"
                                                 placeholder="0"
                                                 className="w-20"
+                                                value={field.value as string}
                                               />
                                             </FormControl>
                                             <span className="text-sm text-neutral-500">{product.unit}</span>
