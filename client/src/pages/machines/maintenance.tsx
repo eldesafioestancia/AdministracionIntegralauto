@@ -14,7 +14,6 @@ import { z } from "zod";
 import { format } from "date-fns";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Badge } from "@/components/ui/badge";
 
 // Maintenance form schema
 const maintenanceFormSchema = z.object({
@@ -85,34 +84,14 @@ const maintenanceFormSchema = z.object({
   // Campos originales para cambio de aceite y filtros
   motorOil: z.boolean().default(false),
   motorOilQuantity: z.string().optional(),
-  motorOilProduct: z.number().optional(), // ID del producto seleccionado
-  motorOilName: z.string().optional(), // Nombre del producto seleccionado
-  
   hydraulicOil: z.boolean().default(false),
   hydraulicOilQuantity: z.string().optional(),
-  hydraulicOilProduct: z.number().optional(), // ID del producto seleccionado
-  hydraulicOilName: z.string().optional(), // Nombre del producto seleccionado
-  
   coolant: z.boolean().default(false),
   coolantQuantity: z.string().optional(),
-  coolantProduct: z.number().optional(), // ID del producto seleccionado
-  coolantName: z.string().optional(), // Nombre del producto seleccionado
-  
   oilFilter: z.boolean().default(false),
-  oilFilterProduct: z.number().optional(), // ID del filtro seleccionado
-  oilFilterName: z.string().optional(), // Nombre del filtro seleccionado
-  
   hydraulicFilter: z.boolean().default(false),
-  hydraulicFilterProduct: z.number().optional(), // ID del filtro seleccionado
-  hydraulicFilterName: z.string().optional(), // Nombre del filtro seleccionado
-  
   fuelFilter: z.boolean().default(false),
-  fuelFilterProduct: z.number().optional(), // ID del filtro seleccionado
-  fuelFilterName: z.string().optional(), // Nombre del filtro seleccionado
-  
   airFilter: z.boolean().default(false),
-  airFilterProduct: z.number().optional(), // ID del filtro seleccionado
-  airFilterName: z.string().optional(), // Nombre del filtro seleccionado,
 });
 
 type MaintenanceFormValues = z.infer<typeof maintenanceFormSchema>;
@@ -127,16 +106,6 @@ export default function MachineMaintenance() {
   const { data: machine, isLoading: machineLoading, error: machineError } = useQuery({
     queryKey: [`/api/machines/${id}`],
   });
-  
-  // Obtener productos de fluidos para mantenimiento
-  const { data: allProducts, isLoading: productsLoading } = useQuery({
-    queryKey: ['/api/warehouse/products'],
-  });
-  
-  // Filtrar productos por categoría
-  const fluidProducts = allProducts ? allProducts.filter((product: any) => product.category === 'fluidos') : [];
-  const filterProducts = allProducts ? allProducts.filter((product: any) => product.category === 'filtros') : [];
-  const fluidProductsLoading = productsLoading;
 
   const form = useForm<MaintenanceFormValues>({
     resolver: zodResolver(maintenanceFormSchema),
@@ -203,34 +172,14 @@ export default function MachineMaintenance() {
       // Campos para cambio de aceite y filtros
       motorOil: false,
       motorOilQuantity: "",
-      motorOilProduct: undefined,
-      motorOilName: "",
-      
       hydraulicOil: false,
       hydraulicOilQuantity: "",
-      hydraulicOilProduct: undefined,
-      hydraulicOilName: "",
-      
       coolant: false,
       coolantQuantity: "",
-      coolantProduct: undefined,
-      coolantName: "",
-      
       oilFilter: false,
-      oilFilterProduct: undefined,
-      oilFilterName: "",
-      
       hydraulicFilter: false,
-      hydraulicFilterProduct: undefined,
-      hydraulicFilterName: "",
-      
       fuelFilter: false,
-      fuelFilterProduct: undefined,
-      fuelFilterName: "",
-      
       airFilter: false,
-      airFilterProduct: undefined,
-      airFilterName: "",
     },
   });
 
@@ -243,7 +192,6 @@ export default function MachineMaintenance() {
 
   async function onSubmit(values: MaintenanceFormValues) {
     try {
-      // Primero registrar el mantenimiento
       await apiRequest("POST", "/api/maintenance", {
         ...values,
         machineId: numericId
@@ -251,77 +199,6 @@ export default function MachineMaintenance() {
 
       // Invalidate maintenance query to refresh the list
       queryClient.invalidateQueries({ queryKey: [`/api/maintenance?machineId=${id}`] });
-      
-      // Actualizar el inventario del depósito si se usaron productos
-      const productsToUpdate = [];
-      
-      // Verificar si se usó aceite de motor
-      if (values.motorOil && values.motorOilProduct && values.motorOilQuantity) {
-        productsToUpdate.push({
-          productId: values.motorOilProduct,
-          quantity: parseFloat(values.motorOilQuantity)
-        });
-      }
-      
-      // Verificar si se usó aceite hidráulico
-      if (values.hydraulicOil && values.hydraulicOilProduct && values.hydraulicOilQuantity) {
-        productsToUpdate.push({
-          productId: values.hydraulicOilProduct,
-          quantity: parseFloat(values.hydraulicOilQuantity)
-        });
-      }
-      
-      // Verificar si se usó refrigerante
-      if (values.coolant && values.coolantProduct && values.coolantQuantity) {
-        productsToUpdate.push({
-          productId: values.coolantProduct,
-          quantity: parseFloat(values.coolantQuantity)
-        });
-      }
-      
-      // Verificar si se usaron filtros
-      if (values.oilFilter && values.oilFilterProduct) {
-        productsToUpdate.push({
-          productId: values.oilFilterProduct,
-          quantity: 1 // Normalmente se usa un filtro a la vez
-        });
-      }
-      
-      if (values.hydraulicFilter && values.hydraulicFilterProduct) {
-        productsToUpdate.push({
-          productId: values.hydraulicFilterProduct,
-          quantity: 1
-        });
-      }
-      
-      if (values.fuelFilter && values.fuelFilterProduct) {
-        productsToUpdate.push({
-          productId: values.fuelFilterProduct,
-          quantity: 1
-        });
-      }
-      
-      if (values.airFilter && values.airFilterProduct) {
-        productsToUpdate.push({
-          productId: values.airFilterProduct,
-          quantity: 1
-        });
-      }
-      
-      // Actualizar el stock para cada producto
-      if (productsToUpdate.length > 0) {
-        for (const product of productsToUpdate) {
-          try {
-            await apiRequest("POST", "/api/warehouse/products/remove-stock", product);
-          } catch (err) {
-            console.error("Error updating product stock:", err);
-            // Continuar con el siguiente producto incluso si hay error
-          }
-        }
-        
-        // Invalidar la cache de productos para refrescar la lista
-        queryClient.invalidateQueries({ queryKey: ['/api/warehouse/products'] });
-      }
 
       toast({
         title: "Mantenimiento registrado",
@@ -1204,29 +1081,6 @@ export default function MachineMaintenance() {
               {maintenanceType === "oil_filter_change" && (
                 <div className="border rounded-md p-4">
                   <h3 className="font-medium text-neutral-500 mb-4">Tareas realizadas</h3>
-                  
-                  {fluidProductsLoading ? (
-                    <div className="text-center py-4">Cargando productos disponibles...</div>
-                  ) : !fluidProducts || fluidProducts.length === 0 ? (
-                    <div className="bg-amber-50 border border-amber-200 rounded-md p-3 mb-4">
-                      <p className="text-amber-600 text-sm flex items-center">
-                        <i className="ri-information-line mr-1"></i>
-                        No hay productos de tipo fluido disponibles en el depósito.
-                        Para agregar nuevos productos vaya a la sección de Depósito.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="mb-4">
-                      <h4 className="text-sm font-medium text-neutral-500 mb-2">Fluidos disponibles en depósito:</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {fluidProducts.map((product: any) => (
-                          <Badge key={product.id} variant="outline" className="text-xs">
-                            {product.name} ({product.quantity} {product.unit})
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
                     <div>
@@ -1250,30 +1104,7 @@ export default function MachineMaintenance() {
                         />
                       </div>
                       {motorOilChecked && (
-                        <div className="ml-6 mt-2 space-y-3">
-                          {fluidProducts && fluidProducts.length > 0 ? (
-                            <Select 
-                              onValueChange={(value) => {
-                                const selectedProduct = fluidProducts.find((p: any) => p.id.toString() === value);
-                                if (selectedProduct) {
-                                  form.setValue("motorOilProduct", selectedProduct.id);
-                                  form.setValue("motorOilName", selectedProduct.name);
-                                }
-                              }}
-                            >
-                              <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Seleccionar producto" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {fluidProducts.map((product: any) => (
-                                  <SelectItem key={product.id} value={product.id.toString()}>
-                                    {product.name} ({product.quantity} {product.unit})
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          ) : null}
-                          
+                        <div className="ml-6 mt-2">
                           <FormField
                             control={form.control}
                             name="motorOilQuantity"
@@ -1319,30 +1150,7 @@ export default function MachineMaintenance() {
                         />
                       </div>
                       {hydraulicOilChecked && (
-                        <div className="ml-6 mt-2 space-y-3">
-                          {fluidProducts && fluidProducts.length > 0 ? (
-                            <Select 
-                              onValueChange={(value) => {
-                                const selectedProduct = fluidProducts.find((p: any) => p.id.toString() === value);
-                                if (selectedProduct) {
-                                  form.setValue("hydraulicOilProduct", selectedProduct.id);
-                                  form.setValue("hydraulicOilName", selectedProduct.name);
-                                }
-                              }}
-                            >
-                              <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Seleccionar producto" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {fluidProducts.map((product: any) => (
-                                  <SelectItem key={product.id} value={product.id.toString()}>
-                                    {product.name} ({product.quantity} {product.unit})
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          ) : null}
-                          
+                        <div className="ml-6 mt-2">
                           <FormField
                             control={form.control}
                             name="hydraulicOilQuantity"
@@ -1388,30 +1196,7 @@ export default function MachineMaintenance() {
                         />
                       </div>
                       {coolantChecked && (
-                        <div className="ml-6 mt-2 space-y-3">
-                          {fluidProducts && fluidProducts.length > 0 ? (
-                            <Select 
-                              onValueChange={(value) => {
-                                const selectedProduct = fluidProducts.find((p: any) => p.id.toString() === value);
-                                if (selectedProduct) {
-                                  form.setValue("coolantProduct", selectedProduct.id);
-                                  form.setValue("coolantName", selectedProduct.name);
-                                }
-                              }}
-                            >
-                              <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Seleccionar producto" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {fluidProducts.map((product: any) => (
-                                  <SelectItem key={product.id} value={product.id.toString()}>
-                                    {product.name} ({product.quantity} {product.unit})
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          ) : null}
-                          
+                        <div className="ml-6 mt-2">
                           <FormField
                             control={form.control}
                             name="coolantQuantity"
@@ -1437,197 +1222,77 @@ export default function MachineMaintenance() {
                     </div>
   
                     <div className="space-y-4">
-                      <div>
-                        <div className="flex items-start space-x-2">
-                          <FormField
-                            control={form.control}
-                            name="oilFilter"
-                            render={({ field }) => (
-                              <FormItem className="flex items-start space-x-2 space-y-0">
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                  />
-                                </FormControl>
-                                <div className="space-y-1">
-                                  <FormLabel>Filtro de aceite</FormLabel>
-                                </div>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        {form.watch("oilFilter") && (
-                          <div className="ml-6 mt-2">
-                            {filterProducts && filterProducts.length > 0 ? (
-                              <Select 
-                                onValueChange={(value) => {
-                                  const selectedProduct = filterProducts.find((p: any) => p.id.toString() === value);
-                                  if (selectedProduct) {
-                                    form.setValue("oilFilterProduct", selectedProduct.id);
-                                    form.setValue("oilFilterName", selectedProduct.name);
-                                  }
-                                }}
-                              >
-                                <SelectTrigger className="w-full">
-                                  <SelectValue placeholder="Seleccionar filtro" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {filterProducts.map((product: any) => (
-                                    <SelectItem key={product.id} value={product.id.toString()}>
-                                      {product.name} ({product.quantity} {product.unit})
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            ) : null}
-                          </div>
+                      <FormField
+                        control={form.control}
+                        name="oilFilter"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Filtro de aceite</FormLabel>
+                            </div>
+                          </FormItem>
                         )}
-                      </div>
-
-                      <div>
-                        <div className="flex items-start space-x-2">
-                          <FormField
-                            control={form.control}
-                            name="hydraulicFilter"
-                            render={({ field }) => (
-                              <FormItem className="flex items-start space-x-2 space-y-0">
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                  />
-                                </FormControl>
-                                <div className="space-y-1">
-                                  <FormLabel>Filtro hidráulico</FormLabel>
-                                </div>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        {form.watch("hydraulicFilter") && (
-                          <div className="ml-6 mt-2">
-                            {filterProducts && filterProducts.length > 0 ? (
-                              <Select 
-                                onValueChange={(value) => {
-                                  const selectedProduct = filterProducts.find((p: any) => p.id.toString() === value);
-                                  if (selectedProduct) {
-                                    form.setValue("hydraulicFilterProduct", selectedProduct.id);
-                                    form.setValue("hydraulicFilterName", selectedProduct.name);
-                                  }
-                                }}
-                              >
-                                <SelectTrigger className="w-full">
-                                  <SelectValue placeholder="Seleccionar filtro" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {filterProducts.map((product: any) => (
-                                    <SelectItem key={product.id} value={product.id.toString()}>
-                                      {product.name} ({product.quantity} {product.unit})
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            ) : null}
-                          </div>
+                      />
+  
+                      <FormField
+                        control={form.control}
+                        name="hydraulicFilter"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Filtro hidráulico</FormLabel>
+                            </div>
+                          </FormItem>
                         )}
-                      </div>
-
-                      <div>
-                        <div className="flex items-start space-x-2">
-                          <FormField
-                            control={form.control}
-                            name="fuelFilter"
-                            render={({ field }) => (
-                              <FormItem className="flex items-start space-x-2 space-y-0">
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                  />
-                                </FormControl>
-                                <div className="space-y-1">
-                                  <FormLabel>Filtro de combustible</FormLabel>
-                                </div>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        {form.watch("fuelFilter") && (
-                          <div className="ml-6 mt-2">
-                            {filterProducts && filterProducts.length > 0 ? (
-                              <Select 
-                                onValueChange={(value) => {
-                                  const selectedProduct = filterProducts.find((p: any) => p.id.toString() === value);
-                                  if (selectedProduct) {
-                                    form.setValue("fuelFilterProduct", selectedProduct.id);
-                                    form.setValue("fuelFilterName", selectedProduct.name);
-                                  }
-                                }}
-                              >
-                                <SelectTrigger className="w-full">
-                                  <SelectValue placeholder="Seleccionar filtro" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {filterProducts.map((product: any) => (
-                                    <SelectItem key={product.id} value={product.id.toString()}>
-                                      {product.name} ({product.quantity} {product.unit})
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            ) : null}
-                          </div>
+                      />
+  
+                      <FormField
+                        control={form.control}
+                        name="fuelFilter"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Filtro de combustible</FormLabel>
+                            </div>
+                          </FormItem>
                         )}
-                      </div>
-
-                      <div>
-                        <div className="flex items-start space-x-2">
-                          <FormField
-                            control={form.control}
-                            name="airFilter"
-                            render={({ field }) => (
-                              <FormItem className="flex items-start space-x-2 space-y-0">
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                  />
-                                </FormControl>
-                                <div className="space-y-1">
-                                  <FormLabel>Filtro de aire</FormLabel>
-                                </div>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        {form.watch("airFilter") && (
-                          <div className="ml-6 mt-2">
-                            {filterProducts && filterProducts.length > 0 ? (
-                              <Select 
-                                onValueChange={(value) => {
-                                  const selectedProduct = filterProducts.find((p: any) => p.id.toString() === value);
-                                  if (selectedProduct) {
-                                    form.setValue("airFilterProduct", selectedProduct.id);
-                                    form.setValue("airFilterName", selectedProduct.name);
-                                  }
-                                }}
-                              >
-                                <SelectTrigger className="w-full">
-                                  <SelectValue placeholder="Seleccionar filtro" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {filterProducts.map((product: any) => (
-                                    <SelectItem key={product.id} value={product.id.toString()}>
-                                      {product.name} ({product.quantity} {product.unit})
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            ) : null}
-                          </div>
+                      />
+  
+                      <FormField
+                        control={form.control}
+                        name="airFilter"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start space-x-2 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel>Filtro de aire</FormLabel>
+                            </div>
+                          </FormItem>
                         )}
-                      </div>
+                      />
                     </div>
                   </div>
                 </div>

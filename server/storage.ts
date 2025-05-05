@@ -13,19 +13,10 @@ import {
   taxes, Tax, InsertTax,
   repairs, Repair, InsertRepair,
   salaries, Salary, InsertSalary,
-  capital, Capital, InsertCapital,
-  products, Product, InsertProduct
+  capital, Capital, InsertCapital
 } from "@shared/schema";
 
 export interface IStorage {
-  // Products
-  getProducts(): Promise<Product[]>;
-  getProduct(id: number): Promise<Product | undefined>;
-  createProduct(product: InsertProduct): Promise<Product>;
-  updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product | undefined>;
-  deleteProduct(id: number): Promise<boolean>;
-  updateProductStock(id: number, quantity: number): Promise<Product | undefined>;
-
   // Users
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
@@ -138,7 +129,6 @@ export class MemStorage implements IStorage {
   private repairs: Map<number, Repair>;
   private salaries: Map<number, Salary>;
   private capitals: Map<number, Capital>;
-  private products: Map<number, Product>;
 
   private currentIds: {
     user: number;
@@ -156,7 +146,6 @@ export class MemStorage implements IStorage {
     repair: number;
     salary: number;
     capital: number;
-    product: number;
   };
 
   constructor() {
@@ -175,7 +164,6 @@ export class MemStorage implements IStorage {
     this.repairs = new Map();
     this.salaries = new Map();
     this.capitals = new Map();
-    this.products = new Map();
 
     this.currentIds = {
       user: 1,
@@ -193,7 +181,6 @@ export class MemStorage implements IStorage {
       repair: 1,
       salary: 1,
       capital: 1,
-      product: 1,
     };
 
     // Initialize with a default admin user
@@ -202,71 +189,6 @@ export class MemStorage implements IStorage {
       password: "$2b$10$eCJJFfGJXRrQGPc7KZbhfeoZXmn1tdGQM.8gGXqUEFSc40KWjN6fC", // This is "password" hashed
       fullName: "Admin User",
       role: "admin",
-    });
-
-    // Inicializar productos de ejemplo
-    this.createProduct({
-      name: "Aceite de motor 15W-40",
-      category: "fluidos",
-      quantity: "200",
-      unit: "litros",
-      price: "4500"
-    });
-
-    this.createProduct({
-      name: "Aceite hidráulico HLP 46",
-      category: "fluidos",
-      quantity: "150",
-      unit: "litros",
-      price: "3800"
-    });
-
-    this.createProduct({
-      name: "Refrigerante",
-      category: "fluidos",
-      quantity: "75",
-      unit: "litros",
-      price: "2500"
-    });
-
-    this.createProduct({
-      name: "Filtro de aceite P550779",
-      category: "filtros",
-      quantity: "15",
-      unit: "unidades",
-      price: "3200"
-    });
-
-    this.createProduct({
-      name: "Filtro de combustible FF5612",
-      category: "filtros",
-      quantity: "10",
-      unit: "unidades",
-      price: "4100"
-    });
-
-    this.createProduct({
-      name: "Filtro de aire PA2805",
-      category: "filtros",
-      quantity: "8",
-      unit: "unidades",
-      price: "5200"
-    });
-
-    this.createProduct({
-      name: "Grasa multipropósito",
-      category: "fluidos",
-      quantity: "25",
-      unit: "kg",
-      price: "1800"
-    });
-
-    this.createProduct({
-      name: "Correa de ventilador",
-      category: "repuestos",
-      quantity: "5",
-      unit: "unidades",
-      price: "2900"
     });
 
     // Initialize animals
@@ -647,67 +569,6 @@ export class MemStorage implements IStorage {
 
   async deleteCapital(id: number): Promise<boolean> {
     return this.capitals.delete(id);
-  }
-
-  // Products
-  async getProducts(): Promise<Product[]> {
-    return Array.from(this.products.values());
-  }
-
-  async getProduct(id: number): Promise<Product | undefined> {
-    return this.products.get(id);
-  }
-
-  async createProduct(insertProduct: InsertProduct): Promise<Product> {
-    const id = this.currentIds.product++;
-    const now = new Date();
-    const product: Product = { 
-      ...insertProduct, 
-      id, 
-      createdAt: now, 
-      updatedAt: now 
-    };
-    this.products.set(id, product);
-    return product;
-  }
-
-  async updateProduct(id: number, updateData: Partial<InsertProduct>): Promise<Product | undefined> {
-    const product = this.products.get(id);
-    if (!product) return undefined;
-    
-    const updatedProduct: Product = {
-      ...product,
-      ...updateData,
-      updatedAt: new Date(),
-    };
-    
-    this.products.set(id, updatedProduct);
-    return updatedProduct;
-  }
-
-  async deleteProduct(id: number): Promise<boolean> {
-    return this.products.delete(id);
-  }
-
-  async updateProductStock(id: number, quantity: number): Promise<Product | undefined> {
-    const product = this.products.get(id);
-    if (!product) return undefined;
-    
-    // Convertir a número antes de operar
-    const currentQuantity = parseFloat(product.quantity.toString());
-    const newQuantity = currentQuantity + quantity;
-    
-    // No permitir cantidades negativas
-    if (newQuantity < 0) return undefined;
-    
-    const updatedProduct: Product = {
-      ...product,
-      quantity: newQuantity.toString(),
-      updatedAt: new Date(),
-    };
-    
-    this.products.set(id, updatedProduct);
-    return updatedProduct;
   }
 
   // Dashboard
