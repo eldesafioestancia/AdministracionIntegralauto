@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useParams, useLocation, Link } from "wouter";
 import { z } from "zod";
 import { format } from "date-fns";
@@ -17,7 +17,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -35,61 +34,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-
-// Define product from warehouse
-const warehouseProductSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  quantity: z.number(),
-  unit: z.string(),
-  category: z.string(),
-});
-
-type WarehouseProduct = z.infer<typeof warehouseProductSchema>;
-
-// Mock products for testing - would normally come from API
-const mockProducts = [
-  {
-    id: 1,
-    name: "Aceite de motor",
-    category: "fluidos",
-    quantity: 8,
-    unit: "litros",
-    unitPrice: 2400,
-  },
-  {
-    id: 2,
-    name: "Aceite hidráulico",
-    category: "fluidos",
-    quantity: 5,
-    unit: "litros",
-    unitPrice: 2800,
-  },
-  {
-    id: 3,
-    name: "Filtro de aceite",
-    category: "repuestos",
-    quantity: 3,
-    unit: "unidades",
-    unitPrice: 1500,
-  },
-  {
-    id: 4,
-    name: "Filtro de combustible",
-    category: "repuestos",
-    quantity: 2,
-    unit: "unidades",
-    unitPrice: 1800,
-  },
-  {
-    id: 5,
-    name: "Filtro de aire",
-    category: "repuestos",
-    quantity: 4,
-    unit: "unidades",
-    unitPrice: 2200,
-  },
-];
 
 // Maintenance form schema
 const maintenanceFormSchema = z.object({
@@ -168,17 +112,6 @@ const maintenanceFormSchema = z.object({
   hydraulicFilter: z.boolean().default(false),
   fuelFilter: z.boolean().default(false),
   airFilter: z.boolean().default(false),
-  
-  // Nuevos campos para integración con depósito
-  selectedOil: z.number().optional(),
-  oilAmount: z.string().optional(),
-  selectedOilFilter: z.number().optional(),
-  selectedFuelFilter: z.number().optional(),
-  selectedAirFilter: z.number().optional(),
-  usedProducts: z.array(z.object({
-    productId: z.number(),
-    quantity: z.number(),
-  })).optional(),
 });
 
 type MaintenanceFormValues = z.infer<typeof maintenanceFormSchema>;
@@ -225,98 +158,8 @@ export default function EditMaintenance() {
   const addOilChecked = form.watch("addOil");
   const addFuelChecked = form.watch("addFuel");
 
-  // Estado para rastrear los productos usados
-  const [usedProducts, setUsedProducts] = useState<{id: number, amount: number}[]>([]);
-  
-  // Función para actualizar el inventario del depósito
-  const updateInventory = async (productId: number, quantity: number) => {
-    try {
-      // En un entorno real, esto sería una llamada API
-      console.log(`Descontando ${quantity} unidades del producto ${productId}`);
-      
-      // Aquí se llamaría a la API para actualizar el inventario
-      // await apiRequest("PUT", `/api/warehouse/products/${productId}/update-stock`, {
-      //   removeQuantity: quantity
-      // });
-      
-      // Simularemos la actualización para este ejemplo
-      toast({
-        title: "Inventario actualizado",
-        description: `Se han descontado ${quantity} unidades del producto #${productId}`,
-      });
-      
-      return true;
-    } catch (error) {
-      console.error("Error al actualizar inventario:", error);
-      toast({
-        title: "Error en inventario",
-        description: "No se pudo actualizar el inventario",
-        variant: "destructive",
-      });
-      return false;
-    }
-  };
-
   async function onSubmit(values: MaintenanceFormValues) {
     try {
-      // Si es un cambio de aceite y filtros, actualizamos el inventario
-      if (values.type === "oil_filter_change") {
-        const productsToUpdate = [];
-        
-        // Verificar aceite seleccionado
-        if (values.selectedOil && values.oilAmount) {
-          const oilAmount = parseInt(values.oilAmount);
-          if (oilAmount > 0) {
-            productsToUpdate.push({
-              id: values.selectedOil,
-              amount: oilAmount
-            });
-          }
-        }
-        
-        // Verificar filtros seleccionados (1 unidad por cada filtro)
-        if (values.selectedOilFilter) {
-          productsToUpdate.push({
-            id: values.selectedOilFilter,
-            amount: 1
-          });
-        }
-        
-        if (values.selectedFuelFilter) {
-          productsToUpdate.push({
-            id: values.selectedFuelFilter,
-            amount: 1
-          });
-        }
-        
-        if (values.selectedAirFilter) {
-          productsToUpdate.push({
-            id: values.selectedAirFilter,
-            amount: 1
-          });
-        }
-        
-        // Actualizar el inventario para cada producto
-        if (productsToUpdate.length > 0) {
-          for (const product of productsToUpdate) {
-            const success = await updateInventory(product.id, product.amount);
-            if (!success) {
-              throw new Error("Error al actualizar inventario");
-            }
-          }
-          
-          // Guardamos la lista de productos usados
-          setUsedProducts(productsToUpdate);
-          
-          // Actualiza valores con la lista de productos utilizados
-          values.usedProducts = productsToUpdate.map(p => ({
-            productId: p.id,
-            quantity: p.amount
-          }));
-        }
-      }
-      
-      // Guardamos el mantenimiento
       await apiRequest("PUT", `/api/maintenance/${id}`, {
         ...values,
         machineId: maintenance.machineId
@@ -325,9 +168,6 @@ export default function EditMaintenance() {
       // Invalidate maintenance queries to refresh the list
       queryClient.invalidateQueries({ queryKey: [`/api/maintenance/${id}`] });
       queryClient.invalidateQueries({ queryKey: [`/api/maintenance?machineId=${maintenance.machineId}`] });
-      
-      // También invalidamos las consultas del depósito para reflejar los cambios
-      queryClient.invalidateQueries({ queryKey: ["/api/warehouse/products"] });
 
       toast({
         title: "Mantenimiento actualizado",
@@ -1198,168 +1038,10 @@ export default function EditMaintenance() {
                 </div>
               
               ) : form.watch("type") === "oil_filter_change" ? (
-                <div className="space-y-6">
-                  <div className="border rounded-md p-4">
-                    <h3 className="font-medium text-neutral-500 mb-4">Elementos del depósito</h3>
-                    <p className="text-sm text-neutral-400 mb-4">
-                      Seleccione los productos del depósito que serán utilizados en este mantenimiento. La cantidad será descontada automáticamente.
-                    </p>
-                    
-                    <div className="space-y-4">
-                      {/* Aceite */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="selectedOil"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Aceite</FormLabel>
-                              <Select
-                                onValueChange={(value) => field.onChange(parseInt(value))}
-                                value={field.value?.toString()}
-                              >
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Seleccione un aceite" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {mockProducts
-                                    .filter(product => product.category === "fluidos")
-                                    .map(product => (
-                                      <SelectItem key={product.id} value={product.id.toString()}>
-                                        {product.name} ({product.quantity} {product.unit} disponibles)
-                                      </SelectItem>
-                                    ))
-                                  }
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={form.control}
-                          name="oilAmount"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Cantidad</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="number"
-                                  {...field}
-                                  placeholder="0"
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      
-                      {/* Filtros */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="selectedOilFilter"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Filtro de aceite</FormLabel>
-                              <Select
-                                onValueChange={(value) => field.onChange(parseInt(value))}
-                                value={field.value?.toString()}
-                              >
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Seleccione filtro" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {mockProducts
-                                    .filter(product => product.category === "repuestos" && product.name.toLowerCase().includes("aceite"))
-                                    .map(product => (
-                                      <SelectItem key={product.id} value={product.id.toString()}>
-                                        {product.name} ({product.quantity} disponibles)
-                                      </SelectItem>
-                                    ))
-                                  }
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={form.control}
-                          name="selectedFuelFilter"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Filtro de combustible</FormLabel>
-                              <Select
-                                onValueChange={(value) => field.onChange(parseInt(value))}
-                                value={field.value?.toString()}
-                              >
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Seleccione filtro" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {mockProducts
-                                    .filter(product => product.category === "repuestos" && product.name.toLowerCase().includes("combustible"))
-                                    .map(product => (
-                                      <SelectItem key={product.id} value={product.id.toString()}>
-                                        {product.name} ({product.quantity} disponibles)
-                                      </SelectItem>
-                                    ))
-                                  }
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={form.control}
-                          name="selectedAirFilter"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Filtro de aire</FormLabel>
-                              <Select
-                                onValueChange={(value) => field.onChange(parseInt(value))}
-                                value={field.value?.toString()}
-                              >
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Seleccione filtro" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {mockProducts
-                                    .filter(product => product.category === "repuestos" && product.name.toLowerCase().includes("aire"))
-                                    .map(product => (
-                                      <SelectItem key={product.id} value={product.id.toString()}>
-                                        {product.name} ({product.quantity} disponibles)
-                                      </SelectItem>
-                                    ))
-                                  }
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="mt-4 p-2 bg-muted rounded-md">
-                      <p className="text-sm text-muted-foreground">
-                        Los productos seleccionados serán descontados del inventario al guardar.
-                      </p>
-                    </div>
+                <div className="border rounded-md p-4">
+                  <h3 className="font-medium text-neutral-500 mb-4">Notas de mantenimiento</h3>
+                  <div className="text-sm text-neutral-400 italic py-4">
+                    Registre cualquier observación relevante sobre el cambio de aceite y filtros en la sección de notas adicionales.
                   </div>
                 </div>
               ) : (
