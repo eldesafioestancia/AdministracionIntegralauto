@@ -2,6 +2,30 @@ import { pgTable, text, serial, integer, decimal, timestamp, boolean, json } fro
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Warehouse Product Table (Productos de Depósito)
+export const warehouseProducts = pgTable("warehouse_products", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  category: text("category").notNull(), // fluidos, repuestos, herramientas, insumos, etc.
+  quantity: decimal("quantity").notNull(),
+  unit: text("unit").notNull(), // litros, unidades, kg, etc.
+  unitPrice: decimal("unit_price").notNull(),
+  totalPrice: decimal("total_price").notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertWarehouseProductSchema = createInsertSchema(warehouseProducts).omit({
+  id: true,
+  totalPrice: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertWarehouseProduct = z.infer<typeof insertWarehouseProductSchema>;
+export type WarehouseProduct = typeof warehouseProducts.$inferSelect;
+
 // User Table
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),

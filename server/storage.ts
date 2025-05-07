@@ -13,10 +13,18 @@ import {
   taxes, Tax, InsertTax,
   repairs, Repair, InsertRepair,
   salaries, Salary, InsertSalary,
-  capital, Capital, InsertCapital
+  capital, Capital, InsertCapital,
+  warehouseProducts, WarehouseProduct, InsertWarehouseProduct
 } from "@shared/schema";
 
 export interface IStorage {
+  // Warehouse Products
+  getWarehouseProducts(category?: string): Promise<WarehouseProduct[]>;
+  getWarehouseProduct(id: number): Promise<WarehouseProduct | undefined>;
+  createWarehouseProduct(product: InsertWarehouseProduct): Promise<WarehouseProduct>;
+  updateWarehouseProduct(id: number, product: Partial<InsertWarehouseProduct>): Promise<WarehouseProduct | undefined>;
+  deleteWarehouseProduct(id: number): Promise<boolean>;
+  
   // Users
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;

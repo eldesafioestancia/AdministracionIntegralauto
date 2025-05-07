@@ -189,9 +189,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/maintenance", async (req: Request, res: Response) => {
     try {
-      const maintenanceData = insertMaintenanceSchema.parse(req.body);
+      // Extraer los productos utilizados del cuerpo de la solicitud
+      const { usedProducts, ...data } = req.body;
+      
+      // Validar los datos de mantenimiento
+      const maintenanceData = insertMaintenanceSchema.parse(data);
+      
+      // Crear el registro de mantenimiento
       const newMaintenance = await storage.createMaintenance(maintenanceData);
+      
+      // Si hay productos utilizados y es un cambio de aceite y filtros,
+      // actualizamos el stock de los productos
+      if (Array.isArray(usedProducts) && usedProducts.length > 0 && 
+          maintenanceData.type === "oil_filter_change") {
+        
+        // Procesar cada producto utilizado
+        const stockUpdateResults = [];
+        
+        for (const product of usedProducts) {
+          try {
+            // Verificar si el producto existe
+            const existingProduct = await storage.getWarehouseProduct(product.productId);
+            
+            if (!existingProduct) {
+              stockUpdateResults.push({
+                productId: product.productId,
+                success: false,
+                message: "Product not found"
+              });
+              continue;
+            }
+            
+            // Verificar si hay suficiente stock
+            if (product.quantity > existingProduct.quantity) {
+              stockUpdateResults.push({
+                productId: product.productId,
+                success: false,
+                message: "Not enough stock available"
+              });
+              continue;
+            }
+            
+            // Actualizar el stock del producto
+            const newQuantity = existingProduct.quantity - product.quantity;
+            const updatedProduct = await storage.updateWarehouseProduct(
+              product.productId,
+              {
+                ...existingProduct,
+                quantity: newQuantity,
+                totalPrice: newQuantity * existingProduct.unitPrice
+              }
+            );
+            
+            stockUpdateResults.push({
+              productId: product.productId,
+              success: true,
+              previousQuantity: existingProduct.quantity,
+              newQuantity: updatedProduct.quantity
+            });
+            
+          } catch (productError) {
+            console.error(`Error updating product ${product.productId}:`, productError);
+            stockUpdateResults.push({
+              productId: product.productId,
+              success: false,
+              message: "Error updating product"
+            });
+          }
+        }
+        
+        // Devolver el nuevo mantenimiento y los resultados de la actualización del stock
+        return res.status(201).json({
+          maintenance: newMaintenance,
+          stockUpdates: stockUpdateResults
+        });
+      }
+      
+      // Si no hay productos utilizados, solo devolvemos el nuevo mantenimiento
       res.status(201).json(newMaintenance);
+      
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid maintenance data", errors: error.errors });
@@ -706,6 +782,127 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting capital record:", error);
       res.status(500).json({ message: "Error deleting capital record" });
+    }
+  });
+
+  // Rutas para el módulo de Warehouse/Depósito
+  
+  // Obtener todos los productos del depósito
+  app.get("/api/warehouse/products", async (req: Request, res: Response) => {
+    try {
+      const category = req.query.category as string | undefined;
+      const products = await storage.getWarehouseProducts(category);
+      res.json(products);
+    } catch (error) {
+      console.error("Error fetching warehouse products:", error);
+      res.status(500).json({ message: "Error fetching warehouse products" });
+    }
+  });
+
+  // Obtener un producto específico del depósito
+  app.get("/api/warehouse/products/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const product = await storage.getWarehouseProduct(id);
+      
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      
+      res.json(product);
+    } catch (error) {
+      console.error("Error fetching warehouse product:", error);
+      res.status(500).json({ message: "Error fetching warehouse product" });
+    }
+  });
+
+  // Crear un nuevo producto en el depósito
+  app.post("/api/warehouse/products", async (req: Request, res: Response) => {
+    try {
+      // En un entorno real deberíamos validar los datos con Zod
+      const newProduct = req.body;
+      const product = await storage.createWarehouseProduct(newProduct);
+      res.status(201).json(product);
+    } catch (error) {
+      console.error("Error creating warehouse product:", error);
+      res.status(500).json({ message: "Error creating warehouse product" });
+    }
+  });
+
+  // Actualizar un producto existente en el depósito
+  app.put("/api/warehouse/products/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updateData = req.body;
+      const product = await storage.updateWarehouseProduct(id, updateData);
+      
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      
+      res.json(product);
+    } catch (error) {
+      console.error("Error updating warehouse product:", error);
+      res.status(500).json({ message: "Error updating warehouse product" });
+    }
+  });
+
+  // Eliminar un producto del depósito
+  app.delete("/api/warehouse/products/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteWarehouseProduct(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting warehouse product:", error);
+      res.status(500).json({ message: "Error deleting warehouse product" });
+    }
+  });
+
+  // Actualizar el stock de un producto (agregar o quitar)
+  app.put("/api/warehouse/products/:id/stock", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { quantity, operation } = req.body;
+      
+      if (!quantity || (operation !== 'add' && operation !== 'remove')) {
+        return res.status(400).json({ message: "Invalid quantity or operation" });
+      }
+      
+      const product = await storage.getWarehouseProduct(id);
+      
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      
+      // Verificar si hay suficiente stock para quitar
+      if (operation === 'remove' && quantity > product.quantity) {
+        return res.status(400).json({ 
+          message: "Not enough stock available", 
+          available: product.quantity 
+        });
+      }
+      
+      // Actualizar el stock
+      const newQuantity = operation === 'add' 
+        ? product.quantity + quantity 
+        : product.quantity - quantity;
+      
+      const updatedProduct = await storage.updateWarehouseProduct(id, {
+        ...product,
+        quantity: newQuantity,
+        totalPrice: newQuantity * product.unitPrice
+      });
+      
+      res.json(updatedProduct);
+    } catch (error) {
+      console.error("Error updating product stock:", error);
+      res.status(500).json({ message: "Error updating product stock" });
     }
   });
 
