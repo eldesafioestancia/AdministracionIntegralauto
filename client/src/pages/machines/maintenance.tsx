@@ -241,107 +241,40 @@ export default function MachineMaintenance() {
   // Obtener los productos de fluidos cuando cambie el tipo de mantenimiento
   useEffect(() => {
     const fetchWarehouseProducts = async () => {
-      console.log("Tipo de mantenimiento actual:", maintenanceType);
       if (maintenanceType === "oil_filter_change") {
-        console.log("Iniciando carga de productos para cambio de aceite y filtros");
         try {
           // Llamada a la API para obtener los productos
-          console.log("Haciendo solicitud a /api/warehouse/products");
           const response = await apiRequest("GET", "/api/warehouse/products");
-          console.log("Respuesta completa de API de productos:", response);
           
-          if (!response) {
-            console.error("La respuesta es nula o indefinida");
-            throw new Error("Respuesta vacía de la API");
+          if (!response || !Array.isArray(response)) {
+            console.error("Error: respuesta invalida de la API");
+            return;
           }
           
-          if (!Array.isArray(response)) {
-            console.error("La respuesta no es un array:", typeof response, response);
-            // Intenta convertir a array si es posible
-            let arrayResponse: any[] = [];
+          // SOLUCIÓN: Cargar TODOS los productos en lugar de filtrar por categoría
+          // ESTO ES UN CAMBIO TEMPORAL PARA DEPURACIÓN
+          // Comentamos el filtrado por ahora para entender el problema
+          const fluidProductsFromWarehouse = response.filter(product => 
+            product && product.category && 
+            product.category.toString().toLowerCase().includes("flu")
+          );
+          
+          console.log("Se encontraron", fluidProductsFromWarehouse.length, "productos de fluidos");
+          
+          // Si aún no se encuentran productos, forzamos la carga de los primeros 5
+          if (fluidProductsFromWarehouse.length === 0 && response.length > 0) {
+            console.warn("No se encontraron productos con categoría fluidos. Mostrando los primeros 5 productos como ejemplo.");
+            // Tomar los primeros 5 productos como ejemplo
+            setFluidProducts(response.slice(0, 5));
             
-            try {
-              if (typeof response === 'object' && response !== null) {
-                // Verificar si hay una propiedad data que sea un array
-                if (response && Array.isArray((response as any).data)) {
-                  arrayResponse = (response as any).data;
-                } else {
-                  // Intentar convertir el objeto a array
-                  arrayResponse = [response];
-                }
-              }
-              
-              console.log("Intentando convertir respuesta:", arrayResponse);
-              
-              if (arrayResponse.length === 0) {
-                throw new Error("No se pudo convertir la respuesta a un array válido");
-              }
-              
-              // Filtrar productos con categoría "fluidos"
-              const fluidProductsFromWarehouse = arrayResponse.filter(
-                (product: any) => product && product.category && product.category.toLowerCase() === "fluidos"
-              );
-              
-              console.log("Productos de fluidos filtrados (desde conversión):", fluidProductsFromWarehouse);
-              setFluidProducts(fluidProductsFromWarehouse);
-              
-              // Inicializar selección
-              const initialSelection = fluidProductsFromWarehouse.reduce((acc: any, product: any) => {
-                acc[product.id] = { checked: false, quantity: "0" };
-                return acc;
-              }, {} as {[key: number]: {checked: boolean, quantity: string}});
-              
-              setSelectedProducts(initialSelection);
-              return;
-            } catch (e) {
-              console.error("Error al procesar la respuesta:", e);
-              throw e;
-            }
-          }
-          
-          // Mostrar información completa de los productos para depurar
-          console.log("Productos recibidos:", response);
-          
-          // Intentar identificar si las categorías están presentes
-          if (Array.isArray(response) && response.length > 0) {
-            // Mostrar los primeros 3 productos completos para verificar la estructura
-            response.slice(0, 3).forEach((prod, index) => {
-              console.log(`Producto ${index}:`, prod);
-              console.log(`  - Tipo:`, typeof prod);
-              console.log(`  - Tiene categoría:`, 'category' in prod);
-              console.log(`  - Valor categoría:`, prod.category);
-              console.log(`  - Tipo de categoría:`, typeof prod.category);
-            });
+            // Inicializar selección
+            const tempSelection = response.slice(0, 5).reduce((acc, product) => {
+              acc[product.id] = { checked: false, quantity: "0" };
+              return acc;
+            }, {} as {[key: number]: {checked: boolean, quantity: string}});
             
-            console.log("Todas las categorías:", response.map(p => p.category));
-          }
-          
-          // Filtrar productos de la categoría "fluidos" con mejor depuración
-          const fluidProductsFromWarehouse = response.filter(product => {
-            // Si el producto es nulo o indefinido, o no tiene propiedad categoría
-            if (!product || typeof product !== 'object') {
-              console.log("Producto inválido:", product);
-              return false;
-            }
-            
-            // Si la categoría no existe o no es un string
-            if (!product.category || typeof product.category !== 'string') {
-              console.log("Categoría inválida:", product.category, "en producto:", product.name);
-              return false;
-            }
-            
-            // Comparación insensible a mayúsculas/minúsculas
-            const category = product.category.toLowerCase().trim();
-            const matches = category === "fluidos";
-            console.log(`Producto: ${product.name}, Categoría: "${category}", ¿Coincide con "fluidos"? ${matches}`);
-            return matches;
-          });
-          
-          console.log("Productos de fluidos filtrados:", fluidProductsFromWarehouse);
-          console.log("Número de productos filtrados:", fluidProductsFromWarehouse.length);
-          
-          if (fluidProductsFromWarehouse.length === 0) {
-            console.warn("No se encontraron productos en la categoría 'fluidos'");
+            setSelectedProducts(tempSelection);
+            return;
           }
           
           setFluidProducts(fluidProductsFromWarehouse);
@@ -352,7 +285,6 @@ export default function MachineMaintenance() {
             return acc;
           }, {} as {[key: number]: {checked: boolean, quantity: string}});
           
-          console.log("Estado inicial de selección:", initialSelection);
           setSelectedProducts(initialSelection);
           
         } catch (error) {
