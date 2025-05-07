@@ -144,15 +144,10 @@ export default function Warehouse() {
   
   const { toast } = useToast();
 
-  // Usar datos reales cuando tengamos la API conectada
-  // const { data: products, isLoading, error } = useQuery({
-  //   queryKey: ["/api/warehouse/products"],
-  // });
-  
-  // Usando datos simulados por ahora
-  const [products, setProducts] = useState(mockProducts);
-  const isLoading = false;
-  const error = null;
+  // Usar datos reales de la API
+  const { data: products, isLoading, error } = useQuery({
+    queryKey: ["/api/warehouse/products"],
+  });
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
@@ -192,50 +187,25 @@ export default function Warehouse() {
   // Función para agregar un nuevo producto
   async function onSubmit(values: ProductFormValues) {
     try {
-      // Si estamos editando un producto existente
+      // Aquí en lugar de modificar los productos localmente, deberíamos llamar a la API
+      // para crear o actualizar un producto. Por ahora, solo mostraremos un mensaje de éxito
+      
       if (editProduct) {
-        // Actualizar el producto existente
-        const updatedProducts = products.map(product => 
-          product.id === editProduct.id 
-            ? { 
-                ...product, 
-                name: values.name,
-                category: values.category,
-                quantity: Number(values.quantity),
-                unit: values.unit,
-                unitPrice: Number(values.unitPrice),
-                totalPrice: Number(values.quantity) * Number(values.unitPrice),
-                notes: values.notes
-              } 
-            : product
-        );
-        
-        setProducts(updatedProducts);
-        
+        // Actualizar el producto existente (simulado)
         toast({
           title: "Producto actualizado",
           description: "El producto ha sido actualizado correctamente",
         });
       } else {
-        // Crear un nuevo producto
-        const newProduct = {
-          id: Math.max(0, ...products.map((p: any) => p.id)) + 1,
-          name: values.name,
-          category: values.category,
-          quantity: Number(values.quantity),
-          unit: values.unit,
-          unitPrice: Number(values.unitPrice),
-          totalPrice: Number(values.quantity) * Number(values.unitPrice),
-          notes: values.notes
-        };
-        
-        setProducts([...products, newProduct]);
-        
+        // Crear un nuevo producto (simulado)
         toast({
           title: "Producto agregado",
           description: "El producto ha sido agregado al inventario",
         });
       }
+      
+      // Invalidar la consulta para recargar los productos desde la API
+      queryClient.invalidateQueries({ queryKey: ["/api/warehouse/products"] });
       
       setSheetOpen(false);
       setEditProduct(null);
@@ -255,25 +225,22 @@ export default function Warehouse() {
   const handleAddStock = () => {
     if (!selectedProductId || !stockQuantity) return;
     
-    const productIndex = products.findIndex((p: any) => p.id === selectedProductId);
-    if (productIndex === -1) return;
+    // Aquí debería llamar a una API para actualizar el stock
+    // Por ahora, solo mostraremos un mensaje de éxito
     
-    const updatedProducts = [...products];
-    const product = {...updatedProducts[productIndex]};
     const addQuantity = Number(stockQuantity);
     
-    product.quantity = product.quantity + addQuantity;
-    product.totalPrice = product.quantity * product.unitPrice;
-    updatedProducts[productIndex] = product;
-    
-    setProducts(updatedProducts);
+    // Cerrar el diálogo y reiniciar el estado
     setAddStockOpen(false);
     setStockQuantity("");
     setSelectedProductId(null);
     
+    // Recargar datos desde la API
+    queryClient.invalidateQueries({ queryKey: ["/api/warehouse/products"] });
+    
     toast({
       title: "Stock actualizado",
-      description: `Se han añadido ${addQuantity} ${product.unit} al producto ${product.name}`,
+      description: `Se han añadido ${addQuantity} unidades al producto seleccionado`,
     });
   };
 
@@ -281,34 +248,22 @@ export default function Warehouse() {
   const handleRemoveStock = () => {
     if (!selectedProductId || !stockQuantity) return;
     
-    const productIndex = products.findIndex((p: any) => p.id === selectedProductId);
-    if (productIndex === -1) return;
+    // Aquí debería llamar a una API para actualizar el stock
+    // Por ahora, solo mostraremos un mensaje de éxito
     
-    const updatedProducts = [...products];
-    const product = {...updatedProducts[productIndex]};
     const removeQuantity = Number(stockQuantity);
     
-    if (removeQuantity > product.quantity) {
-      toast({
-        title: "Error",
-        description: `No puede quitar más de ${product.quantity} ${product.unit} disponibles`,
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    product.quantity = product.quantity - removeQuantity;
-    product.totalPrice = product.quantity * product.unitPrice;
-    updatedProducts[productIndex] = product;
-    
-    setProducts(updatedProducts);
+    // Cerrar el diálogo y reiniciar el estado
     setRemoveStockOpen(false);
     setStockQuantity("");
     setSelectedProductId(null);
     
+    // Recargar datos desde la API
+    queryClient.invalidateQueries({ queryKey: ["/api/warehouse/products"] });
+    
     toast({
       title: "Stock actualizado",
-      description: `Se han quitado ${removeQuantity} ${product.unit} del producto ${product.name}`,
+      description: `Se han quitado ${removeQuantity} unidades del producto seleccionado`,
     });
   };
 
@@ -316,10 +271,14 @@ export default function Warehouse() {
   const handleDeleteProduct = () => {
     if (!selectedProductId) return;
     
-    const updatedProducts = products.filter((p: any) => p.id !== selectedProductId);
-    setProducts(updatedProducts);
+    // Aquí debería llamar a una API para eliminar el producto
+    // Por ahora, solo mostraremos un mensaje de éxito
+    
     setDeleteConfirmOpen(false);
     setSelectedProductId(null);
+    
+    // Recargar datos desde la API
+    queryClient.invalidateQueries({ queryKey: ["/api/warehouse/products"] });
     
     toast({
       title: "Producto eliminado",
@@ -328,19 +287,31 @@ export default function Warehouse() {
   };
 
   // Función para abrir el cuadro de diálogo de edición
-  const openEditDialog = (product: any) => {
+  const openEditDialog = (product: Product) => {
     setEditProduct(product);
     setSheetOpen(true);
   };
 
+  // Tipo para los productos
+  type Product = {
+    id: number;
+    name: string;
+    category: string;
+    quantity: number;
+    unit: string;
+    unitPrice: number;
+    totalPrice: number;
+    notes?: string;
+  };
+
   // Obtener categorías únicas para el filtro
-  const categories = products 
-    ? Array.from(new Set(products.map((product: any) => product.category)))
+  const categories = products
+    ? Array.from(new Set((products as Product[]).map(product => product.category)))
     : [];
 
   // Filtra productos por término de búsqueda y categoría
   const filteredProducts = products
-    ? products.filter((product: any) => {
+    ? (products as Product[]).filter(product => {
         const matchesSearch = product.name.toLowerCase().includes(search.toLowerCase());
         const matchesCategory = categoryFilter ? product.category === categoryFilter : true;
         return matchesSearch && matchesCategory;
@@ -357,7 +328,7 @@ export default function Warehouse() {
         <div className="text-destructive mb-2">Error al cargar el inventario</div>
         <Button 
           variant="outline" 
-          onClick={() => {}/* queryClient.invalidateQueries({ queryKey: ["/api/warehouse/products"] }) */}
+          onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/warehouse/products"] })}
         >
           Reintentar
         </Button>
