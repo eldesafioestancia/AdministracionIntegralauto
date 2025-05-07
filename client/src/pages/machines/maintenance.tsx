@@ -19,6 +19,46 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { AlertCircle, Plus, Trash2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
+// Tipo para productos de depósito
+interface WarehouseProduct {
+  id: number;
+  name: string;
+  category: string;
+  quantity: number;
+  unit: string;
+  unitPrice: number;
+  totalPrice: number;
+}
+
+// Tipo para la respuesta de creación de mantenimiento
+interface MaintenanceResponse {
+  maintenance: {
+    id: number;
+    machineId: number;
+    date: string;
+    time: string;
+    type: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+  stockUpdates?: Array<{
+    productId: number;
+    success: boolean;
+    previousQuantity: string;
+    newQuantity: number;
+  }>;
+}
+
+// Tipo para los datos de la máquina
+interface Machine {
+  id: number;
+  brand: string;
+  model: string;
+  hours: number;
+  type: string;
+  [key: string]: any;
+}
+
 // Maintenance form schema
 const maintenanceFormSchema = z.object({
   date: z.date({
@@ -100,17 +140,6 @@ const maintenanceFormSchema = z.object({
 
 type MaintenanceFormValues = z.infer<typeof maintenanceFormSchema>;
 
-// Tipo para productos del depósito
-type WarehouseProduct = {
-  id: number;
-  name: string;
-  category: string;
-  quantity: number;
-  unit: string;
-  unitPrice: number;
-  totalPrice: number;
-};
-
 export default function MachineMaintenance() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
@@ -122,7 +151,7 @@ export default function MachineMaintenance() {
   const [selectedProducts, setSelectedProducts] = useState<{[key: number]: {checked: boolean, quantity: string}}>({});
 
   // Get machine details
-  const { data: machine, isLoading: machineLoading, error: machineError } = useQuery({
+  const { data: machine, isLoading: machineLoading, error: machineError } = useQuery<Machine>({
     queryKey: [`/api/machines/${id}`],
   });
 
@@ -214,14 +243,21 @@ export default function MachineMaintenance() {
     const fetchWarehouseProducts = async () => {
       if (maintenanceType === "oil_filter_change") {
         try {
-          // Llamada a la API para obtener los productos de la categoría "fluidos"
-          const response = await apiRequest("GET", "/api/warehouse/products?category=fluidos");
-          const warehouseProducts = response;
+          // Llamada a la API para obtener los productos
+          const response = await apiRequest<WarehouseProduct[]>("GET", "/api/warehouse/products");
+          console.log("Respuesta de API de productos:", response);
+          
+          if (!response || !Array.isArray(response)) {
+            console.error("La respuesta no es un array:", response);
+            throw new Error("Formato de respuesta inválido");
+          }
           
           // Filtrar solo los productos de la categoría "fluidos"
-          const fluidProductsFromWarehouse = warehouseProducts.filter(
-            (product) => product.category === "fluidos"
+          const fluidProductsFromWarehouse = response.filter(
+            product => product.category === "fluidos"
           );
+          
+          console.log("Productos de fluidos filtrados:", fluidProductsFromWarehouse);
           
           setFluidProducts(fluidProductsFromWarehouse);
           
@@ -300,35 +336,33 @@ export default function MachineMaintenance() {
         }
       }
       
-      // Crear registro de mantenimiento
-      await apiRequest("POST", "/api/maintenance", {
+      // Crear registro de mantenimiento y actualizar stock en una sola operación
+      const response = await apiRequest<MaintenanceResponse>("POST", "/api/maintenance", {
         ...values,
         machineId: numericId,
         // Incluir los productos utilizados para actualizar el stock
         usedProducts: selectedFluidProducts
       });
 
-      // Actualizar el stock de productos utilizados
-      // En una implementación real, esto se manejaría en el servidor
-      // Aquí mostramos un ejemplo de cómo se actualizaría
-      if (selectedFluidProducts.length > 0) {
-        try {
-          // Por cada producto seleccionado, actualizar su stock
-          for (const product of selectedFluidProducts) {
-            console.log(`Actualizando stock del producto ${product.productId}: -${product.quantity}`);
-            
-            // En una implementación real, esto sería:
-            // await apiRequest("PUT", `/api/warehouse/products/${product.productId}/remove-stock`, {
-            //   quantity: product.quantity
-            // });
-          }
-          
+      console.log("Respuesta de creación de mantenimiento:", response);
+      
+      // El servidor ahora maneja la actualización del stock automáticamente
+      // y devuelve los resultados de la actualización
+      if (selectedFluidProducts.length > 0 && response?.stockUpdates) {
+        const successfulUpdates = response.stockUpdates.filter(update => update.success).length;
+        
+        if (successfulUpdates === selectedFluidProducts.length) {
           toast({
             title: "Stock actualizado",
             description: "El inventario ha sido actualizado correctamente"
           });
-        } catch (stockError) {
-          console.error("Error al actualizar el stock:", stockError);
+        } else if (successfulUpdates > 0) {
+          toast({
+            title: "Actualización parcial",
+            description: `Se actualizaron ${successfulUpdates} de ${selectedFluidProducts.length} productos`,
+            variant: "destructive",
+          });
+        } else {
           toast({
             title: "Advertencia",
             description: "El mantenimiento se registró pero hubo un error al actualizar el inventario",
@@ -662,125 +696,131 @@ export default function MachineMaintenance() {
                   </div>
 
                   {/* Diagnóstico */}
-                  <div className="border rounded-md p-4">
-                    <h3 className="font-medium text-neutral-500 mb-4">Diagnóstico</h3>
-                    <FormField
-                      control={form.control}
-                      name="diagnosis"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Describa el diagnóstico realizado"
-                              className="min-h-[100px] resize-y"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="diagnosis"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Diagnóstico</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Descripción del diagnóstico"
+                            {...field}
+                            rows={3}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   {/* Costos */}
                   <div className="border rounded-md p-4">
                     <h3 className="font-medium text-neutral-500 mb-4">Costos</h3>
-                    <div className="space-y-6">
+                    <div className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="col-span-1 md:col-span-2">
-                          <FormField
-                            control={form.control}
-                            name="spareParts"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Repuestos</FormLabel>
-                                <FormControl>
-                                  <Textarea 
-                                    placeholder="Detalle de repuestos utilizados"
-                                    className="min-h-[80px] resize-y"
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
+                        <FormField
+                          control={form.control}
+                          name="spareParts"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Repuestos</FormLabel>
+                              <FormControl>
+                                <Textarea
+                                  placeholder="Descripción de repuestos"
+                                  {...field}
+                                  rows={3}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                         <FormField
                           control={form.control}
                           name="sparePartsCost"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Costo repuestos ($)</FormLabel>
+                              <FormLabel>Costo de repuestos ($)</FormLabel>
                               <FormControl>
-                                <Input placeholder="0.00" {...field} />
+                                <Input
+                                  type="number"
+                                  placeholder="0.00"
+                                  {...field}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
                       </div>
-
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="col-span-1 md:col-span-2">
-                          <FormField
-                            control={form.control}
-                            name="labor"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Mano de obra</FormLabel>
-                                <FormControl>
-                                  <Textarea 
-                                    placeholder="Detalle de la mano de obra realizada"
-                                    className="min-h-[80px] resize-y"
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
+                        <FormField
+                          control={form.control}
+                          name="labor"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Mano de obra</FormLabel>
+                              <FormControl>
+                                <Textarea
+                                  placeholder="Descripción de la mano de obra"
+                                  {...field}
+                                  rows={3}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                         <FormField
                           control={form.control}
                           name="laborCost"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Costo mano de obra ($)</FormLabel>
+                              <FormLabel>Costo de mano de obra ($)</FormLabel>
                               <FormControl>
-                                <Input placeholder="0.00" {...field} />
+                                <Input
+                                  type="number"
+                                  placeholder="0.00"
+                                  {...field}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
                       </div>
-
-                      <FormField
-                        control={form.control}
-                        name="totalCost"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Costo total ($)</FormLabel>
-                            <FormControl>
-                              <Input placeholder="0.00" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      <div className="col-span-1 md:col-span-2">
+                        <FormField
+                          control={form.control}
+                          name="totalCost"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Costo total ($)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  placeholder="0.00"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Sección para Control previo puesta en marcha */}
+              {/* Control previo a la puesta en marcha */}
               {maintenanceType === "pre_start_check" && (
                 <div className="space-y-6">
-                  {/* Sección de inspección previa al arranque */}
+                  {/* Antes del arranque */}
                   <div className="border rounded-md p-4">
-                    <h3 className="font-medium text-neutral-500 mb-4">Controles previos al arranque</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
+                    <h3 className="font-medium text-neutral-500 mb-4">Previo al arranque</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-y-4 gap-x-6">
                       <FormField
                         control={form.control}
                         name="gearboxOilLevel"
@@ -793,7 +833,7 @@ export default function MachineMaintenance() {
                               />
                             </FormControl>
                             <div className="space-y-1">
-                              <FormLabel>Nivel de aceite de caja</FormLabel>
+                              <FormLabel>Nivel aceite de caja</FormLabel>
                             </div>
                           </FormItem>
                         )}
@@ -811,7 +851,7 @@ export default function MachineMaintenance() {
                               />
                             </FormControl>
                             <div className="space-y-1">
-                              <FormLabel>Nivel de aceite de motor</FormLabel>
+                              <FormLabel>Nivel aceite de motor</FormLabel>
                             </div>
                           </FormItem>
                         )}
@@ -945,10 +985,10 @@ export default function MachineMaintenance() {
                     </div>
                   </div>
 
-                  {/* Sección de inspección después del arranque */}
+                  {/* Después del arranque */}
                   <div className="border rounded-md p-4">
-                    <h3 className="font-medium text-neutral-500 mb-4">Controles después del arranque</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
+                    <h3 className="font-medium text-neutral-500 mb-4">Después del arranque</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-y-4 gap-x-6">
                       <FormField
                         control={form.control}
                         name="fuelLeaks"
@@ -979,7 +1019,7 @@ export default function MachineMaintenance() {
                               />
                             </FormControl>
                             <div className="space-y-1">
-                              <FormLabel>Pérdidas de aceite: Motor</FormLabel>
+                              <FormLabel>Pérdidas aceite motor</FormLabel>
                             </div>
                           </FormItem>
                         )}
@@ -997,7 +1037,7 @@ export default function MachineMaintenance() {
                               />
                             </FormControl>
                             <div className="space-y-1">
-                              <FormLabel>Pérdidas de aceite: Caja</FormLabel>
+                              <FormLabel>Pérdidas aceite caja</FormLabel>
                             </div>
                           </FormItem>
                         )}
@@ -1015,7 +1055,7 @@ export default function MachineMaintenance() {
                               />
                             </FormControl>
                             <div className="space-y-1">
-                              <FormLabel>Pérdidas de aceite: Diferencial</FormLabel>
+                              <FormLabel>Pérdidas aceite diferencial</FormLabel>
                             </div>
                           </FormItem>
                         )}
@@ -1033,7 +1073,7 @@ export default function MachineMaintenance() {
                               />
                             </FormControl>
                             <div className="space-y-1">
-                              <FormLabel>Pérdidas de aceite: Hidráulico</FormLabel>
+                              <FormLabel>Pérdidas aceite hidráulico</FormLabel>
                             </div>
                           </FormItem>
                         )}
@@ -1051,7 +1091,7 @@ export default function MachineMaintenance() {
                               />
                             </FormControl>
                             <div className="space-y-1">
-                              <FormLabel>Presión de aceite y temperatura</FormLabel>
+                              <FormLabel>Presión aceite y temperatura</FormLabel>
                             </div>
                           </FormItem>
                         )}
@@ -1059,108 +1099,88 @@ export default function MachineMaintenance() {
                     </div>
                   </div>
 
-                  {/* Sección de adición de aceite/combustible */}
+                  {/* Agregar aceite/combustible */}
                   <div className="border rounded-md p-4">
-                    <h3 className="font-medium text-neutral-500 mb-4">Adición de aceite/combustible</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
-                      <div>
-                        <div className="flex items-start space-x-2">
-                          <FormField
-                            control={form.control}
-                            name="addOil"
-                            render={({ field }) => (
-                              <FormItem className="flex items-start space-x-2 space-y-0">
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                  />
-                                </FormControl>
-                                <div className="space-y-1">
-                                  <FormLabel>Agregar aceite</FormLabel>
-                                </div>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        {addOilChecked && (
-                          <div className="ml-6 mt-2">
-                            <FormField
-                              control={form.control}
-                              name="addOilQuantity"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <div className="flex items-center space-x-2">
-                                    <FormControl>
-                                      <Input
-                                        {...field}
-                                        type="number"
-                                        placeholder="0"
-                                        className="w-20"
-                                      />
-                                    </FormControl>
-                                    <span className="text-sm text-neutral-500">litros</span>
-                                  </div>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                        )}
+                    <h3 className="font-medium text-neutral-500 mb-4">Agregar aceite/combustible</h3>
+                    <div className="space-y-4">
+                      <div className="flex items-center space-x-2">
+                        <FormField
+                          control={form.control}
+                          name="addOil"
+                          render={({ field }) => (
+                            <FormItem className="flex items-center space-x-2 space-y-0">
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                              <div>
+                                <FormLabel>Agregar aceite</FormLabel>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
                       </div>
 
-                      <div>
-                        <div className="flex items-start space-x-2">
-                          <FormField
-                            control={form.control}
-                            name="addFuel"
-                            render={({ field }) => (
-                              <FormItem className="flex items-start space-x-2 space-y-0">
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                  />
-                                </FormControl>
-                                <div className="space-y-1">
-                                  <FormLabel>Agregar combustible</FormLabel>
-                                </div>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        {addFuelChecked && (
-                          <div className="ml-6 mt-2">
-                            <FormField
-                              control={form.control}
-                              name="addFuelQuantity"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <div className="flex items-center space-x-2">
-                                    <FormControl>
-                                      <Input
-                                        {...field}
-                                        type="number"
-                                        placeholder="0"
-                                        className="w-20"
-                                      />
-                                    </FormControl>
-                                    <span className="text-sm text-neutral-500">litros</span>
-                                  </div>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                        )}
+                      {addOilChecked && (
+                        <FormField
+                          control={form.control}
+                          name="addOilQuantity"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Cantidad de aceite (litros)</FormLabel>
+                              <FormControl>
+                                <Input type="number" step="0.1" placeholder="0.0" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
+
+                      <div className="flex items-center space-x-2">
+                        <FormField
+                          control={form.control}
+                          name="addFuel"
+                          render={({ field }) => (
+                            <FormItem className="flex items-center space-x-2 space-y-0">
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                              <div>
+                                <FormLabel>Agregar combustible</FormLabel>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
                       </div>
+
+                      {addFuelChecked && (
+                        <FormField
+                          control={form.control}
+                          name="addFuelQuantity"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Cantidad de combustible (litros)</FormLabel>
+                              <FormControl>
+                                <Input type="number" step="0.1" placeholder="0.0" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
                     </div>
                   </div>
-                  
-                  {/* Sección de terminado el turno */}
+
+                  {/* Terminado el turno */}
                   <div className="border rounded-md p-4">
                     <h3 className="font-medium text-neutral-500 mb-4">Terminado el turno</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-y-4 gap-x-6">
                       <FormField
                         control={form.control}
                         name="cutoffSwitch"
@@ -1209,7 +1229,7 @@ export default function MachineMaintenance() {
                               />
                             </FormControl>
                             <div className="space-y-1">
-                              <FormLabel>Chequeo general y reporte de fallas</FormLabel>
+                              <FormLabel>Chequeo general</FormLabel>
                             </div>
                           </FormItem>
                         )}
@@ -1219,7 +1239,7 @@ export default function MachineMaintenance() {
                 </div>
               )}
 
-              {/* Sección para Cambio de aceite y filtros */}
+              {/* Cambio de aceite y filtros */}
               {maintenanceType === "oil_filter_change" && (
                 <div className="border rounded-md p-4">
                   <h3 className="font-medium text-neutral-500 mb-4">Fluidos y Filtros del Depósito</h3>
@@ -1303,7 +1323,7 @@ export default function MachineMaintenance() {
                 />
               )}
 
-              <div className="flex justify-end space-x-2">
+              <div className="flex justify-end space-x-2 pt-4">
                 <Button
                   type="button"
                   variant="outline"
@@ -1312,7 +1332,7 @@ export default function MachineMaintenance() {
                   Cancelar
                 </Button>
                 <Button type="submit">
-                  <i className="ri-save-line mr-1"></i> Guardar
+                  Guardar registro
                 </Button>
               </div>
             </form>
