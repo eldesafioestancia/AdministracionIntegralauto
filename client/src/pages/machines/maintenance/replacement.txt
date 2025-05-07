@@ -1,6 +1,3 @@
-                <div className="border rounded-md p-4">
-                  <h3 className="font-medium text-neutral-500 mb-4">Notas de mantenimiento</h3>
-                  <div className="text-sm text-neutral-400 italic py-4">
-                    Registre cualquier observación relevante sobre el cambio de aceite y filtros en la sección de notas adicionales.
-                  </div>
-                </div>
+              {form.watch("type") === "pre_start_check" ? (
+                <div className="space-y-6">
+                  {/* Sección de inspección previa al arranque */}
