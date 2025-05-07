@@ -667,6 +667,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Warehouse products routes
+  app.get("/api/warehouse/products", async (req: Request, res: Response) => {
+    try {
+      // Por ahora, utilizaremos datos estáticos para los productos del depósito
+      const products = [
+        {
+          id: 1,
+          name: "Aceite de motor",
+          category: "Fluidos",
+          quantity: 8,
+          unit: "litros",
+          unitPrice: 2400,
+          totalPrice: 19200,
+        },
+        {
+          id: 2,
+          name: "Aceite hidráulico",
+          category: "Fluidos",
+          quantity: 0,
+          unit: "litros",
+          unitPrice: 0,
+          totalPrice: 0,
+        },
+        {
+          id: 3,
+          name: "Refrigerante",
+          category: "Fluidos",
+          quantity: 0,
+          unit: "litros",
+          unitPrice: 0,
+          totalPrice: 0,
+        },
+        {
+          id: 4,
+          name: "Filtros",
+          category: "Repuestos",
+          quantity: 0,
+          unit: "unidades",
+          unitPrice: 0,
+          totalPrice: 0,
+        },
+        {
+          id: 5,
+          name: "Correas",
+          category: "Repuestos",
+          quantity: 0,
+          unit: "unidades",
+          unitPrice: 0,
+          totalPrice: 0,
+        }
+      ];
+      res.json(products);
+    } catch (error) {
+      console.error("Error fetching warehouse products:", error);
+      res.status(500).json({ message: "Error fetching warehouse products" });
+    }
+  });
+
   // Capital routes
   app.get("/api/capital", async (req: Request, res: Response) => {
     try {
