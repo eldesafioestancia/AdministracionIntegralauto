@@ -214,58 +214,9 @@ export default function MachineMaintenance() {
     const fetchWarehouseProducts = async () => {
       if (maintenanceType === "oil_filter_change") {
         try {
-          // En un entorno real, esta sería una llamada a la API
-          // const response = await apiRequest("GET", "/api/warehouse/products?category=fluidos");
-          // const products = response.data;
-          
-          // Por ahora, usamos los productos simulados del warehouse disponibles en la app
-          const warehouseProducts = [
-            {
-              id: 1,
-              name: "Aceite de motor",
-              category: "fluidos",
-              quantity: 8,
-              unit: "litros",
-              unitPrice: 2400,
-              totalPrice: 19200,
-            },
-            {
-              id: 2,
-              name: "Aceite hidráulico",
-              category: "fluidos",
-              quantity: 10,
-              unit: "litros",
-              unitPrice: 1800,
-              totalPrice: 18000,
-            },
-            {
-              id: 3,
-              name: "Refrigerante",
-              category: "fluidos",
-              quantity: 5,
-              unit: "litros",
-              unitPrice: 1200,
-              totalPrice: 6000,
-            },
-            {
-              id: 4,
-              name: "Aceite de transmisión",
-              category: "fluidos",
-              quantity: 4,
-              unit: "litros",
-              unitPrice: 2200,
-              totalPrice: 8800,
-            },
-            {
-              id: 5,
-              name: "Líquido de frenos",
-              category: "fluidos",
-              quantity: 3,
-              unit: "litros",
-              unitPrice: 1500,
-              totalPrice: 4500,
-            },
-          ];
+          // Llamada a la API para obtener los productos de la categoría "fluidos"
+          const response = await apiRequest("GET", "/api/warehouse/products?category=fluidos");
+          const warehouseProducts = response;
           
           // Filtrar solo los productos de la categoría "fluidos"
           const fluidProductsFromWarehouse = warehouseProducts.filter(
