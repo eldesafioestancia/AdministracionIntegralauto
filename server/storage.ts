@@ -13,18 +13,10 @@ import {
   taxes, Tax, InsertTax,
   repairs, Repair, InsertRepair,
   salaries, Salary, InsertSalary,
-  capital, Capital, InsertCapital,
-  warehouseProducts, WarehouseProduct, InsertWarehouseProduct
+  capital, Capital, InsertCapital
 } from "@shared/schema";
 
 export interface IStorage {
-  // Warehouse Products
-  getWarehouseProducts(category?: string): Promise<WarehouseProduct[]>;
-  getWarehouseProduct(id: number): Promise<WarehouseProduct | undefined>;
-  createWarehouseProduct(product: InsertWarehouseProduct): Promise<WarehouseProduct>;
-  updateWarehouseProduct(id: number, product: Partial<InsertWarehouseProduct>): Promise<WarehouseProduct | undefined>;
-  deleteWarehouseProduct(id: number): Promise<boolean>;
-  
   // Users
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
@@ -154,10 +146,7 @@ export class MemStorage implements IStorage {
     repair: number;
     salary: number;
     capital: number;
-    warehouseProduct: number;
   };
-
-  private warehouseProducts: Map<number, WarehouseProduct>;
 
   constructor() {
     this.users = new Map();
@@ -175,7 +164,6 @@ export class MemStorage implements IStorage {
     this.repairs = new Map();
     this.salaries = new Map();
     this.capitals = new Map();
-    this.warehouseProducts = new Map();
 
     this.currentIds = {
       user: 1,
@@ -193,7 +181,6 @@ export class MemStorage implements IStorage {
       repair: 1,
       salary: 1,
       capital: 1,
-      warehouseProduct: 1,
     };
 
     // Initialize with a default admin user
@@ -660,75 +647,6 @@ export class MemStorage implements IStorage {
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 5);
   }
-      
-  // Warehouse Products
-  async getWarehouseProducts(category?: string): Promise<WarehouseProduct[]> {
-    const products = Array.from(this.warehouseProducts.values());
-    if (category) {
-      return products.filter(p => p.category === category);
-    }
-    return products;
-  }
-
-  async getWarehouseProduct(id: number): Promise<WarehouseProduct | undefined> {
-    return this.warehouseProducts.get(id);
-  }
-
-  async createWarehouseProduct(insertProduct: InsertWarehouseProduct): Promise<WarehouseProduct> {
-    const id = this.currentIds.warehouseProduct++;
-    const now = new Date();
-    
-    // Calcular el precio total basado en la cantidad y el precio unitario
-    const quantity = parseFloat(insertProduct.quantity.toString());
-    const unitPrice = parseFloat(insertProduct.unitPrice.toString());
-    const totalPrice = quantity * unitPrice;
-    
-    const product: WarehouseProduct = { 
-      ...insertProduct, 
-      id, 
-      totalPrice: totalPrice.toString(),
-      createdAt: now, 
-      updatedAt: now 
-    };
-    
-    this.warehouseProducts.set(id, product);
-    return product;
-  }
-
-  async updateWarehouseProduct(id: number, updateData: Partial<InsertWarehouseProduct>): Promise<WarehouseProduct | undefined> {
-    const product = this.warehouseProducts.get(id);
-    if (!product) return undefined;
-    
-    const now = new Date();
-    let totalPrice = parseFloat(product.totalPrice.toString());
-    
-    // Si se actualizó la cantidad o el precio unitario, recalculamos el total
-    if (updateData.quantity !== undefined || updateData.unitPrice !== undefined) {
-      const quantity = updateData.quantity !== undefined 
-        ? parseFloat(updateData.quantity.toString()) 
-        : parseFloat(product.quantity.toString());
-        
-      const unitPrice = updateData.unitPrice !== undefined 
-        ? parseFloat(updateData.unitPrice.toString()) 
-        : parseFloat(product.unitPrice.toString());
-        
-      totalPrice = quantity * unitPrice;
-    }
-    
-    const updatedProduct: WarehouseProduct = {
-      ...product,
-      ...updateData,
-      totalPrice: totalPrice.toString(),
-      updatedAt: now,
-    };
-    
-    this.warehouseProducts.set(id, updatedProduct);
-    return updatedProduct;
-  }
-
-  async deleteWarehouseProduct(id: number): Promise<boolean> {
-    return this.warehouseProducts.delete(id);
-  }
 }
 
 // Inicializar el almacenamiento
@@ -816,92 +734,6 @@ async function loadSampleData() {
     });
     console.log(`[Sample Data] Finanza 2 creada: ${finance2.concept} (ID: ${finance2.id})`);
 
-    // Crear productos de depósito (fluidos para mantenimiento)
-    const fluidCategory = "fluidos";
-    await storage.createWarehouseProduct({
-      name: "Aceite de motor 15W-40",
-      category: fluidCategory,
-      quantity: "50",
-      unit: "litros",
-      unitPrice: "15.50",
-      notes: "Aceite para motores diésel"
-    });
-
-    await storage.createWarehouseProduct({
-      name: "Aceite hidráulico",
-      category: fluidCategory,
-      quantity: "35",
-      unit: "litros",
-      unitPrice: "18.75",
-      notes: "Para sistemas hidráulicos"
-    });
-
-    await storage.createWarehouseProduct({
-      name: "Aceite de transmisión",
-      category: fluidCategory,
-      quantity: "25",
-      unit: "litros",
-      unitPrice: "22.30",
-      notes: "Para cajas de cambio y transmisiones"
-    });
-
-    await storage.createWarehouseProduct({
-      name: "Refrigerante",
-      category: fluidCategory,
-      quantity: "40",
-      unit: "litros",
-      unitPrice: "12.80",
-      notes: "Anticongelante para radiadores"
-    });
-
-    await storage.createWarehouseProduct({
-      name: "Grasa multipropósito",
-      category: fluidCategory,
-      quantity: "20",
-      unit: "kg",
-      unitPrice: "25.40",
-      notes: "Para articulaciones y rodamientos"
-    });
-
-    // Crear productos de categoría repuestos
-    const repuestosCategory = "repuestos";
-    await storage.createWarehouseProduct({
-      name: "Filtro de aceite",
-      category: repuestosCategory,
-      quantity: "15",
-      unit: "unidades",
-      unitPrice: "35.20",
-      notes: "Compatible con motores John Deere serie 5000"
-    });
-
-    await storage.createWarehouseProduct({
-      name: "Filtro de combustible",
-      category: repuestosCategory,
-      quantity: "18",
-      unit: "unidades",
-      unitPrice: "28.90",
-      notes: "Compatible con motores diésel"
-    });
-
-    await storage.createWarehouseProduct({
-      name: "Filtro de aire",
-      category: repuestosCategory,
-      quantity: "10",
-      unit: "unidades",
-      unitPrice: "42.75",
-      notes: "Para tractores agrícolas"
-    });
-
-    await storage.createWarehouseProduct({
-      name: "Filtro hidráulico",
-      category: repuestosCategory,
-      quantity: "8",
-      unit: "unidades",
-      unitPrice: "55.40",
-      notes: "Para sistemas hidráulicos de alta presión"
-    });
-
-    console.log("[Sample Data] Productos de depósito creados exitosamente");
     console.log("[Sample Data] Datos de ejemplo cargados exitosamente.");
   } catch (error) {
     console.error("[Sample Data] Error al crear datos de ejemplo:", error);
