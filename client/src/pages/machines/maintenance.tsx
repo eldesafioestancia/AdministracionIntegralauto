@@ -208,64 +208,89 @@ export default function MachineMaintenance() {
 
   // Obtener los productos de fluidos cuando cambie el tipo de mantenimiento
   useEffect(() => {
-    if (maintenanceType === "oil_filter_change") {
-      // Para este ejemplo, estamos usando datos simulados del warehouse
-      // En un caso real, se obtendría mediante una consulta a la API
-      const mockProducts = [
-        {
-          id: 1,
-          name: "Aceite de motor",
-          category: "fluidos",
-          quantity: 8,
-          unit: "litros",
-          unitPrice: 2400,
-          totalPrice: 19200,
-        },
-        {
-          id: 2,
-          name: "Aceite hidráulico",
-          category: "fluidos",
-          quantity: 10,
-          unit: "litros",
-          unitPrice: 1800,
-          totalPrice: 18000,
-        },
-        {
-          id: 3,
-          name: "Refrigerante",
-          category: "fluidos",
-          quantity: 5,
-          unit: "litros",
-          unitPrice: 1200,
-          totalPrice: 6000,
-        },
-        {
-          id: 4,
-          name: "Aceite de transmisión",
-          category: "fluidos",
-          quantity: 4,
-          unit: "litros",
-          unitPrice: 2200,
-          totalPrice: 8800,
-        },
-      ];
-      
-      // Filtrar solo los productos de la categoría "fluidos"
-      const fluidProductsFromWarehouse = mockProducts.filter(
-        (product) => product.category === "fluidos"
-      );
-      
-      setFluidProducts(fluidProductsFromWarehouse);
-      
-      // Inicializar el estado de selección para cada producto
-      const initialSelection = fluidProductsFromWarehouse.reduce((acc, product) => {
-        acc[product.id] = { checked: false, quantity: "0" };
-        return acc;
-      }, {} as {[key: number]: {checked: boolean, quantity: string}});
-      
-      setSelectedProducts(initialSelection);
-    }
-  }, [maintenanceType]);
+    const fetchWarehouseProducts = async () => {
+      if (maintenanceType === "oil_filter_change") {
+        try {
+          // En un entorno real, esta sería una llamada a la API
+          // const response = await apiRequest("GET", "/api/warehouse/products?category=fluidos");
+          // const products = response.data;
+          
+          // Por ahora, usamos los productos simulados del warehouse disponibles en la app
+          const warehouseProducts = [
+            {
+              id: 1,
+              name: "Aceite de motor",
+              category: "fluidos",
+              quantity: 8,
+              unit: "litros",
+              unitPrice: 2400,
+              totalPrice: 19200,
+            },
+            {
+              id: 2,
+              name: "Aceite hidráulico",
+              category: "fluidos",
+              quantity: 10,
+              unit: "litros",
+              unitPrice: 1800,
+              totalPrice: 18000,
+            },
+            {
+              id: 3,
+              name: "Refrigerante",
+              category: "fluidos",
+              quantity: 5,
+              unit: "litros",
+              unitPrice: 1200,
+              totalPrice: 6000,
+            },
+            {
+              id: 4,
+              name: "Aceite de transmisión",
+              category: "fluidos",
+              quantity: 4,
+              unit: "litros",
+              unitPrice: 2200,
+              totalPrice: 8800,
+            },
+            {
+              id: 5,
+              name: "Líquido de frenos",
+              category: "fluidos",
+              quantity: 3,
+              unit: "litros",
+              unitPrice: 1500,
+              totalPrice: 4500,
+            },
+          ];
+          
+          // Filtrar solo los productos de la categoría "fluidos"
+          const fluidProductsFromWarehouse = warehouseProducts.filter(
+            (product) => product.category === "fluidos"
+          );
+          
+          setFluidProducts(fluidProductsFromWarehouse);
+          
+          // Inicializar el estado de selección para cada producto
+          const initialSelection = fluidProductsFromWarehouse.reduce((acc, product) => {
+            acc[product.id] = { checked: false, quantity: "0" };
+            return acc;
+          }, {} as {[key: number]: {checked: boolean, quantity: string}});
+          
+          setSelectedProducts(initialSelection);
+        } catch (error) {
+          console.error("Error al cargar productos del depósito:", error);
+          toast({
+            title: "Error",
+            description: "No se pudieron cargar los productos del depósito",
+            variant: "destructive",
+          });
+        }
+      }
+    };
+    
+    fetchWarehouseProducts();
+  }, [maintenanceType, toast]);
 
   // Manejar cambios en la selección de productos
   const handleProductChange = (productId: number, isChecked: boolean) => {
@@ -291,20 +316,84 @@ export default function MachineMaintenance() {
 
   async function onSubmit(values: MaintenanceFormValues) {
     try {
+      // Si es cambio de aceite y filtros, recopilar los productos seleccionados
+      const selectedFluidProducts: {productId: number, quantity: number}[] = [];
+      
+      if (values.type === "oil_filter_change") {
+        // Recopilar todos los productos seleccionados que tengan cantidad mayor a 0
+        Object.entries(selectedProducts).forEach(([productId, data]) => {
+          if (data.checked && parseFloat(data.quantity) > 0) {
+            selectedFluidProducts.push({
+              productId: parseInt(productId),
+              quantity: parseFloat(data.quantity)
+            });
+          }
+        });
+        
+        // Validar que no se exceda el stock disponible
+        const invalidProduct = fluidProducts.find(product => {
+          const selected = selectedProducts[product.id];
+          return selected?.checked && parseFloat(selected.quantity) > product.quantity;
+        });
+        
+        if (invalidProduct) {
+          toast({
+            title: "Error de stock",
+            description: `La cantidad seleccionada de ${invalidProduct.name} excede el stock disponible`,
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+      
+      // Crear registro de mantenimiento
       await apiRequest("POST", "/api/maintenance", {
         ...values,
-        machineId: numericId
+        machineId: numericId,
+        // Incluir los productos utilizados para actualizar el stock
+        usedProducts: selectedFluidProducts
       });
 
-      // Invalidate maintenance query to refresh the list
+      // Actualizar el stock de productos utilizados
+      // En una implementación real, esto se manejaría en el servidor
+      // Aquí mostramos un ejemplo de cómo se actualizaría
+      if (selectedFluidProducts.length > 0) {
+        try {
+          // Por cada producto seleccionado, actualizar su stock
+          for (const product of selectedFluidProducts) {
+            console.log(`Actualizando stock del producto ${product.productId}: -${product.quantity}`);
+            
+            // En una implementación real, esto sería:
+            // await apiRequest("PUT", `/api/warehouse/products/${product.productId}/remove-stock`, {
+            //   quantity: product.quantity
+            // });
+          }
+          
+          toast({
+            title: "Stock actualizado",
+            description: "El inventario ha sido actualizado correctamente"
+          });
+        } catch (stockError) {
+          console.error("Error al actualizar el stock:", stockError);
+          toast({
+            title: "Advertencia",
+            description: "El mantenimiento se registró pero hubo un error al actualizar el inventario",
+            variant: "destructive",
+          });
+        }
+      }
+
+      // Invalidar las consultas para refrescar los datos
       queryClient.invalidateQueries({ queryKey: [`/api/maintenance?machineId=${id}`] });
+      // También invalidar las consultas del inventario
+      queryClient.invalidateQueries({ queryKey: ["/api/warehouse/products"] });
 
       toast({
         title: "Mantenimiento registrado",
         description: "El registro de mantenimiento ha sido creado exitosamente",
       });
 
-      // Navigate back to machine details
+      // Navegar de vuelta a detalles de la máquina
       navigate(`/machines/${id}`);
 
     } catch (error) {

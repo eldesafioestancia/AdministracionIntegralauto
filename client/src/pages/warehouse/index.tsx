@@ -311,6 +311,33 @@ export default function Warehouse() {
       description: `Se han quitado ${removeQuantity} ${product.unit} del producto ${product.name}`,
     });
   };
+  
+  // Función para reducir stock después de mantenimiento (llamada desde la API)
+  const reduceStockAfterMaintenance = (productId: number, quantity: number) => {
+    const productIndex = products.findIndex((p: any) => p.id === productId);
+    
+    if (productIndex === -1) {
+      console.error(`Producto con ID ${productId} no encontrado`);
+      return false;
+    }
+    
+    const product = {...products[productIndex]};
+    
+    if (quantity > product.quantity) {
+      console.error(`No hay suficiente stock para el producto ${product.name}`);
+      return false;
+    }
+    
+    const updatedProducts = [...products];
+    product.quantity = product.quantity - quantity;
+    product.totalPrice = product.quantity * product.unitPrice;
+    updatedProducts[productIndex] = product;
+    
+    setProducts(updatedProducts);
+    
+    console.log(`Stock reducido: ${quantity} ${product.unit} de ${product.name} para mantenimiento`);
+    return true;
+  };
 
   // Función para eliminar un producto
   const handleDeleteProduct = () => {
