@@ -104,15 +104,41 @@ export default function MachineMaintenance() {
   const { toast } = useToast();
   const numericId = parseInt(id);
 
+  // Definimos el tipo de máquina
+  type Machine = {
+    id: number;
+    brand: string;
+    model: string;
+    type: string;
+    year: number;
+    hours: number;
+    status: string;
+    notes?: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+  
   // Get machine details
-  const { data: machine, isLoading: machineLoading, error: machineError } = useQuery({
+  const { data: machine, isLoading: machineLoading, error: machineError } = useQuery<Machine>({
     queryKey: [`/api/machines/${id}`],
   });
   
+  // Definimos el tipo de producto
+  type Product = {
+    id: number;
+    name: string;
+    category: string;
+    quantity: number;
+    unit: string;
+    unitPrice: number;
+    totalPrice: number;
+    notes?: string;
+  };
+
   // Get fluid products from warehouse
   const { data: fluidProducts, isLoading: fluidProductsLoading } = useQuery({
     queryKey: ['/api/warehouse/products'],
-    select: (products) => products?.filter((product: any) => 
+    select: (products) => (products as Product[])?.filter(product => 
       product.category === 'Fluidos'
     ),
   });
@@ -194,7 +220,7 @@ export default function MachineMaintenance() {
     
     // Añadir campos dinámicos para los productos del depósito
     if (fluidProducts) {
-      fluidProducts.forEach((product: any) => {
+      fluidProducts.forEach((product: Product) => {
         defaultValues[`product_${product.id}`] = false;
         defaultValues[`quantity_${product.id}`] = "";
       });
@@ -227,7 +253,7 @@ export default function MachineMaintenance() {
       // Si es cambio de aceite y filtros, procesar los productos utilizados
       if (values.type === "oil_filter_change" && fluidProducts) {
         // Recopilar los productos fluidos seleccionados
-        fluidProducts.forEach((product: any) => {
+        fluidProducts.forEach((product: Product) => {
           const productKey = `product_${product.id}`;
           const quantityKey = `quantity_${product.id}`;
           

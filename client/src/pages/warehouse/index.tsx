@@ -552,7 +552,7 @@ export default function Warehouse() {
           </TableHeader>
           <TableBody>
             {filteredProducts.length > 0 ? (
-              filteredProducts.map((product: any) => (
+              filteredProducts.map((product) => (
                 <TableRow key={product.id}>
                   <TableCell className="font-medium">{product.name}</TableCell>
                   <TableCell>
