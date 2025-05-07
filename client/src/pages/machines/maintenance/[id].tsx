@@ -48,12 +48,12 @@ const maintenanceFormSchema = z.object({
   notes: z.string().optional(),
   isModified: z.boolean().default(true),
   modifiedAt: z.date().optional(),
-  
+
   // Información del taller para mantenimiento y reparación
   workshopName: z.string().optional(), // Nombre del taller
   workshopAddress: z.string().optional(), // Dirección del taller
   workshopPhone: z.string().optional(), // Teléfono del taller
-  
+
   // Campos para mantenimiento y reparación
   electricalSystem: z.boolean().default(false), // Eléctrico
   mechanicalSystem: z.boolean().default(false), // Mecánico
@@ -63,14 +63,14 @@ const maintenanceFormSchema = z.object({
   hydraulicSystem: z.boolean().default(false), // Hidráulico
   brakes: z.boolean().default(false), // Frenos
   diagnosis: z.string().optional(), // Diagnóstico
-  
+
   // Costos de mantenimiento y reparación
   spareParts: z.string().optional(), // Descripción de repuestos
   sparePartsCost: z.string().optional(), // Costo total de repuestos en pesos
   labor: z.string().optional(), // Descripción de mano de obra
   laborCost: z.string().optional(), // Costo total de mano de obra en pesos
   totalCost: z.string().optional(), // Costo total
-  
+
   // Previo al arranque
   gearboxOilLevel: z.boolean().default(false), // Chequear nivel aceite de caja
   engineOilLevel: z.boolean().default(false), // Chequear nivel aceite de motor
@@ -81,7 +81,7 @@ const maintenanceFormSchema = z.object({
   oilBathAirFilter: z.boolean().default(false), // Limpiar filtro de aire baño aceite
   differentialVent: z.boolean().default(false), // Limpiar venteo de diferencial
   greasing: z.boolean().default(false), // Engrasar
-  
+
   // Después del arranque
   fuelLeaks: z.boolean().default(false), // Posibles pérdidas de combustible
   engineOilLeaks: z.boolean().default(false), // Posibles pérdidas de aceite: Motor
@@ -89,18 +89,18 @@ const maintenanceFormSchema = z.object({
   differentialOilLeaks: z.boolean().default(false), // Posibles pérdidas de aceite: Diferencial
   hydraulicOilLeaks: z.boolean().default(false), // Posibles pérdidas de aceite: Hidráulico
   oilPressureTemp: z.boolean().default(false), // Presión de aceite y temperatura
-  
+
   // Agregar aceite/combustible
   addOil: z.boolean().default(false), // Agregar aceite
   addOilQuantity: z.string().optional(), // Cantidad de aceite agregado
   addFuel: z.boolean().default(false), // Agregar combustible
   addFuelQuantity: z.string().optional(), // Cantidad de combustible agregado
-  
+
   // Terminado el turno
   cutoffSwitch: z.boolean().default(false), // Llave de corte
   cleaning: z.boolean().default(false), // Limpiar
   generalCheck: z.boolean().default(false), // Chequeo general y reporte de fallas
-  
+
   // Campos originales para cambio de aceite y filtros
   motorOil: z.boolean().default(false),
   motorOilQuantity: z.string().optional(),
@@ -881,7 +881,7 @@ export default function EditMaintenance() {
                           </FormItem>
                         )}
                       />
-                      
+
                       <div>
                         <div className="flex items-start space-x-2">
                           <FormField
@@ -927,7 +927,7 @@ export default function EditMaintenance() {
                           </div>
                         )}
                       </div>
-                      
+
                       <div>
                         <div className="flex items-start space-x-2">
                           <FormField
@@ -975,7 +975,7 @@ export default function EditMaintenance() {
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Sección de terminado el turno */}
                   <div className="border rounded-md p-4">
                     <h3 className="font-medium text-neutral-500 mb-4">Terminado el turno</h3>
@@ -1036,10 +1036,17 @@ export default function EditMaintenance() {
                     </div>
                   </div>
                 </div>
-              ) : (
+              )}
+
+              {form.watch("type") === "oil_filter_change" && (
+                <div className="border rounded-md p-4">
+                  <h3 className="font-medium text-neutral-500 mb-4">Cambio de aceite y filtros</h3>
+                  <p className="text-sm text-neutral-500">Se ha realizado el cambio de aceite y filtros correspondiente.</p>
+                </div>
+              )} : (
                 <div className="border rounded-md p-4">
                   <h3 className="font-medium text-neutral-500 mb-4">Tareas realizadas</h3>
-  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
                     <div>
                       <div className="flex items-start space-x-2">
@@ -1086,7 +1093,7 @@ export default function EditMaintenance() {
                         </div>
                       )}
                     </div>
-  
+
                     <div>
                       <div className="flex items-start space-x-2">
                         <FormField
@@ -1132,7 +1139,7 @@ export default function EditMaintenance() {
                         </div>
                       )}
                     </div>
-  
+
                     <div>
                       <div className="flex items-start space-x-2">
                         <FormField
@@ -1178,7 +1185,7 @@ export default function EditMaintenance() {
                         </div>
                       )}
                     </div>
-  
+
                     <FormField
                       control={form.control}
                       name="oilFilter"
@@ -1196,7 +1203,7 @@ export default function EditMaintenance() {
                         </FormItem>
                       )}
                     />
-  
+
                     <FormField
                       control={form.control}
                       name="hydraulicFilter"
@@ -1214,7 +1221,7 @@ export default function EditMaintenance() {
                         </FormItem>
                       )}
                     />
-  
+
                     <FormField
                       control={form.control}
                       name="fuelFilter"
@@ -1232,7 +1239,7 @@ export default function EditMaintenance() {
                         </FormItem>
                       )}
                     />
-  
+
                     <FormField
                       control={form.control}
                       name="airFilter"
