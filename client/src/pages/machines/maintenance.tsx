@@ -113,7 +113,7 @@ export default function MachineMaintenance() {
   const { data: fluidProducts, isLoading: fluidProductsLoading } = useQuery({
     queryKey: ['/api/warehouse/products'],
     select: (products) => products?.filter((product: any) => 
-      product.category?.toLowerCase() === 'fluidos'
+      product.category === 'Fluidos'
     ),
   });
 
