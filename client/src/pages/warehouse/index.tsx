@@ -144,10 +144,15 @@ export default function Warehouse() {
   
   const { toast } = useToast();
 
-  // Usar datos reales de la API
-  const { data: products, isLoading, error } = useQuery({
-    queryKey: ["/api/warehouse/products"],
-  });
+  // Usar datos reales cuando tengamos la API conectada
+  // const { data: products, isLoading, error } = useQuery({
+  //   queryKey: ["/api/warehouse/products"],
+  // });
+  
+  // Usando datos simulados por ahora
+  const [products, setProducts] = useState(mockProducts);
+  const isLoading = false;
+  const error = null;
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
@@ -187,25 +192,50 @@ export default function Warehouse() {
   // Función para agregar un nuevo producto
   async function onSubmit(values: ProductFormValues) {
     try {
-      // Aquí en lugar de modificar los productos localmente, deberíamos llamar a la API
-      // para crear o actualizar un producto. Por ahora, solo mostraremos un mensaje de éxito
-      
+      // Si estamos editando un producto existente
       if (editProduct) {
-        // Actualizar el producto existente (simulado)
+        // Actualizar el producto existente
+        const updatedProducts = products.map(product => 
+          product.id === editProduct.id 
+            ? { 
+                ...product, 
+                name: values.name,
+                category: values.category,
+                quantity: Number(values.quantity),
+                unit: values.unit,
+                unitPrice: Number(values.unitPrice),
+                totalPrice: Number(values.quantity) * Number(values.unitPrice),
+                notes: values.notes
+              } 
+            : product
+        );
+        
+        setProducts(updatedProducts);
+        
         toast({
           title: "Producto actualizado",
           description: "El producto ha sido actualizado correctamente",
         });
       } else {
-        // Crear un nuevo producto (simulado)
+        // Crear un nuevo producto
+        const newProduct = {
+          id: Math.max(0, ...products.map((p: any) => p.id)) + 1,
+          name: values.name,
+          category: values.category,
+          quantity: Number(values.quantity),
+          unit: values.unit,
+          unitPrice: Number(values.unitPrice),
+          totalPrice: Number(values.quantity) * Number(values.unitPrice),
+          notes: values.notes
+        };
+        
+        setProducts([...products, newProduct]);
+        
         toast({
           title: "Producto agregado",
           description: "El producto ha sido agregado al inventario",
         });
       }
-      
-      // Invalidar la consulta para recargar los productos desde la API
-      queryClient.invalidateQueries({ queryKey: ["/api/warehouse/products"] });
       
       setSheetOpen(false);
       setEditProduct(null);
@@ -225,22 +255,25 @@ export default function Warehouse() {
   const handleAddStock = () => {
     if (!selectedProductId || !stockQuantity) return;
     
-    // Aquí debería llamar a una API para actualizar el stock
-    // Por ahora, solo mostraremos un mensaje de éxito
+    const productIndex = products.findIndex((p: any) => p.id === selectedProductId);
+    if (productIndex === -1) return;
     
+    const updatedProducts = [...products];
+    const product = {...updatedProducts[productIndex]};
     const addQuantity = Number(stockQuantity);
     
-    // Cerrar el diálogo y reiniciar el estado
+    product.quantity = product.quantity + addQuantity;
+    product.totalPrice = product.quantity * product.unitPrice;
+    updatedProducts[productIndex] = product;
+    
+    setProducts(updatedProducts);
     setAddStockOpen(false);
     setStockQuantity("");
     setSelectedProductId(null);
     
-    // Recargar datos desde la API
-    queryClient.invalidateQueries({ queryKey: ["/api/warehouse/products"] });
-    
     toast({
       title: "Stock actualizado",
-      description: `Se han añadido ${addQuantity} unidades al producto seleccionado`,
+      description: `Se han añadido ${addQuantity} ${product.unit} al producto ${product.name}`,
     });
   };
 
@@ -248,22 +281,34 @@ export default function Warehouse() {
   const handleRemoveStock = () => {
     if (!selectedProductId || !stockQuantity) return;
     
-    // Aquí debería llamar a una API para actualizar el stock
-    // Por ahora, solo mostraremos un mensaje de éxito
+    const productIndex = products.findIndex((p: any) => p.id === selectedProductId);
+    if (productIndex === -1) return;
     
+    const updatedProducts = [...products];
+    const product = {...updatedProducts[productIndex]};
     const removeQuantity = Number(stockQuantity);
     
-    // Cerrar el diálogo y reiniciar el estado
+    if (removeQuantity > product.quantity) {
+      toast({
+        title: "Error",
+        description: `No puede quitar más de ${product.quantity} ${product.unit} disponibles`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    product.quantity = product.quantity - removeQuantity;
+    product.totalPrice = product.quantity * product.unitPrice;
+    updatedProducts[productIndex] = product;
+    
+    setProducts(updatedProducts);
     setRemoveStockOpen(false);
     setStockQuantity("");
     setSelectedProductId(null);
     
-    // Recargar datos desde la API
-    queryClient.invalidateQueries({ queryKey: ["/api/warehouse/products"] });
-    
     toast({
       title: "Stock actualizado",
-      description: `Se han quitado ${removeQuantity} unidades del producto seleccionado`,
+      description: `Se han quitado ${removeQuantity} ${product.unit} del producto ${product.name}`,
     });
   };
 
@@ -271,14 +316,10 @@ export default function Warehouse() {
   const handleDeleteProduct = () => {
     if (!selectedProductId) return;
     
-    // Aquí debería llamar a una API para eliminar el producto
-    // Por ahora, solo mostraremos un mensaje de éxito
-    
+    const updatedProducts = products.filter((p: any) => p.id !== selectedProductId);
+    setProducts(updatedProducts);
     setDeleteConfirmOpen(false);
     setSelectedProductId(null);
-    
-    // Recargar datos desde la API
-    queryClient.invalidateQueries({ queryKey: ["/api/warehouse/products"] });
     
     toast({
       title: "Producto eliminado",
@@ -287,31 +328,19 @@ export default function Warehouse() {
   };
 
   // Función para abrir el cuadro de diálogo de edición
-  const openEditDialog = (product: Product) => {
+  const openEditDialog = (product: any) => {
     setEditProduct(product);
     setSheetOpen(true);
   };
 
-  // Tipo para los productos
-  type Product = {
-    id: number;
-    name: string;
-    category: string;
-    quantity: number;
-    unit: string;
-    unitPrice: number;
-    totalPrice: number;
-    notes?: string;
-  };
-
   // Obtener categorías únicas para el filtro
-  const categories = products
-    ? Array.from(new Set((products as Product[]).map(product => product.category)))
+  const categories = products 
+    ? Array.from(new Set(products.map((product: any) => product.category)))
     : [];
 
   // Filtra productos por término de búsqueda y categoría
   const filteredProducts = products
-    ? (products as Product[]).filter(product => {
+    ? products.filter((product: any) => {
         const matchesSearch = product.name.toLowerCase().includes(search.toLowerCase());
         const matchesCategory = categoryFilter ? product.category === categoryFilter : true;
         return matchesSearch && matchesCategory;
@@ -328,7 +357,7 @@ export default function Warehouse() {
         <div className="text-destructive mb-2">Error al cargar el inventario</div>
         <Button 
           variant="outline" 
-          onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/warehouse/products"] })}
+          onClick={() => {}/* queryClient.invalidateQueries({ queryKey: ["/api/warehouse/products"] }) */}
         >
           Reintentar
         </Button>
@@ -552,7 +581,7 @@ export default function Warehouse() {
           </TableHeader>
           <TableBody>
             {filteredProducts.length > 0 ? (
-              filteredProducts.map((product) => (
+              filteredProducts.map((product: any) => (
                 <TableRow key={product.id}>
                   <TableCell className="font-medium">{product.name}</TableCell>
                   <TableCell>
