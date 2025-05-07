@@ -299,10 +299,43 @@ export default function MachineMaintenance() {
             }
           }
           
-          // Filtrar solo los productos de la categoría "fluidos"
-          const fluidProductsFromWarehouse = response.filter(
-            product => product && product.category && product.category.toLowerCase() === "fluidos"
-          );
+          // Mostrar información completa de los productos para depurar
+          console.log("Productos recibidos:", response);
+          
+          // Intentar identificar si las categorías están presentes
+          if (Array.isArray(response) && response.length > 0) {
+            // Mostrar los primeros 3 productos completos para verificar la estructura
+            response.slice(0, 3).forEach((prod, index) => {
+              console.log(`Producto ${index}:`, prod);
+              console.log(`  - Tipo:`, typeof prod);
+              console.log(`  - Tiene categoría:`, 'category' in prod);
+              console.log(`  - Valor categoría:`, prod.category);
+              console.log(`  - Tipo de categoría:`, typeof prod.category);
+            });
+            
+            console.log("Todas las categorías:", response.map(p => p.category));
+          }
+          
+          // Filtrar productos de la categoría "fluidos" con mejor depuración
+          const fluidProductsFromWarehouse = response.filter(product => {
+            // Si el producto es nulo o indefinido, o no tiene propiedad categoría
+            if (!product || typeof product !== 'object') {
+              console.log("Producto inválido:", product);
+              return false;
+            }
+            
+            // Si la categoría no existe o no es un string
+            if (!product.category || typeof product.category !== 'string') {
+              console.log("Categoría inválida:", product.category, "en producto:", product.name);
+              return false;
+            }
+            
+            // Comparación insensible a mayúsculas/minúsculas
+            const category = product.category.toLowerCase().trim();
+            const matches = category === "fluidos";
+            console.log(`Producto: ${product.name}, Categoría: "${category}", ¿Coincide con "fluidos"? ${matches}`);
+            return matches;
+          });
           
           console.log("Productos de fluidos filtrados:", fluidProductsFromWarehouse);
           console.log("Número de productos filtrados:", fluidProductsFromWarehouse.length);
@@ -1302,6 +1335,10 @@ export default function MachineMaintenance() {
                   {fluidProducts.length === 0 ? (
                     <div className="text-center py-4 text-neutral-400">
                       No hay productos disponibles en la categoría de Fluidos
+                      <div className="mt-2 text-sm">
+                        <p>Verifique que existan productos con la categoría "fluidos" en el sistema.</p>
+                        <p className="mt-1">Debe agregar productos con esta categoría exacta en el módulo de Depósito.</p>
+                      </div>
                     </div>
                   ) : (
                     <div className="space-y-4">
