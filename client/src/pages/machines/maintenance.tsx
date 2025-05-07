@@ -241,23 +241,75 @@ export default function MachineMaintenance() {
   // Obtener los productos de fluidos cuando cambie el tipo de mantenimiento
   useEffect(() => {
     const fetchWarehouseProducts = async () => {
+      console.log("Tipo de mantenimiento actual:", maintenanceType);
       if (maintenanceType === "oil_filter_change") {
+        console.log("Iniciando carga de productos para cambio de aceite y filtros");
         try {
           // Llamada a la API para obtener los productos
-          const response = await apiRequest<WarehouseProduct[]>("GET", "/api/warehouse/products");
-          console.log("Respuesta de API de productos:", response);
+          console.log("Haciendo solicitud a /api/warehouse/products");
+          const response = await apiRequest("GET", "/api/warehouse/products");
+          console.log("Respuesta completa de API de productos:", response);
           
-          if (!response || !Array.isArray(response)) {
-            console.error("La respuesta no es un array:", response);
-            throw new Error("Formato de respuesta inválido");
+          if (!response) {
+            console.error("La respuesta es nula o indefinida");
+            throw new Error("Respuesta vacía de la API");
+          }
+          
+          if (!Array.isArray(response)) {
+            console.error("La respuesta no es un array:", typeof response, response);
+            // Intenta convertir a array si es posible
+            let arrayResponse: any[] = [];
+            
+            try {
+              if (typeof response === 'object' && response !== null) {
+                // Verificar si hay una propiedad data que sea un array
+                if (response && Array.isArray((response as any).data)) {
+                  arrayResponse = (response as any).data;
+                } else {
+                  // Intentar convertir el objeto a array
+                  arrayResponse = [response];
+                }
+              }
+              
+              console.log("Intentando convertir respuesta:", arrayResponse);
+              
+              if (arrayResponse.length === 0) {
+                throw new Error("No se pudo convertir la respuesta a un array válido");
+              }
+              
+              // Filtrar productos con categoría "fluidos"
+              const fluidProductsFromWarehouse = arrayResponse.filter(
+                (product: any) => product && product.category && product.category.toLowerCase() === "fluidos"
+              );
+              
+              console.log("Productos de fluidos filtrados (desde conversión):", fluidProductsFromWarehouse);
+              setFluidProducts(fluidProductsFromWarehouse);
+              
+              // Inicializar selección
+              const initialSelection = fluidProductsFromWarehouse.reduce((acc: any, product: any) => {
+                acc[product.id] = { checked: false, quantity: "0" };
+                return acc;
+              }, {} as {[key: number]: {checked: boolean, quantity: string}});
+              
+              setSelectedProducts(initialSelection);
+              return;
+            } catch (e) {
+              console.error("Error al procesar la respuesta:", e);
+              throw e;
+            }
           }
           
           // Filtrar solo los productos de la categoría "fluidos"
           const fluidProductsFromWarehouse = response.filter(
-            product => product.category === "fluidos"
+            product => product && product.category && product.category.toLowerCase() === "fluidos"
           );
           
           console.log("Productos de fluidos filtrados:", fluidProductsFromWarehouse);
+          console.log("Número de productos filtrados:", fluidProductsFromWarehouse.length);
+          
+          if (fluidProductsFromWarehouse.length === 0) {
+            console.warn("No se encontraron productos en la categoría 'fluidos'");
+          }
           
           setFluidProducts(fluidProductsFromWarehouse);
           
@@ -267,7 +319,9 @@ export default function MachineMaintenance() {
             return acc;
           }, {} as {[key: number]: {checked: boolean, quantity: string}});
           
+          console.log("Estado inicial de selección:", initialSelection);
           setSelectedProducts(initialSelection);
+          
         } catch (error) {
           console.error("Error al cargar productos del depósito:", error);
           toast({
@@ -337,7 +391,7 @@ export default function MachineMaintenance() {
       }
       
       // Crear registro de mantenimiento y actualizar stock en una sola operación
-      const response = await apiRequest<MaintenanceResponse>("POST", "/api/maintenance", {
+      const response = await apiRequest("POST", "/api/maintenance", {
         ...values,
         machineId: numericId,
         // Incluir los productos utilizados para actualizar el stock
@@ -348,8 +402,9 @@ export default function MachineMaintenance() {
       
       // El servidor ahora maneja la actualización del stock automáticamente
       // y devuelve los resultados de la actualización
-      if (selectedFluidProducts.length > 0 && response?.stockUpdates) {
-        const successfulUpdates = response.stockUpdates.filter(update => update.success).length;
+      const typedResponse = response as unknown as MaintenanceResponse; 
+      if (selectedFluidProducts.length > 0 && typedResponse?.stockUpdates) {
+        const successfulUpdates = typedResponse.stockUpdates.filter((update: {success: boolean}) => update.success).length;
         
         if (successfulUpdates === selectedFluidProducts.length) {
           toast({
