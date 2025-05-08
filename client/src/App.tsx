@@ -23,6 +23,7 @@ import Employees from "@/pages/employees/index";
 import Salaries from "@/pages/salaries";
 import Capital from "@/pages/capital";
 import Warehouse from "@/pages/warehouse/index";
+import Weather from "@/pages/weather";
 import Reports from "@/pages/reports/index";
 import Settings from "@/pages/settings/index";
 import AppLayout from "@/components/layouts/AppLayout";
@@ -142,6 +143,13 @@ function App() {
         <Route path="/warehouse">
           <AppLayout>
             <Warehouse />
+          </AppLayout>
+        </Route>
+        
+        {/* Ruta para clima */}
+        <Route path="/weather">
+          <AppLayout>
+            <Weather />
           </AppLayout>
         </Route>
         

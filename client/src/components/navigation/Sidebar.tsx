@@ -97,6 +97,18 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                 <i className="ri-store-2-line mr-3 text-lg"></i>
                 Depósito
               </Link>
+              <Link 
+                href="/weather"
+                className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  isActive("/weather")
+                    ? "bg-primary-light bg-opacity-10 text-primary"
+                    : "text-neutral-500 hover:bg-neutral-100"
+                }`}
+                onClick={closeSidebar}
+              >
+                <i className="ri-cloud-line mr-3 text-lg"></i>
+                Clima y Riesgos
+              </Link>
             </div>
           </div>
 
