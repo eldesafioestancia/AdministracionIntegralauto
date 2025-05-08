@@ -1039,9 +1039,26 @@ export default function EditMaintenance() {
               
               ) : form.watch("type") === "oil_filter_change" ? (
                 <div className="border rounded-md p-4">
-                  <h3 className="font-medium text-neutral-500 mb-4">Notas de mantenimiento</h3>
-                  <div className="text-sm text-neutral-400 italic py-4">
-                    Registre cualquier observación relevante sobre el cambio de aceite y filtros en la sección de notas adicionales.
+                  <h3 className="font-medium text-neutral-500 mb-4">Productos utilizados</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    {mockProducts.map((product) => (
+                      <div key={product.id} className="flex items-start space-x-2">
+                        <input 
+                          type="checkbox" 
+                          id={`product-${product.id}`}
+                          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary mt-1"
+                        />
+                        <label htmlFor={`product-${product.id}`} className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          <div className="font-medium text-neutral-700">{product.name}</div>
+                          <div className="text-neutral-500 text-xs">
+                            Disponible: {product.quantity} {product.unit} - ${product.unitPrice}/{product.unit}
+                          </div>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="text-sm text-neutral-400 italic py-2">
+                    Seleccione los productos utilizados para este mantenimiento.
                   </div>
                 </div>
               ) : (
