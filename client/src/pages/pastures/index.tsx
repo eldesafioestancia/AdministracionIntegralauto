@@ -1025,8 +1025,8 @@ export default function PasturesIndex() {
                   <FormItem>
                     <FormLabel>Máquina Utilizada</FormLabel>
                     <Select 
-                      onValueChange={(value) => field.onChange(value ? parseInt(value) : null)} 
-                      value={field.value?.toString() || ""}
+                      onValueChange={(value) => field.onChange(value === "0" ? null : parseInt(value))} 
+                      value={field.value?.toString() || "0"}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -1034,7 +1034,7 @@ export default function PasturesIndex() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Ninguna</SelectItem>
+                        <SelectItem value="0">Ninguna</SelectItem>
                         {machines && Array.isArray(machines) && machines.map((machine: any) => (
                           <SelectItem key={machine.id} value={machine.id.toString()}>
                             {machine.brand} {machine.model}
@@ -1165,7 +1165,7 @@ export default function PasturesIndex() {
                     <FormLabel>Condiciones Climáticas</FormLabel>
                     <Select 
                       onValueChange={field.onChange} 
-                      value={field.value || ""}
+                      value={field.value || undefined}
                     >
                       <FormControl>
                         <SelectTrigger>
