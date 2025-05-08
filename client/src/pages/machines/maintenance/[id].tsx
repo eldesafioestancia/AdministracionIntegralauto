@@ -31,7 +31,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -122,7 +121,6 @@ export default function EditMaintenance() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const numericId = parseInt(id);
-  const [selectedProducts, setSelectedProducts] = React.useState<number[]>([]);
 
   // Get maintenance details
   const { data: maintenance, isLoading: maintenanceLoading, error: maintenanceError } = useQuery({
@@ -134,78 +132,6 @@ export default function EditMaintenance() {
     queryKey: maintenance ? [`/api/machines/${maintenance.machineId}`] : null,
     enabled: !!maintenance,
   });
-  
-  // Usar los datos simulados de productos del almacén
-  // En un futuro se reemplazará por una llamada a la API real
-  const mockProducts = [
-    {
-      id: 1,
-      name: "Aceite de motor",
-      category: "fluidos",
-      quantity: 8,
-      unit: "litros",
-      unitPrice: 2400,
-      totalPrice: 19200,
-    },
-    {
-      id: 2,
-      name: "Aceite hidráulico",
-      category: "fluidos",
-      quantity: 5,
-      unit: "litros",
-      unitPrice: 2800,
-      totalPrice: 14000,
-    },
-    {
-      id: 3,
-      name: "Refrigerante",
-      category: "fluidos",
-      quantity: 3,
-      unit: "litros",
-      unitPrice: 1500,
-      totalPrice: 4500,
-    },
-    {
-      id: 4,
-      name: "Filtro de aceite",
-      category: "repuestos",
-      quantity: 4,
-      unit: "unidades",
-      unitPrice: 980,
-      totalPrice: 3920,
-    },
-    {
-      id: 5,
-      name: "Filtro de combustible",
-      category: "repuestos",
-      quantity: 3,
-      unit: "unidades",
-      unitPrice: 1200,
-      totalPrice: 3600,
-    },
-    {
-      id: 6,
-      name: "Filtro hidráulico",
-      category: "repuestos",
-      quantity: 2,
-      unit: "unidades",
-      unitPrice: 1800,
-      totalPrice: 3600,
-    },
-    {
-      id: 7,
-      name: "Filtro de aire",
-      category: "repuestos",
-      quantity: 2,
-      unit: "unidades",
-      unitPrice: 2100,
-      totalPrice: 4200,
-    }
-  ];
-  
-  // Simular carga de productos
-  const [products, setProducts] = React.useState(mockProducts);
-  const productsLoading = false;
 
   // Initialize form after data is loaded
   const form = useForm<MaintenanceFormValues>({
@@ -234,32 +160,10 @@ export default function EditMaintenance() {
 
   async function onSubmit(values: MaintenanceFormValues) {
     try {
-      // Si es cambio de aceite y filtros, incluir los productos seleccionados
-      const dataToSubmit = {
+      await apiRequest("PUT", `/api/maintenance/${id}`, {
         ...values,
         machineId: maintenance.machineId
-      };
-      
-      if (values.type === "oil_filter_change" && selectedProducts.length > 0) {
-        // En una implementación real, se enviarían también los IDs de productos
-        // para registrar los insumos utilizados y actualizar el inventario
-        console.log("Productos seleccionados:", selectedProducts.map(id => {
-          const product = products.find(p => p.id === id);
-          return product?.name;
-        }));
-        
-        // Simulación: Actualizar localmente el stock
-        // En un sistema real, esto se haría en el servidor
-        setProducts(prevProducts => 
-          prevProducts.map(product => 
-            selectedProducts.includes(product.id)
-              ? { ...product, quantity: Math.max(0, product.quantity - 1) }
-              : product
-          )
-        );
-      }
-
-      await apiRequest("PUT", `/api/maintenance/${id}`, dataToSubmit);
+      });
 
       // Invalidate maintenance queries to refresh the list
       queryClient.invalidateQueries({ queryKey: [`/api/maintenance/${id}`] });
@@ -1134,115 +1038,10 @@ export default function EditMaintenance() {
                 </div>
               
               ) : form.watch("type") === "oil_filter_change" ? (
-                <div className="space-y-6">
-                  <div className="border rounded-md p-4">
-                    <h3 className="font-medium text-neutral-500 mb-4">Productos para mantenimiento</h3>
-                    
-                    {productsLoading ? (
-                      <div className="text-sm text-neutral-400 py-4">
-                        Cargando productos...
-                      </div>
-                    ) : products.length === 0 ? (
-                      <div className="text-sm text-neutral-400 py-4">
-                        No hay productos disponibles en el depósito.
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-1 gap-4">
-                          <h4 className="text-sm font-medium text-neutral-600">Seleccione los productos utilizados:</h4>
-                          
-                          {/* Productos para filtros */}
-                          <div className="border rounded-md p-3">
-                            <h5 className="font-medium text-neutral-500 mb-2">Filtros</h5>
-                            <div className="grid grid-cols-1 gap-2">
-                              {products
-                                .filter(product => product.category === 'repuestos')
-                                .map(product => (
-                                  <div key={product.id} className="flex items-center space-x-2">
-                                    <Checkbox 
-                                      id={`product-${product.id}`}
-                                      checked={selectedProducts.includes(product.id)}
-                                      onCheckedChange={(checked) => {
-                                        if (checked) {
-                                          setSelectedProducts(prev => [...prev, product.id]);
-                                        } else {
-                                          setSelectedProducts(prev => prev.filter(id => id !== product.id));
-                                        }
-                                      }}
-                                    />
-                                    <label 
-                                      htmlFor={`product-${product.id}`}
-                                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                    >
-                                      {product.name} 
-                                      <Badge className="ml-2" variant="outline">
-                                        {product.quantity} {product.unit}
-                                      </Badge>
-                                    </label>
-                                  </div>
-                                ))}
-                            </div>
-                          </div>
-                          
-                          {/* Productos para fluidos */}
-                          <div className="border rounded-md p-3">
-                            <h5 className="font-medium text-neutral-500 mb-2">Fluidos</h5>
-                            <div className="grid grid-cols-1 gap-2">
-                              {products
-                                .filter(product => product.category === 'fluidos')
-                                .map(product => (
-                                  <div key={product.id} className="flex items-center space-x-2">
-                                    <Checkbox 
-                                      id={`product-${product.id}`}
-                                      checked={selectedProducts.includes(product.id)}
-                                      onCheckedChange={(checked) => {
-                                        if (checked) {
-                                          setSelectedProducts(prev => [...prev, product.id]);
-                                        } else {
-                                          setSelectedProducts(prev => prev.filter(id => id !== product.id));
-                                        }
-                                      }}
-                                    />
-                                    <label 
-                                      htmlFor={`product-${product.id}`}
-                                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                    >
-                                      {product.name} 
-                                      <Badge className="ml-2" variant="outline">
-                                        {product.quantity} {product.unit}
-                                      </Badge>
-                                    </label>
-                                  </div>
-                                ))}
-                            </div>
-                          </div>
-
-                          {/* Mostrar los productos seleccionados */}
-                          {selectedProducts.length > 0 && (
-                            <div className="mt-4 p-3 bg-neutral-50 rounded-md">
-                              <h5 className="font-medium text-neutral-600 mb-2">Productos seleccionados:</h5>
-                              <ul className="space-y-1">
-                                {selectedProducts.map(id => {
-                                  const product = products.find(p => p.id === id);
-                                  return (
-                                    <li key={id} className="text-sm">
-                                      • {product?.name}
-                                    </li>
-                                  );
-                                })}
-                              </ul>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="border rounded-md p-4">
-                    <h3 className="font-medium text-neutral-500 mb-4">Notas de mantenimiento</h3>
-                    <div className="text-sm text-neutral-400 italic py-4">
-                      Registre cualquier observación relevante sobre el cambio de aceite y filtros en la sección de notas adicionales.
-                    </div>
+                <div className="border rounded-md p-4">
+                  <h3 className="font-medium text-neutral-500 mb-4">Notas de mantenimiento</h3>
+                  <div className="text-sm text-neutral-400 italic py-4">
+                    Registre cualquier observación relevante sobre el cambio de aceite y filtros en la sección de notas adicionales.
                   </div>
                 </div>
               ) : (
