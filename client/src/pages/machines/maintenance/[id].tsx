@@ -135,11 +135,77 @@ export default function EditMaintenance() {
     enabled: !!maintenance,
   });
   
-  // Get warehouse products for oil changes
-  const { data: products = [], isLoading: productsLoading } = useQuery({
-    queryKey: ['/api/warehouse-products'],
-    enabled: !!maintenance,
-  });
+  // Usar los datos simulados de productos del almacén
+  // En un futuro se reemplazará por una llamada a la API real
+  const mockProducts = [
+    {
+      id: 1,
+      name: "Aceite de motor",
+      category: "fluidos",
+      quantity: 8,
+      unit: "litros",
+      unitPrice: 2400,
+      totalPrice: 19200,
+    },
+    {
+      id: 2,
+      name: "Aceite hidráulico",
+      category: "fluidos",
+      quantity: 5,
+      unit: "litros",
+      unitPrice: 2800,
+      totalPrice: 14000,
+    },
+    {
+      id: 3,
+      name: "Refrigerante",
+      category: "fluidos",
+      quantity: 3,
+      unit: "litros",
+      unitPrice: 1500,
+      totalPrice: 4500,
+    },
+    {
+      id: 4,
+      name: "Filtro de aceite",
+      category: "repuestos",
+      quantity: 4,
+      unit: "unidades",
+      unitPrice: 980,
+      totalPrice: 3920,
+    },
+    {
+      id: 5,
+      name: "Filtro de combustible",
+      category: "repuestos",
+      quantity: 3,
+      unit: "unidades",
+      unitPrice: 1200,
+      totalPrice: 3600,
+    },
+    {
+      id: 6,
+      name: "Filtro hidráulico",
+      category: "repuestos",
+      quantity: 2,
+      unit: "unidades",
+      unitPrice: 1800,
+      totalPrice: 3600,
+    },
+    {
+      id: 7,
+      name: "Filtro de aire",
+      category: "repuestos",
+      quantity: 2,
+      unit: "unidades",
+      unitPrice: 2100,
+      totalPrice: 4200,
+    }
+  ];
+  
+  // Simular carga de productos
+  const [products, setProducts] = React.useState(mockProducts);
+  const productsLoading = false;
 
   // Initialize form after data is loaded
   const form = useForm<MaintenanceFormValues>({
@@ -168,10 +234,32 @@ export default function EditMaintenance() {
 
   async function onSubmit(values: MaintenanceFormValues) {
     try {
-      await apiRequest("PUT", `/api/maintenance/${id}`, {
+      // Si es cambio de aceite y filtros, incluir los productos seleccionados
+      const dataToSubmit = {
         ...values,
         machineId: maintenance.machineId
-      });
+      };
+      
+      if (values.type === "oil_filter_change" && selectedProducts.length > 0) {
+        // En una implementación real, se enviarían también los IDs de productos
+        // para registrar los insumos utilizados y actualizar el inventario
+        console.log("Productos seleccionados:", selectedProducts.map(id => {
+          const product = products.find(p => p.id === id);
+          return product?.name;
+        }));
+        
+        // Simulación: Actualizar localmente el stock
+        // En un sistema real, esto se haría en el servidor
+        setProducts(prevProducts => 
+          prevProducts.map(product => 
+            selectedProducts.includes(product.id)
+              ? { ...product, quantity: Math.max(0, product.quantity - 1) }
+              : product
+          )
+        );
+      }
+
+      await apiRequest("PUT", `/api/maintenance/${id}`, dataToSubmit);
 
       // Invalidate maintenance queries to refresh the list
       queryClient.invalidateQueries({ queryKey: [`/api/maintenance/${id}`] });

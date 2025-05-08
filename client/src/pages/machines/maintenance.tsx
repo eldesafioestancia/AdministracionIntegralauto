@@ -1079,10 +1079,18 @@ export default function MachineMaintenance() {
 
               {/* Sección para Cambio de aceite y filtros */}
               {maintenanceType === "oil_filter_change" && (
-                <div className="border rounded-md p-4">
-                  <h3 className="font-medium text-neutral-500 mb-4">Notas de mantenimiento</h3>
-                  <div className="text-sm text-neutral-400 italic py-4">
-                    Registre cualquier observación relevante sobre el cambio de aceite y filtros en la sección de notas adicionales.
+                <div className="space-y-6">
+                  <div className="border rounded-md p-4">
+                    <h3 className="font-medium text-neutral-500 mb-4">Productos para mantenimiento</h3>
+                    <div className="text-sm text-neutral-400 italic py-4">
+                      Para seleccionar los productos específicos para el mantenimiento, utilice el formulario de edición después de crear este registro.
+                    </div>
+                  </div>
+                  <div className="border rounded-md p-4">
+                    <h3 className="font-medium text-neutral-500 mb-4">Notas de mantenimiento</h3>
+                    <div className="text-sm text-neutral-400 italic py-4">
+                      Registre cualquier observación relevante sobre el cambio de aceite y filtros en la sección de notas adicionales.
+                    </div>
                   </div>
                 </div>
               )}
