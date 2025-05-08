@@ -524,6 +524,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  app.get("/api/machine-finances/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const finance = await dbStorage.getMachineFinance(id);
+      
+      if (!finance) {
+        return res.status(404).json({ message: "Finance record not found" });
+      }
+      
+      res.json(finance);
+    } catch (error) {
+      console.error("Error fetching finance record:", error);
+      res.status(500).json({ message: "Error fetching finance record" });
+    }
+  });
+  
   app.post("/api/machine-finances", async (req: Request, res: Response) => {
     try {
       const financeData = insertMachineFinanceSchema.parse(req.body);
@@ -534,8 +550,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid finance data", errors: error.errors });
       }
       
-      console.error("Error creating machine finance:", error);
-      res.status(500).json({ message: "Error creating machine finance" });
+      console.error("Error creating finance record:", error);
+      res.status(500).json({ message: "Error creating finance record" });
     }
   });
   
@@ -554,6 +570,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Error deleting finance record" });
     }
   });
+
 
   // Animal routes
   app.get("/api/animals", async (req: Request, res: Response) => {
