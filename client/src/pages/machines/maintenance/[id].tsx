@@ -6,6 +6,73 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 
+// Lista de productos dummy (hasta que tengamos la API real)
+const mockProducts = [
+  {
+    id: 1,
+    name: "Aceite de motor",
+    category: "fluidos",
+    quantity: 8,
+    unit: "litros",
+    unitPrice: 2400,
+    totalPrice: 19200,
+  },
+  {
+    id: 2,
+    name: "Aceite hidráulico",
+    category: "fluidos",
+    quantity: 5,
+    unit: "litros",
+    unitPrice: 2200,
+    totalPrice: 11000,
+  },
+  {
+    id: 3,
+    name: "Refrigerante",
+    category: "fluidos",
+    quantity: 3,
+    unit: "litros",
+    unitPrice: 1500,
+    totalPrice: 4500,
+  },
+  {
+    id: 4,
+    name: "Filtro de aceite",
+    category: "repuestos",
+    quantity: 4,
+    unit: "unidades",
+    unitPrice: 1800,
+    totalPrice: 7200,
+  },
+  {
+    id: 5,
+    name: "Filtro de combustible",
+    category: "repuestos",
+    quantity: 2,
+    unit: "unidades",
+    unitPrice: 2100,
+    totalPrice: 4200,
+  },
+  {
+    id: 6,
+    name: "Filtro hidráulico",
+    category: "repuestos",
+    quantity: 3,
+    unit: "unidades",
+    unitPrice: 2500,
+    totalPrice: 7500,
+  },
+  {
+    id: 7,
+    name: "Filtro de aire",
+    category: "repuestos",
+    quantity: 2,
+    unit: "unidades",
+    unitPrice: 1900,
+    totalPrice: 3800,
+  }
+];
+
 import {
   Form,
   FormControl,
