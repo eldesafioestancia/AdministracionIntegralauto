@@ -1,7 +1,10 @@
-import { Express, Request, Response } from "express";
+import { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage as dbStorage } from "./storage";
 import { z } from "zod";
+import * as fs from 'fs';
+import * as path from 'path';
+import multer from 'multer';
 import {
   insertUserSchema,
   insertMachineSchema,
@@ -24,7 +27,53 @@ import {
   getHistoricalPrecipitation 
 } from './weather';
 
+// Configuración de almacenamiento para multer
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    // Crear el directorio si no existe
+    const uploadDir = path.join(process.cwd(), 'uploads');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    // Generar un nombre único para el archivo
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const extension = path.extname(file.originalname);
+    cb(null, 'file-' + uniqueSuffix + extension);
+  }
+});
+
+const upload = multer({ storage: storage });
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Ruta para subir archivos
+  app.post('/api/upload', upload.single('file'), (req: Request, res: Response) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'No se recibió ningún archivo' });
+      }
+      
+      // Devolvemos la ruta del archivo subido
+      return res.status(200).json({ 
+        message: 'Archivo subido correctamente',
+        filePath: `/uploads/${req.file.filename}`
+      });
+    } catch (error) {
+      console.error('Error al subir archivo:', error);
+      return res.status(500).json({ message: 'Error al procesar la carga de archivo' });
+    }
+  });
+
+  // Servir archivos estáticos de la carpeta uploads
+  app.use('/uploads', (req: Request, res: Response, next: NextFunction) => {
+    const filePath = path.join(process.cwd(), req.url);
+    if (fs.existsSync(filePath)) {
+      return res.sendFile(filePath);
+    }
+    next();
+  });
   // Rutas de autenticación simuladas - sin verificación real
   app.post("/api/auth/login", async (req: Request, res: Response) => {
     try {
@@ -72,9 +121,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Dashboard
   app.get("/api/dashboard", async (req: Request, res: Response) => {
     try {
-      const stats = await storage.getDashboardStats();
-      const upcomingMaintenances = await storage.getUpcomingMaintenances();
-      const recentTransactions = await storage.getRecentTransactions();
+      const stats = await dbStorage.getDashboardStats();
+      const upcomingMaintenances = await dbStorage.getUpcomingMaintenances();
+      const recentTransactions = await dbStorage.getRecentTransactions();
       
       res.json({
         stats,
@@ -90,7 +139,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Machines routes
   app.get("/api/machines", async (req: Request, res: Response) => {
     try {
-      const machines = await storage.getMachines();
+      const machines = await dbStorage.getMachines();
       res.json(machines);
     } catch (error) {
       console.error("Error fetching machines:", error);
@@ -101,7 +150,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/machines/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const machine = await storage.getMachine(id);
+      const machine = await dbStorage.getMachine(id);
       
       if (!machine) {
         return res.status(404).json({ message: "Machine not found" });
@@ -117,7 +166,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/machines", async (req: Request, res: Response) => {
     try {
       const machineData = insertMachineSchema.parse(req.body);
-      const newMachine = await storage.createMachine(machineData);
+      const newMachine = await dbStorage.createMachine(machineData);
       res.status(201).json(newMachine);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -134,7 +183,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       const machineData = insertMachineSchema.partial().parse(req.body);
       
-      const updatedMachine = await storage.updateMachine(id, machineData);
+      const updatedMachine = await dbStorage.updateMachine(id, machineData);
       
       if (!updatedMachine) {
         return res.status(404).json({ message: "Machine not found" });
@@ -154,7 +203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/machines/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const deleted = await storage.deleteMachine(id);
+      const deleted = await dbStorage.deleteMachine(id);
       
       if (!deleted) {
         return res.status(404).json({ message: "Machine not found" });
@@ -171,7 +220,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/maintenance", async (req: Request, res: Response) => {
     try {
       const machineId = req.query.machineId ? parseInt(req.query.machineId as string) : undefined;
-      const maintenances = await storage.getMaintenances(machineId);
+      const maintenances = await dbStorage.getMaintenances(machineId);
       res.json(maintenances);
     } catch (error) {
       console.error("Error fetching maintenance records:", error);
@@ -182,7 +231,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/maintenance/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const maintenance = await storage.getMaintenance(id);
+      const maintenance = await dbStorage.getMaintenance(id);
       
       if (!maintenance) {
         return res.status(404).json({ message: "Maintenance record not found" });
@@ -198,37 +247,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/maintenance", async (req: Request, res: Response) => {
     try {
       const maintenanceData = insertMaintenanceSchema.parse(req.body);
-      const newMaintenance = await storage.createMaintenance(maintenanceData);
+      const newMaintenance = await dbStorage.createMaintenance(maintenanceData);
       
       // Actualizar el inventario si es un mantenimiento de tipo "oil_filter_change"
       if (maintenanceData.type === "oil_filter_change") {
         // Descontar productos usados
         if (maintenanceData.motorOil && maintenanceData.motorOilQuantity) {
-          await storage.updateProductStock("Aceite de motor", -Number(maintenanceData.motorOilQuantity));
+          await dbStorage.updateProductStock("Aceite de motor", -Number(maintenanceData.motorOilQuantity));
         }
         
         if (maintenanceData.hydraulicOil && maintenanceData.hydraulicOilQuantity) {
-          await storage.updateProductStock("Aceite hidráulico", -Number(maintenanceData.hydraulicOilQuantity));
+          await dbStorage.updateProductStock("Aceite hidráulico", -Number(maintenanceData.hydraulicOilQuantity));
         }
         
         if (maintenanceData.coolant && maintenanceData.coolantQuantity) {
-          await storage.updateProductStock("Refrigerante", -Number(maintenanceData.coolantQuantity));
+          await dbStorage.updateProductStock("Refrigerante", -Number(maintenanceData.coolantQuantity));
         }
         
         if (maintenanceData.oilFilter) {
-          await storage.updateProductStock("Filtro de aceite", -1);
+          await dbStorage.updateProductStock("Filtro de aceite", -1);
         }
         
         if (maintenanceData.hydraulicFilter) {
-          await storage.updateProductStock("Filtro hidráulico", -1);
+          await dbStorage.updateProductStock("Filtro hidráulico", -1);
         }
         
         if (maintenanceData.fuelFilter) {
-          await storage.updateProductStock("Filtro de combustible", -1);
+          await dbStorage.updateProductStock("Filtro de combustible", -1);
         }
         
         if (maintenanceData.airFilter) {
-          await storage.updateProductStock("Filtro de aire", -1);
+          await dbStorage.updateProductStock("Filtro de aire", -1);
         }
       }
       
@@ -249,13 +298,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const maintenanceData = insertMaintenanceSchema.partial().parse(req.body);
       
       // Obtener el mantenimiento original para comparar cambios
-      const originalMaintenance = await storage.getMaintenance(id);
+      const originalMaintenance = await dbStorage.getMaintenance(id);
       if (!originalMaintenance) {
         return res.status(404).json({ message: "Maintenance record not found" });
       }
       
       // Actualizar el registro de mantenimiento
-      const updatedMaintenance = await storage.updateMaintenance(id, maintenanceData);
+      const updatedMaintenance = await dbStorage.updateMaintenance(id, maintenanceData);
       
       // Si es mantenimiento tipo "oil_filter_change", actualizar inventario
       if (originalMaintenance.type === "oil_filter_change" || maintenanceData.type === "oil_filter_change") {
@@ -270,19 +319,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Si se quitó el producto
           if (originalMaintenance.motorOil && !maintenanceData.motorOil) {
             // Devolver al inventario
-            await storage.updateProductStock("Aceite de motor", Number(originalMaintenance.motorOilQuantity));
+            await dbStorage.updateProductStock("Aceite de motor", Number(originalMaintenance.motorOilQuantity));
           } 
           // Si se agregó el producto
           else if (!originalMaintenance.motorOil && maintenanceData.motorOil) {
             // Restar del inventario
-            await storage.updateProductStock("Aceite de motor", -Number(maintenanceData.motorOilQuantity));
+            await dbStorage.updateProductStock("Aceite de motor", -Number(maintenanceData.motorOilQuantity));
           }
           // Si se cambió la cantidad
           else if (originalMaintenance.motorOil && maintenanceData.motorOil && 
                    originalMaintenance.motorOilQuantity !== maintenanceData.motorOilQuantity) {
             // Actualizar diferencia
             const diff = Number(originalMaintenance.motorOilQuantity) - Number(maintenanceData.motorOilQuantity);
-            await storage.updateProductStock("Aceite de motor", diff);
+            await dbStorage.updateProductStock("Aceite de motor", diff);
           }
         }
         
@@ -293,15 +342,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
              maintenanceData.hydraulicOilQuantity !== originalMaintenance.hydraulicOilQuantity)) {
              
           if (originalMaintenance.hydraulicOil && !maintenanceData.hydraulicOil) {
-            await storage.updateProductStock("Aceite hidráulico", Number(originalMaintenance.hydraulicOilQuantity));
+            await dbStorage.updateProductStock("Aceite hidráulico", Number(originalMaintenance.hydraulicOilQuantity));
           } 
           else if (!originalMaintenance.hydraulicOil && maintenanceData.hydraulicOil) {
-            await storage.updateProductStock("Aceite hidráulico", -Number(maintenanceData.hydraulicOilQuantity));
+            await dbStorage.updateProductStock("Aceite hidráulico", -Number(maintenanceData.hydraulicOilQuantity));
           }
           else if (originalMaintenance.hydraulicOil && maintenanceData.hydraulicOil && 
                    originalMaintenance.hydraulicOilQuantity !== maintenanceData.hydraulicOilQuantity) {
             const diff = Number(originalMaintenance.hydraulicOilQuantity) - Number(maintenanceData.hydraulicOilQuantity);
-            await storage.updateProductStock("Aceite hidráulico", diff);
+            await dbStorage.updateProductStock("Aceite hidráulico", diff);
           }
         }
         
@@ -312,15 +361,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
              maintenanceData.coolantQuantity !== originalMaintenance.coolantQuantity)) {
              
           if (originalMaintenance.coolant && !maintenanceData.coolant) {
-            await storage.updateProductStock("Refrigerante", Number(originalMaintenance.coolantQuantity));
+            await dbStorage.updateProductStock("Refrigerante", Number(originalMaintenance.coolantQuantity));
           } 
           else if (!originalMaintenance.coolant && maintenanceData.coolant) {
-            await storage.updateProductStock("Refrigerante", -Number(maintenanceData.coolantQuantity));
+            await dbStorage.updateProductStock("Refrigerante", -Number(maintenanceData.coolantQuantity));
           }
           else if (originalMaintenance.coolant && maintenanceData.coolant && 
                    originalMaintenance.coolantQuantity !== maintenanceData.coolantQuantity) {
             const diff = Number(originalMaintenance.coolantQuantity) - Number(maintenanceData.coolantQuantity);
-            await storage.updateProductStock("Refrigerante", diff);
+            await dbStorage.updateProductStock("Refrigerante", diff);
           }
         }
         
@@ -329,9 +378,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (maintenanceData.oilFilter !== undefined && 
             maintenanceData.oilFilter !== originalMaintenance.oilFilter) {
           if (originalMaintenance.oilFilter && !maintenanceData.oilFilter) {
-            await storage.updateProductStock("Filtro de aceite", 1);
+            await dbStorage.updateProductStock("Filtro de aceite", 1);
           } else if (!originalMaintenance.oilFilter && maintenanceData.oilFilter) {
-            await storage.updateProductStock("Filtro de aceite", -1);
+            await dbStorage.updateProductStock("Filtro de aceite", -1);
           }
         }
         
@@ -339,9 +388,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (maintenanceData.hydraulicFilter !== undefined && 
             maintenanceData.hydraulicFilter !== originalMaintenance.hydraulicFilter) {
           if (originalMaintenance.hydraulicFilter && !maintenanceData.hydraulicFilter) {
-            await storage.updateProductStock("Filtro hidráulico", 1);
+            await dbStorage.updateProductStock("Filtro hidráulico", 1);
           } else if (!originalMaintenance.hydraulicFilter && maintenanceData.hydraulicFilter) {
-            await storage.updateProductStock("Filtro hidráulico", -1);
+            await dbStorage.updateProductStock("Filtro hidráulico", -1);
           }
         }
         
@@ -349,9 +398,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (maintenanceData.fuelFilter !== undefined && 
             maintenanceData.fuelFilter !== originalMaintenance.fuelFilter) {
           if (originalMaintenance.fuelFilter && !maintenanceData.fuelFilter) {
-            await storage.updateProductStock("Filtro de combustible", 1);
+            await dbStorage.updateProductStock("Filtro de combustible", 1);
           } else if (!originalMaintenance.fuelFilter && maintenanceData.fuelFilter) {
-            await storage.updateProductStock("Filtro de combustible", -1);
+            await dbStorage.updateProductStock("Filtro de combustible", -1);
           }
         }
         
@@ -359,9 +408,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (maintenanceData.airFilter !== undefined && 
             maintenanceData.airFilter !== originalMaintenance.airFilter) {
           if (originalMaintenance.airFilter && !maintenanceData.airFilter) {
-            await storage.updateProductStock("Filtro de aire", 1);
+            await dbStorage.updateProductStock("Filtro de aire", 1);
           } else if (!originalMaintenance.airFilter && maintenanceData.airFilter) {
-            await storage.updateProductStock("Filtro de aire", -1);
+            await dbStorage.updateProductStock("Filtro de aire", -1);
           }
         }
       }
@@ -380,7 +429,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/maintenance/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const deleted = await storage.deleteMaintenance(id);
+      const deleted = await dbStorage.deleteMaintenance(id);
       
       if (!deleted) {
         return res.status(404).json({ message: "Maintenance record not found" });
@@ -396,7 +445,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Warehouse/Products routes
   app.get("/api/warehouse/products", async (req: Request, res: Response) => {
     try {
-      const products = await storage.getProducts();
+      const products = await dbStorage.getProducts();
       res.json(products);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -408,7 +457,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/machine-finances", async (req: Request, res: Response) => {
     try {
       const machineId = req.query.machineId ? parseInt(req.query.machineId as string) : undefined;
-      const finances = await storage.getMachineFinances(machineId);
+      const finances = await dbStorage.getMachineFinances(machineId);
       res.json(finances);
     } catch (error) {
       console.error("Error fetching machine finances:", error);
@@ -419,7 +468,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/machine-finances", async (req: Request, res: Response) => {
     try {
       const financeData = insertMachineFinanceSchema.parse(req.body);
-      const newFinance = await storage.createMachineFinance(financeData);
+      const newFinance = await dbStorage.createMachineFinance(financeData);
       res.status(201).json(newFinance);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -434,7 +483,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/machine-finances/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const deleted = await storage.deleteMachineFinance(id);
+      const deleted = await dbStorage.deleteMachineFinance(id);
       
       if (!deleted) {
         return res.status(404).json({ message: "Finance record not found" });
@@ -450,7 +499,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Animal routes
   app.get("/api/animals", async (req: Request, res: Response) => {
     try {
-      const animals = await storage.getAnimals();
+      const animals = await dbStorage.getAnimals();
       res.json(animals);
     } catch (error) {
       console.error("Error fetching animals:", error);
@@ -461,7 +510,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/animals/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const animal = await storage.getAnimal(id);
+      const animal = await dbStorage.getAnimal(id);
       
       if (!animal) {
         return res.status(404).json({ message: "Animal not found" });
@@ -477,7 +526,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/animals", async (req: Request, res: Response) => {
     try {
       const animalData = insertAnimalSchema.parse(req.body);
-      const newAnimal = await storage.createAnimal(animalData);
+      const newAnimal = await dbStorage.createAnimal(animalData);
       res.status(201).json(newAnimal);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -494,7 +543,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       const animalData = insertAnimalSchema.partial().parse(req.body);
       
-      const updatedAnimal = await storage.updateAnimal(id, animalData);
+      const updatedAnimal = await dbStorage.updateAnimal(id, animalData);
       
       if (!updatedAnimal) {
         return res.status(404).json({ message: "Animal not found" });
@@ -514,7 +563,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/animals/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const deleted = await storage.deleteAnimal(id);
+      const deleted = await dbStorage.deleteAnimal(id);
       
       if (!deleted) {
         return res.status(404).json({ message: "Animal not found" });
@@ -531,7 +580,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/animal-veterinary", async (req: Request, res: Response) => {
     try {
       const animalId = req.query.animalId ? parseInt(req.query.animalId as string) : undefined;
-      const records = await storage.getAnimalVeterinary(animalId);
+      const records = await dbStorage.getAnimalVeterinary(animalId);
       res.json(records);
     } catch (error) {
       console.error("Error fetching veterinary records:", error);
@@ -542,7 +591,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/animal-veterinary", async (req: Request, res: Response) => {
     try {
       const recordData = insertAnimalVeterinarySchema.parse(req.body);
-      const newRecord = await storage.createAnimalVeterinary(recordData);
+      const newRecord = await dbStorage.createAnimalVeterinary(recordData);
       res.status(201).json(newRecord);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -557,7 +606,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/animal-veterinary/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const deleted = await storage.deleteAnimalVeterinary(id);
+      const deleted = await dbStorage.deleteAnimalVeterinary(id);
       
       if (!deleted) {
         return res.status(404).json({ message: "Veterinary record not found" });
@@ -574,7 +623,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/animal-finances", async (req: Request, res: Response) => {
     try {
       const animalId = req.query.animalId ? parseInt(req.query.animalId as string) : undefined;
-      const finances = await storage.getAnimalFinances(animalId);
+      const finances = await dbStorage.getAnimalFinances(animalId);
       res.json(finances);
     } catch (error) {
       console.error("Error fetching animal finances:", error);
@@ -585,7 +634,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/animal-finances", async (req: Request, res: Response) => {
     try {
       const financeData = insertAnimalFinanceSchema.parse(req.body);
-      const newFinance = await storage.createAnimalFinance(financeData);
+      const newFinance = await dbStorage.createAnimalFinance(financeData);
       res.status(201).json(newFinance);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -600,7 +649,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/animal-finances/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const deleted = await storage.deleteAnimalFinance(id);
+      const deleted = await dbStorage.deleteAnimalFinance(id);
       
       if (!deleted) {
         return res.status(404).json({ message: "Finance record not found" });
@@ -617,7 +666,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/animals/:id/reproduction", async (req: Request, res: Response) => {
     try {
       const animalId = parseInt(req.params.id);
-      const animal = await storage.getAnimal(animalId);
+      const animal = await dbStorage.getAnimal(animalId);
       
       if (!animal) {
         return res.status(404).json({ message: "Animal not found" });
@@ -635,7 +684,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/animals/:id/reproduction", async (req: Request, res: Response) => {
     try {
       const animalId = parseInt(req.params.id);
-      const animal = await storage.getAnimal(animalId);
+      const animal = await dbStorage.getAnimal(animalId);
       
       if (!animal) {
         return res.status(404).json({ message: "Animal not found" });
@@ -653,7 +702,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Pasture routes
   app.get("/api/pastures", async (req: Request, res: Response) => {
     try {
-      const pastures = await storage.getPastures();
+      const pastures = await dbStorage.getPastures();
       res.json(pastures);
     } catch (error) {
       console.error("Error fetching pastures:", error);
@@ -664,7 +713,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/pastures/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const pasture = await storage.getPasture(id);
+      const pasture = await dbStorage.getPasture(id);
       
       if (!pasture) {
         return res.status(404).json({ message: "Pasture not found" });
@@ -680,7 +729,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/pastures", async (req: Request, res: Response) => {
     try {
       const pastureData = insertPastureSchema.parse(req.body);
-      const newPasture = await storage.createPasture(pastureData);
+      const newPasture = await dbStorage.createPasture(pastureData);
       res.status(201).json(newPasture);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -697,7 +746,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       const pastureData = insertPastureSchema.partial().parse(req.body);
       
-      const updatedPasture = await storage.updatePasture(id, pastureData);
+      const updatedPasture = await dbStorage.updatePasture(id, pastureData);
       
       if (!updatedPasture) {
         return res.status(404).json({ message: "Pasture not found" });
@@ -717,7 +766,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/pastures/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const deleted = await storage.deletePasture(id);
+      const deleted = await dbStorage.deletePasture(id);
       
       if (!deleted) {
         return res.status(404).json({ message: "Pasture not found" });
@@ -734,7 +783,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/pasture-works", async (req: Request, res: Response) => {
     try {
       const pastureId = req.query.pastureId ? parseInt(req.query.pastureId as string) : undefined;
-      const works = await storage.getPastureWorks(pastureId);
+      const works = await dbStorage.getPastureWorks(pastureId);
       res.json(works);
     } catch (error) {
       console.error("Error fetching pasture works:", error);
@@ -745,7 +794,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/pasture-works/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const work = await storage.getPastureWork(id);
+      const work = await dbStorage.getPastureWork(id);
       
       if (!work) {
         return res.status(404).json({ message: "Pasture work not found" });
@@ -761,7 +810,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/pasture-works", async (req: Request, res: Response) => {
     try {
       const workData = insertPastureWorkSchema.parse(req.body);
-      const newWork = await storage.createPastureWork(workData);
+      const newWork = await dbStorage.createPastureWork(workData);
       res.status(201).json(newWork);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -776,7 +825,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/pasture-works/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const deleted = await storage.deletePastureWork(id);
+      const deleted = await dbStorage.deletePastureWork(id);
       
       if (!deleted) {
         return res.status(404).json({ message: "Pasture work not found" });
@@ -793,7 +842,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/pasture-finances", async (req: Request, res: Response) => {
     try {
       const pastureId = req.query.pastureId ? parseInt(req.query.pastureId as string) : undefined;
-      const finances = await storage.getPastureFinances(pastureId);
+      const finances = await dbStorage.getPastureFinances(pastureId);
       res.json(finances);
     } catch (error) {
       console.error("Error fetching pasture finances:", error);
@@ -804,7 +853,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/pasture-finances", async (req: Request, res: Response) => {
     try {
       const financeData = insertPastureFinanceSchema.parse(req.body);
-      const newFinance = await storage.createPastureFinance(financeData);
+      const newFinance = await dbStorage.createPastureFinance(financeData);
       res.status(201).json(newFinance);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -819,7 +868,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/pasture-finances/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const deleted = await storage.deletePastureFinance(id);
+      const deleted = await dbStorage.deletePastureFinance(id);
       
       if (!deleted) {
         return res.status(404).json({ message: "Finance record not found" });
@@ -835,7 +884,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Rutas para inversiones
   app.get("/api/investments", async (req: Request, res: Response) => {
     try {
-      const investments = await storage.getInvestments();
+      const investments = await dbStorage.getInvestments();
       res.json(investments);
     } catch (error) {
       console.error("Error fetching investments:", error);
@@ -846,7 +895,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/investments/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const investment = await storage.getInvestment(id);
+      const investment = await dbStorage.getInvestment(id);
       
       if (!investment) {
         return res.status(404).json({ message: "Investment not found" });
@@ -862,7 +911,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/investments", async (req: Request, res: Response) => {
     try {
       const investmentData = insertInvestmentSchema.parse(req.body);
-      const newInvestment = await storage.createInvestment(investmentData);
+      const newInvestment = await dbStorage.createInvestment(investmentData);
       res.status(201).json(newInvestment);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -877,7 +926,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/investments/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const deleted = await storage.deleteInvestment(id);
+      const deleted = await dbStorage.deleteInvestment(id);
       
       if (!deleted) {
         return res.status(404).json({ message: "Investment not found" });
@@ -893,7 +942,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Capital routes
   app.get("/api/capital", async (req: Request, res: Response) => {
     try {
-      const capital = await storage.getCapital();
+      const capital = await dbStorage.getCapital();
       res.json(capital);
     } catch (error) {
       console.error("Error fetching capital records:", error);
@@ -904,7 +953,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/capital", async (req: Request, res: Response) => {
     try {
       const capitalData = insertCapitalSchema.parse(req.body);
-      const newRecord = await storage.createCapital(capitalData);
+      const newRecord = await dbStorage.createCapital(capitalData);
       res.status(201).json(newRecord);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -919,7 +968,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/capital/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const deleted = await storage.deleteCapital(id);
+      const deleted = await dbStorage.deleteCapital(id);
       
       if (!deleted) {
         return res.status(404).json({ message: "Capital record not found" });
