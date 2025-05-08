@@ -15,73 +15,6 @@ import { format } from "date-fns";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
-// Lista de productos dummy (hasta que tengamos la API real)
-const mockProducts = [
-  {
-    id: 1,
-    name: "Aceite de motor",
-    category: "fluidos",
-    quantity: 8,
-    unit: "litros",
-    unitPrice: 2400,
-    totalPrice: 19200,
-  },
-  {
-    id: 2,
-    name: "Aceite hidráulico",
-    category: "fluidos",
-    quantity: 5,
-    unit: "litros",
-    unitPrice: 2200,
-    totalPrice: 11000,
-  },
-  {
-    id: 3,
-    name: "Refrigerante",
-    category: "fluidos",
-    quantity: 3,
-    unit: "litros",
-    unitPrice: 1500,
-    totalPrice: 4500,
-  },
-  {
-    id: 4,
-    name: "Filtro de aceite",
-    category: "repuestos",
-    quantity: 4,
-    unit: "unidades",
-    unitPrice: 1800,
-    totalPrice: 7200,
-  },
-  {
-    id: 5,
-    name: "Filtro de combustible",
-    category: "repuestos",
-    quantity: 2,
-    unit: "unidades",
-    unitPrice: 2100,
-    totalPrice: 4200,
-  },
-  {
-    id: 6,
-    name: "Filtro hidráulico",
-    category: "repuestos",
-    quantity: 3,
-    unit: "unidades",
-    unitPrice: 2500,
-    totalPrice: 7500,
-  },
-  {
-    id: 7,
-    name: "Filtro de aire",
-    category: "repuestos",
-    quantity: 2,
-    unit: "unidades",
-    unitPrice: 1900,
-    totalPrice: 3800,
-  }
-];
-
 // Maintenance form schema
 const maintenanceFormSchema = z.object({
   date: z.date({
@@ -1147,26 +1080,9 @@ export default function MachineMaintenance() {
               {/* Sección para Cambio de aceite y filtros */}
               {maintenanceType === "oil_filter_change" && (
                 <div className="border rounded-md p-4">
-                  <h3 className="font-medium text-neutral-500 mb-4">Productos utilizados</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    {mockProducts.map((product) => (
-                      <div key={product.id} className="flex items-start space-x-2">
-                        <input 
-                          type="checkbox" 
-                          id={`product-${product.id}`}
-                          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary mt-1"
-                        />
-                        <label htmlFor={`product-${product.id}`} className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                          <div className="font-medium text-neutral-700">{product.name}</div>
-                          <div className="text-neutral-500 text-xs">
-                            Disponible: {product.quantity} {product.unit} - ${product.unitPrice}/{product.unit}
-                          </div>
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="text-sm text-neutral-400 italic py-2">
-                    Seleccione los productos utilizados para este mantenimiento.
+                  <h3 className="font-medium text-neutral-500 mb-4">Notas de mantenimiento</h3>
+                  <div className="text-sm text-neutral-400 italic py-4">
+                    Registre cualquier observación relevante sobre el cambio de aceite y filtros en la sección de notas adicionales.
                   </div>
                 </div>
               )}
