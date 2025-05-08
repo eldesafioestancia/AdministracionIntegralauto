@@ -341,14 +341,14 @@ export default function Warehouse() {
   };
 
   // Obtener categorías únicas para el filtro
-  const categories = products 
-    ? Array.from(new Set(products.map((product: any) => product.category)))
+  const categories = Array.isArray(products) 
+    ? Array.from(new Set(products.map((product: any) => product.category).filter(Boolean)))
     : [];
 
   // Filtra productos por término de búsqueda y categoría
-  const filteredProducts = products
+  const filteredProducts = Array.isArray(products)
     ? products.filter((product: any) => {
-        const matchesSearch = product.name.toLowerCase().includes(search.toLowerCase());
+        const matchesSearch = product.name?.toLowerCase().includes(search.toLowerCase()) || false;
         const matchesCategory = categoryFilter ? product.category === categoryFilter : true;
         return matchesSearch && matchesCategory;
       })
@@ -590,15 +590,15 @@ export default function Warehouse() {
             {filteredProducts.length > 0 ? (
               filteredProducts.map((product: any) => (
                 <TableRow key={product.id}>
-                  <TableCell className="font-medium">{product.name}</TableCell>
+                  <TableCell className="font-medium">{product.name || "Sin nombre"}</TableCell>
                   <TableCell>
                     <Badge variant="outline" className="capitalize">
-                      {product.category}
+                      {product.category || "Sin categoría"}
                     </Badge>
                   </TableCell>
-                  <TableCell>{product.quantity} {product.unit}</TableCell>
-                  <TableCell>${product.unitPrice.toLocaleString()}</TableCell>
-                  <TableCell>${product.totalPrice.toLocaleString()}</TableCell>
+                  <TableCell>{product.quantity || 0} {product.unit || "unidades"}</TableCell>
+                  <TableCell>${(product.unitPrice || 0).toLocaleString()}</TableCell>
+                  <TableCell>${(product.totalPrice || 0).toLocaleString()}</TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-1">
                       <Button

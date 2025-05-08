@@ -372,7 +372,11 @@ export class MemStorage implements IStorage {
   ];
   
   async getProducts(): Promise<any[]> {
-    return [...this.products]; // Devolver una copia para evitar modificaciones directas
+    // Calcular totalPrice para cada producto y devolver una copia para evitar modificaciones directas
+    return this.products.map(product => ({
+      ...product,
+      totalPrice: product.quantity * product.unitPrice
+    }));
   }
   
   async updateProductStock(productName: string, quantity: number): Promise<boolean> {
