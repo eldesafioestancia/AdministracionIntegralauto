@@ -168,9 +168,18 @@ export const machineFinances = pgTable("machine_finances", {
   id: serial("id").primaryKey(),
   machineId: integer("machine_id").notNull(),
   date: timestamp("date").notNull(),
-  type: text("type").notNull(), // expense, income
-  concept: text("concept").notNull(),
-  amount: decimal("amount").notNull(),
+  type: text("type").notNull(), // income, expense, reference
+  paymentMethod: text("payment_method"), // efectivo, transferencia, cheque, etc.
+  originModule: text("origin_module"), // maquinarias, animales, pasturas, etc.
+  machineType: text("machine_type"), // tractor, camión, cosechadora, etc.
+  machineBrandModel: text("machine_brand_model"), // descripción de marca y modelo
+  warehouseProductId: integer("warehouse_product_id"), // ID del producto de depósito
+  quantity: decimal("quantity"), // cantidad de producto
+  unitPrice: decimal("unit_price"), // precio unitario
+  concept: text("concept").notNull(), // descripción/concepto
+  amount: decimal("amount").notNull(), // monto total
+  attachmentUrl: text("attachment_url"), // URL de archivo adjunto
+  notes: text("notes"), // notas adicionales
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
