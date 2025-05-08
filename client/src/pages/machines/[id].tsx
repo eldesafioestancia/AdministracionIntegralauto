@@ -36,20 +36,11 @@ const financeFormSchema = z.object({
   date: z.date({
     required_error: "La fecha es requerida",
   }),
-  type: z.enum(["income", "expense", "reference"], {
+  type: z.enum(["income", "expense"], {
     required_error: "El tipo de registro es requerido",
   }),
-  paymentMethod: z.string().optional(),
-  originModule: z.string().default("Maquinarias"),
-  machineType: z.string().optional(),
-  machineBrandModel: z.string().optional(),
-  warehouseProductId: z.number().optional().nullable(),
-  quantity: z.string().optional(),
-  unitPrice: z.string().optional(),
   concept: z.string().min(1, { message: "El concepto es requerido" }),
   amount: z.string().min(1, { message: "El monto es requerido" }),
-  attachmentUrl: z.string().optional(),
-  notes: z.string().optional(),
 });
 
 type FinanceFormValues = z.infer<typeof financeFormSchema>;
@@ -76,27 +67,13 @@ export default function MachineDetail() {
     queryKey: [`/api/machine-finances?machineId=${id}`],
   });
 
-  // Get warehouse products
-  const { data: warehouseProducts, isLoading: productsLoading } = useQuery({
-    queryKey: ['/api/warehouse/products'],
-  });
-
   const financeForm = useForm<FinanceFormValues>({
     resolver: zodResolver(financeFormSchema),
     defaultValues: {
       date: new Date(),
       type: "expense",
-      paymentMethod: "Efectivo",
-      originModule: "Maquinarias",
-      machineType: machine?.type || "",
-      machineBrandModel: machine ? `${machine.brand} ${machine.model}` : "",
-      warehouseProductId: null,
-      quantity: "",
-      unitPrice: "",
       concept: "",
       amount: "",
-      attachmentUrl: "",
-      notes: "",
     },
   });
 
@@ -151,17 +128,8 @@ export default function MachineDetail() {
       financeForm.reset({
         date: new Date(),
         type: "expense",
-        paymentMethod: "Efectivo",
-        originModule: "Maquinarias",
-        machineType: machine?.type || "",
-        machineBrandModel: machine ? `${machine.brand} ${machine.model}` : "",
-        warehouseProductId: null,
-        quantity: "",
-        unitPrice: "",
         concept: "",
         amount: "",
-        attachmentUrl: "",
-        notes: "",
       });
 
     } catch (error) {
@@ -525,13 +493,37 @@ export default function MachineDetail() {
 
                 <Form {...financeForm}>
                   <form onSubmit={financeForm.handleSubmit(onSubmitFinance)} className="space-y-4">
-                    {/* Fecha */}
+                    <FormField
+                      control={financeForm.control}
+                      name="type"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tipo</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Seleccione un tipo" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="income">Ingreso</SelectItem>
+                              <SelectItem value="expense">Gasto</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
                     <FormField
                       control={financeForm.control}
                       name="date"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Fecha *</FormLabel>
+                          <FormLabel>Fecha</FormLabel>
                           <FormControl>
                             <Input
                               type="date"
@@ -548,267 +540,12 @@ export default function MachineDetail() {
                       )}
                     />
 
-                    {/* Tipo de transacción */}
-                    <FormField
-                      control={financeForm.control}
-                      name="type"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Tipo *</FormLabel>
-                          <div className="text-xs text-slate-500 mb-2">
-                            Seleccione "Ingreso" para aumentar inventario, "Egreso" para disminuir, o "Referencia" para transacciones informativas sin impacto en inventario.
-                          </div>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Seleccione un tipo" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="income">Ingreso</SelectItem>
-                              <SelectItem value="expense">Egreso</SelectItem>
-                              <SelectItem value="reference">Referencia</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Forma de Pago */}
-                    <FormField
-                      control={financeForm.control}
-                      name="paymentMethod"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Forma de Pago</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Seleccione forma de pago" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="Efectivo">Efectivo</SelectItem>
-                              <SelectItem value="Transferencia">Transferencia</SelectItem>
-                              <SelectItem value="Cheque">Cheque</SelectItem>
-                              <SelectItem value="Tarjeta">Tarjeta</SelectItem>
-                              <SelectItem value="Otro">Otro</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Módulo de Origen */}
-                    <FormField
-                      control={financeForm.control}
-                      name="originModule"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Módulo de Origen</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Seleccione módulo" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="Maquinarias">Maquinarias</SelectItem>
-                              <SelectItem value="Animales">Animales</SelectItem>
-                              <SelectItem value="Pasturas">Pasturas</SelectItem>
-                              <SelectItem value="Depósito">Depósito</SelectItem>
-                              <SelectItem value="Otro">Otro</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Tipo de Maquinaria */}
-                    <FormField
-                      control={financeForm.control}
-                      name="machineType"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Tipo de Maquinaria</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Seleccione tipo" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="tractor">Tractor</SelectItem>
-                              <SelectItem value="camion">Camión</SelectItem>
-                              <SelectItem value="topadora">Topadora</SelectItem>
-                              <SelectItem value="sembradora">Sembradora</SelectItem>
-                              <SelectItem value="cosechadora">Cosechadora</SelectItem>
-                              <SelectItem value="vehiculo">Vehículo</SelectItem>
-                              <SelectItem value="accesorio">Accesorio</SelectItem>
-                              <SelectItem value="otro">Otro</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Marca y Modelo */}
-                    <FormField
-                      control={financeForm.control}
-                      name="machineBrandModel"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Marca y Modelo</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Ej: Deutz ax180" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Producto de Depósito */}
-                    <FormField
-                      control={financeForm.control}
-                      name="warehouseProductId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Producto de Depósito</FormLabel>
-                          <Select
-                            onValueChange={(value) => field.onChange(value ? parseInt(value) : null)}
-                            value={field.value ? field.value.toString() : ""}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Seleccionar producto" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="">Ninguno</SelectItem>
-                              {warehouseProducts && warehouseProducts.map((product) => (
-                                <SelectItem key={product.id} value={product.id.toString()}>
-                                  {product.name} - {product.stock} {product.unit}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Grid para Cantidad y Precio Unitario */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Cantidad */}
-                      <FormField
-                        control={financeForm.control}
-                        name="quantity"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Cantidad</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="text"
-                                placeholder="Ingrese cantidad"
-                                {...field}
-                                onChange={(e) => {
-                                  // Solo permitir números y punto decimal
-                                  const value = e.target.value.replace(/[^\d.]/g, '');
-                                  field.onChange(value);
-                                  
-                                  // Actualizar monto automáticamente si hay precio unitario
-                                  const priceValue = financeForm.getValues("unitPrice");
-                                  if (priceValue && value) {
-                                    const totalAmount = (parseFloat(priceValue) * parseFloat(value)).toFixed(2);
-                                    financeForm.setValue("amount", totalAmount);
-                                  }
-                                }}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      {/* Precio Unitario */}
-                      <FormField
-                        control={financeForm.control}
-                        name="unitPrice"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Precio Unitario</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="text"
-                                placeholder="Precio por unidad"
-                                {...field}
-                                onChange={(e) => {
-                                  // Solo permitir números y punto decimal
-                                  const value = e.target.value.replace(/[^\d.]/g, '');
-                                  field.onChange(value);
-                                  
-                                  // Actualizar monto automáticamente si hay cantidad
-                                  const quantityValue = financeForm.getValues("quantity");
-                                  if (quantityValue && value) {
-                                    const totalAmount = (parseFloat(value) * parseFloat(quantityValue)).toFixed(2);
-                                    financeForm.setValue("amount", totalAmount);
-                                  }
-                                }}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    {/* Monto */}
-                    <FormField
-                      control={financeForm.control}
-                      name="amount"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Monto *</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="text"
-                              placeholder="$0.00"
-                              {...field}
-                              onChange={(e) => {
-                                // Solo permitir números y punto decimal
-                                const value = e.target.value.replace(/[^\d.]/g, '');
-                                field.onChange(value);
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Concepto */}
                     <FormField
                       control={financeForm.control}
                       name="concept"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Concepto *</FormLabel>
+                          <FormLabel>Concepto</FormLabel>
                           <FormControl>
                             <Input placeholder="Ej: Repuestos, Combustible, etc." {...field} />
                           </FormControl>
@@ -817,19 +554,14 @@ export default function MachineDetail() {
                       )}
                     />
 
-                    {/* Notas adicionales */}
                     <FormField
                       control={financeForm.control}
-                      name="notes"
+                      name="amount"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Notas</FormLabel>
+                          <FormLabel>Monto</FormLabel>
                           <FormControl>
-                            <textarea
-                              className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                              placeholder="Notas adicionales..."
-                              {...field}
-                            />
+                            <Input placeholder="0.00" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -879,8 +611,6 @@ export default function MachineDetail() {
                         <th className="text-left p-4 text-sm font-medium text-neutral-500">Fecha</th>
                         <th className="text-left p-4 text-sm font-medium text-neutral-500">Concepto</th>
                         <th className="text-left p-4 text-sm font-medium text-neutral-500">Tipo</th>
-                        <th className="text-left p-4 text-sm font-medium text-neutral-500">F. Pago</th>
-                        <th className="text-left p-4 text-sm font-medium text-neutral-500">Producto</th>
                         <th className="text-right p-4 text-sm font-medium text-neutral-500">Monto</th>
                         <th className="p-4 w-10"></th>
                       </tr>
@@ -893,45 +623,14 @@ export default function MachineDetail() {
                           </td>
                           <td className="p-4 text-sm text-neutral-500">{finance.concept}</td>
                           <td className="p-4">
-                            <Badge 
-                              className={
-                                finance.type === "income" 
-                                  ? "bg-success" 
-                                  : finance.type === "expense" 
-                                    ? "bg-destructive" 
-                                    : "bg-neutral-400"
-                              }
-                            >
-                              {finance.type === "income" 
-                                ? "Ingreso" 
-                                : finance.type === "expense" 
-                                  ? "Egreso" 
-                                  : "Referencia"
-                              }
+                            <Badge className={finance.type === "income" ? "bg-success" : "bg-destructive"}>
+                              {finance.type === "income" ? "Ingreso" : "Gasto"}
                             </Badge>
                           </td>
-                          <td className="p-4 text-sm text-neutral-500">
-                            {finance.paymentMethod || "-"}
-                          </td>
-                          <td className="p-4 text-sm text-neutral-500">
-                            {finance.warehouseProductId 
-                              ? warehouseProducts?.find(p => p.id === finance.warehouseProductId)?.name || "Producto" 
-                              : "-"
-                            }
-                          </td>
                           <td className={`p-4 text-sm font-medium text-right ${
-                            finance.type === "income" 
-                              ? "text-success" 
-                              : finance.type === "expense" 
-                                ? "text-destructive" 
-                                : "text-neutral-500"
+                            finance.type === "income" ? "text-success" : "text-destructive"
                           }`}>
-                            {finance.type === "income" 
-                              ? "+" 
-                              : finance.type === "expense" 
-                                ? "-" 
-                                : ""
-                            }${finance.amount}
+                            {finance.type === "income" ? "+" : "-"}${finance.amount}
                           </td>
                           <td className="p-4">
                             <Button variant="ghost" size="sm">
