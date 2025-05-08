@@ -16,6 +16,7 @@ import {
   insertInvestmentSchema,
   insertCapitalSchema,
 } from "@shared/schema";
+import { getCurrentWeather, getWeatherForecast, assessCropRisks } from './weather';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Rutas de autenticación simuladas - sin verificación real
@@ -922,6 +923,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting capital record:", error);
       res.status(500).json({ message: "Error deleting capital record" });
+    }
+  });
+
+  // Weather API routes
+  app.get("/api/weather/current", async (req: Request, res: Response) => {
+    try {
+      const { lat, lon } = req.query;
+      
+      if (!lat || !lon) {
+        return res.status(400).json({ 
+          message: "Latitude and longitude are required query parameters" 
+        });
+      }
+      
+      const weather = await getCurrentWeather(
+        parseFloat(lat as string), 
+        parseFloat(lon as string)
+      );
+      
+      res.json(weather);
+    } catch (error) {
+      console.error("Error fetching current weather:", error);
+      res.status(500).json({ 
+        message: "Error fetching current weather data", 
+        error: (error as Error).message 
+      });
+    }
+  });
+
+  app.get("/api/weather/forecast", async (req: Request, res: Response) => {
+    try {
+      const { lat, lon } = req.query;
+      
+      if (!lat || !lon) {
+        return res.status(400).json({ 
+          message: "Latitude and longitude are required query parameters" 
+        });
+      }
+      
+      const forecast = await getWeatherForecast(
+        parseFloat(lat as string), 
+        parseFloat(lon as string)
+      );
+      
+      res.json(forecast);
+    } catch (error) {
+      console.error("Error fetching weather forecast:", error);
+      res.status(500).json({ 
+        message: "Error fetching weather forecast data", 
+        error: (error as Error).message 
+      });
+    }
+  });
+
+  app.get("/api/weather/crop-risks", async (req: Request, res: Response) => {
+    try {
+      const { lat, lon } = req.query;
+      
+      if (!lat || !lon) {
+        return res.status(400).json({ 
+          message: "Latitude and longitude are required query parameters" 
+        });
+      }
+      
+      // Obtener datos meteorológicos actuales y pronóstico
+      const [currentWeather, forecast] = await Promise.all([
+        getCurrentWeather(parseFloat(lat as string), parseFloat(lon as string)),
+        getWeatherForecast(parseFloat(lat as string), parseFloat(lon as string))
+      ]);
+      
+      // Evaluar riesgos para cultivos
+      const riskAssessment = assessCropRisks(currentWeather, forecast);
+      
+      res.json({
+        currentWeather,
+        forecast: forecast.list.slice(0, 8), // Solo las próximas 24 horas (8 periodos de 3 horas)
+        riskAssessment
+      });
+    } catch (error) {
+      console.error("Error in crop risk assessment:", error);
+      res.status(500).json({ 
+        message: "Error assessing crop risks", 
+        error: (error as Error).message 
+      });
     }
   });
 
