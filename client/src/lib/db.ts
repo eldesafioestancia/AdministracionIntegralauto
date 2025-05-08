@@ -56,6 +56,7 @@ const localDBs = {
   repairs: createMockDB('repairs'),
   salaries: createMockDB('salaries'),
   capital: createMockDB('capital'),
+  products: createMockDB('products'),
 };
 
 // Setup mock remote databases
@@ -76,6 +77,7 @@ const setupRemoteDBs = (remoteUrl: string) => {
     repairs: createMockDB(`${remoteUrl}/repairs`),
     salaries: createMockDB(`${remoteUrl}/salaries`),
     capital: createMockDB(`${remoteUrl}/capital`),
+    products: createMockDB(`${remoteUrl}/products`),
   };
 
   return remoteDBs;
