@@ -1299,25 +1299,47 @@ export default function PasturesIndex() {
               )}
               
               {selectedWorkType === "cosecha" && (
-                <FormField
-                  control={workForm.control}
-                  name="harvestQuantity"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Rendimiento (kg/ha)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="3500"
-                          step="1"
-                          {...field}
-                          value={field.value || ""}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField
+                      control={workForm.control}
+                      name="seedType"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tipo de Semilla</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Ej: Trigo/Cebada/Maíz"
+                              {...field}
+                              value={field.value || ""}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={workForm.control}
+                      name="harvestQuantity"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Rendimiento (kg/ha)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="3500"
+                              step="1"
+                              {...field}
+                              value={field.value || ""}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </>
               )}
               
               {selectedWorkType === "fumigacion" && (
