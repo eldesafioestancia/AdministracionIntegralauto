@@ -366,6 +366,14 @@ export class MemStorage implements IStorage {
       unitPrice: 850,
     },
     {
+      id: 18,
+      name: "Rollos de hilo",
+      category: "forraje",
+      quantity: 15,
+      unit: "rollos",
+      unitPrice: 4500,
+    },
+    {
       id: 4,
       name: "Filtro de aceite",
       category: "repuestos",
