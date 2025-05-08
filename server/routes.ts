@@ -11,6 +11,7 @@ import {
   insertAnimalVeterinarySchema,
   insertAnimalFinanceSchema,
   insertPastureSchema,
+  insertPastureWorkSchema,
   insertPastureFinanceSchema,
   insertInvestmentSchema,
   insertCapitalSchema,
@@ -722,6 +723,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Pasture Work routes (Trabajos agrícolas)
+  app.get("/api/pasture-works", async (req: Request, res: Response) => {
+    try {
+      const pastureId = req.query.pastureId ? parseInt(req.query.pastureId as string) : undefined;
+      const works = await storage.getPastureWorks(pastureId);
+      res.json(works);
+    } catch (error) {
+      console.error("Error fetching pasture works:", error);
+      res.status(500).json({ message: "Error fetching pasture works" });
+    }
+  });
+  
+  app.get("/api/pasture-works/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const work = await storage.getPastureWork(id);
+      
+      if (!work) {
+        return res.status(404).json({ message: "Pasture work not found" });
+      }
+      
+      res.json(work);
+    } catch (error) {
+      console.error("Error fetching pasture work:", error);
+      res.status(500).json({ message: "Error fetching pasture work" });
+    }
+  });
+  
+  app.post("/api/pasture-works", async (req: Request, res: Response) => {
+    try {
+      const workData = insertPastureWorkSchema.parse(req.body);
+      const newWork = await storage.createPastureWork(workData);
+      res.status(201).json(newWork);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid work data", errors: error.errors });
+      }
+      
+      console.error("Error creating pasture work:", error);
+      res.status(500).json({ message: "Error creating pasture work" });
+    }
+  });
+  
+  app.delete("/api/pasture-works/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deletePastureWork(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Pasture work not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting pasture work:", error);
+      res.status(500).json({ message: "Error deleting pasture work" });
+    }
+  });
+
   // Pasture Finance routes
   app.get("/api/pasture-finances", async (req: Request, res: Response) => {
     try {

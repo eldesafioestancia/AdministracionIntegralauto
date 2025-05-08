@@ -632,6 +632,31 @@ export class MemStorage implements IStorage {
     return this.pastures.delete(id);
   }
 
+  // Pasture Works (Trabajos agrícolas)
+  async getPastureWorks(pastureId?: number): Promise<PastureWork[]> {
+    const works = Array.from(this.pastureWorks.values());
+    if (pastureId) {
+      return works.filter(w => w.pastureId === pastureId);
+    }
+    return works;
+  }
+
+  async getPastureWork(id: number): Promise<PastureWork | undefined> {
+    return this.pastureWorks.get(id);
+  }
+
+  async createPastureWork(insertWork: InsertPastureWork): Promise<PastureWork> {
+    const id = this.currentIds.pastureWork++;
+    const now = new Date();
+    const work: PastureWork = { ...insertWork, id, createdAt: now };
+    this.pastureWorks.set(id, work);
+    return work;
+  }
+
+  async deletePastureWork(id: number): Promise<boolean> {
+    return this.pastureWorks.delete(id);
+  }
+
   // Pasture Finances
   async getPastureFinances(pastureId?: number): Promise<PastureFinance[]> {
     const finances = Array.from(this.pastureFinances.values());
