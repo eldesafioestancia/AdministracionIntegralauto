@@ -651,6 +651,14 @@ export default function PasturesIndex() {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8"
+                            title="Trabajos Realizados"
+                          >
+                            <i className="ri-tools-fill text-blue-500"></i>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
                             title="Eliminar"
                             onClick={() => handleDelete(pasture.id)}
                           >

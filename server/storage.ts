@@ -338,6 +338,22 @@ export class MemStorage implements IStorage {
       unitPrice: 1500,
     },
     {
+      id: 16,
+      name: "Gas Oil",
+      category: "combustibles",
+      quantity: 250,
+      unit: "litros",
+      unitPrice: 750,
+    },
+    {
+      id: 17,
+      name: "Nafta",
+      category: "combustibles",
+      quantity: 80,
+      unit: "litros",
+      unitPrice: 850,
+    },
+    {
       id: 4,
       name: "Filtro de aceite",
       category: "repuestos",
