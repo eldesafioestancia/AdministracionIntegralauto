@@ -117,6 +117,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Rutas para finanzas de maquinaria
+  app.get("/api/machine-finances", async (req: Request, res: Response) => {
+    try {
+      const machineId = req.query.machineId ? parseInt(req.query.machineId as string) : undefined;
+      const finances = await dbStorage.getMachineFinances(machineId);
+      res.json(finances);
+    } catch (error) {
+      console.error("Error fetching machine finances:", error);
+      res.status(500).json({ message: "Error fetching machine finances" });
+    }
+  });
+  
+  app.get("/api/machine-finances/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const finance = await dbStorage.getMachineFinance(id);
+      
+      if (!finance) {
+        return res.status(404).json({ message: "Finance record not found" });
+      }
+      
+      res.json(finance);
+    } catch (error) {
+      console.error("Error fetching finance record:", error);
+      res.status(500).json({ message: "Error fetching finance record" });
+    }
+  });
+  
+  app.post("/api/machine-finances", async (req: Request, res: Response) => {
+    try {
+      const financeData = insertMachineFinanceSchema.parse(req.body);
+      const newFinance = await dbStorage.createMachineFinance(financeData);
+      res.status(201).json(newFinance);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid finance data", errors: error.errors });
+      }
+      
+      console.error("Error creating finance record:", error);
+      res.status(500).json({ message: "Error creating finance record" });
+    }
+  });
+  
+  app.delete("/api/machine-finances/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await dbStorage.deleteMachineFinance(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Finance record not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting finance record:", error);
+      res.status(500).json({ message: "Error deleting finance record" });
+    }
+  });
+
   // Rutas (sin protección de autenticación)
   // Dashboard
   app.get("/api/dashboard", async (req: Request, res: Response) => {

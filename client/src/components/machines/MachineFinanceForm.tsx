@@ -75,12 +75,9 @@ const MachineFinanceForm: React.FC<MachineFinanceFormProps> = ({ machineId, onSu
 
   const mutation = useMutation({
     mutationFn: async (data: FinanceFormValues) => {
-      return await apiRequest('/api/machine-finances', {
-        method: 'POST',
-        body: JSON.stringify({
-          ...data,
-          machineId,
-        }),
+      return await apiRequest('/api/machine-finances', 'POST', {
+        ...data,
+        machineId,
       });
     },
     onSuccess: () => {

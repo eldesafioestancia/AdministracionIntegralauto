@@ -72,9 +72,7 @@ export default function MachineFinancesPage() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      return await apiRequest(`/api/machine-finances/${id}`, {
-        method: 'DELETE',
-      });
+      return await apiRequest(`/api/machine-finances/${id}`, 'DELETE');
     },
     onSuccess: () => {
       toast({
