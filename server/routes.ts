@@ -191,6 +191,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const maintenanceData = insertMaintenanceSchema.parse(req.body);
       const newMaintenance = await storage.createMaintenance(maintenanceData);
+      
+      // Actualizar el inventario si es un mantenimiento de tipo "oil_change"
+      if (maintenanceData.type === "oil_change") {
+        // Descontar productos usados
+        if (maintenanceData.motorOil && maintenanceData.motorOilQuantity) {
+          await storage.updateProductStock("Aceite de motor", -Number(maintenanceData.motorOilQuantity));
+        }
+        
+        if (maintenanceData.hydraulicOil && maintenanceData.hydraulicOilQuantity) {
+          await storage.updateProductStock("Aceite hidráulico", -Number(maintenanceData.hydraulicOilQuantity));
+        }
+        
+        if (maintenanceData.coolant && maintenanceData.coolantQuantity) {
+          await storage.updateProductStock("Refrigerante", -Number(maintenanceData.coolantQuantity));
+        }
+        
+        if (maintenanceData.oilFilter) {
+          await storage.updateProductStock("Filtro de aceite", -1);
+        }
+        
+        if (maintenanceData.hydraulicFilter) {
+          await storage.updateProductStock("Filtro hidráulico", -1);
+        }
+        
+        if (maintenanceData.fuelFilter) {
+          await storage.updateProductStock("Filtro de combustible", -1);
+        }
+        
+        if (maintenanceData.airFilter) {
+          await storage.updateProductStock("Filtro de aire", -1);
+        }
+      }
+      
       res.status(201).json(newMaintenance);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -207,10 +240,122 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       const maintenanceData = insertMaintenanceSchema.partial().parse(req.body);
       
+      // Obtener el mantenimiento original para comparar cambios
+      const originalMaintenance = await storage.getMaintenance(id);
+      if (!originalMaintenance) {
+        return res.status(404).json({ message: "Maintenance record not found" });
+      }
+      
+      // Actualizar el registro de mantenimiento
       const updatedMaintenance = await storage.updateMaintenance(id, maintenanceData);
       
-      if (!updatedMaintenance) {
-        return res.status(404).json({ message: "Maintenance record not found" });
+      // Si es mantenimiento tipo "oil_change", actualizar inventario
+      if (originalMaintenance.type === "oil_change" || maintenanceData.type === "oil_change") {
+        // Productos que podrían haber cambiado
+        
+        // Aceite de motor
+        if (maintenanceData.motorOil !== undefined && 
+            maintenanceData.motorOilQuantity !== undefined &&
+            (maintenanceData.motorOil !== originalMaintenance.motorOil || 
+             maintenanceData.motorOilQuantity !== originalMaintenance.motorOilQuantity)) {
+             
+          // Si se quitó el producto
+          if (originalMaintenance.motorOil && !maintenanceData.motorOil) {
+            // Devolver al inventario
+            await storage.updateProductStock("Aceite de motor", Number(originalMaintenance.motorOilQuantity));
+          } 
+          // Si se agregó el producto
+          else if (!originalMaintenance.motorOil && maintenanceData.motorOil) {
+            // Restar del inventario
+            await storage.updateProductStock("Aceite de motor", -Number(maintenanceData.motorOilQuantity));
+          }
+          // Si se cambió la cantidad
+          else if (originalMaintenance.motorOil && maintenanceData.motorOil && 
+                   originalMaintenance.motorOilQuantity !== maintenanceData.motorOilQuantity) {
+            // Actualizar diferencia
+            const diff = Number(originalMaintenance.motorOilQuantity) - Number(maintenanceData.motorOilQuantity);
+            await storage.updateProductStock("Aceite de motor", diff);
+          }
+        }
+        
+        // Aceite hidráulico (similar al aceite de motor)
+        if (maintenanceData.hydraulicOil !== undefined && 
+            maintenanceData.hydraulicOilQuantity !== undefined &&
+            (maintenanceData.hydraulicOil !== originalMaintenance.hydraulicOil || 
+             maintenanceData.hydraulicOilQuantity !== originalMaintenance.hydraulicOilQuantity)) {
+             
+          if (originalMaintenance.hydraulicOil && !maintenanceData.hydraulicOil) {
+            await storage.updateProductStock("Aceite hidráulico", Number(originalMaintenance.hydraulicOilQuantity));
+          } 
+          else if (!originalMaintenance.hydraulicOil && maintenanceData.hydraulicOil) {
+            await storage.updateProductStock("Aceite hidráulico", -Number(maintenanceData.hydraulicOilQuantity));
+          }
+          else if (originalMaintenance.hydraulicOil && maintenanceData.hydraulicOil && 
+                   originalMaintenance.hydraulicOilQuantity !== maintenanceData.hydraulicOilQuantity) {
+            const diff = Number(originalMaintenance.hydraulicOilQuantity) - Number(maintenanceData.hydraulicOilQuantity);
+            await storage.updateProductStock("Aceite hidráulico", diff);
+          }
+        }
+        
+        // Refrigerante (similar a los anteriores)
+        if (maintenanceData.coolant !== undefined && 
+            maintenanceData.coolantQuantity !== undefined &&
+            (maintenanceData.coolant !== originalMaintenance.coolant || 
+             maintenanceData.coolantQuantity !== originalMaintenance.coolantQuantity)) {
+             
+          if (originalMaintenance.coolant && !maintenanceData.coolant) {
+            await storage.updateProductStock("Refrigerante", Number(originalMaintenance.coolantQuantity));
+          } 
+          else if (!originalMaintenance.coolant && maintenanceData.coolant) {
+            await storage.updateProductStock("Refrigerante", -Number(maintenanceData.coolantQuantity));
+          }
+          else if (originalMaintenance.coolant && maintenanceData.coolant && 
+                   originalMaintenance.coolantQuantity !== maintenanceData.coolantQuantity) {
+            const diff = Number(originalMaintenance.coolantQuantity) - Number(maintenanceData.coolantQuantity);
+            await storage.updateProductStock("Refrigerante", diff);
+          }
+        }
+        
+        // Filtros (componentes unitarios)
+        // Filtro de aceite
+        if (maintenanceData.oilFilter !== undefined && 
+            maintenanceData.oilFilter !== originalMaintenance.oilFilter) {
+          if (originalMaintenance.oilFilter && !maintenanceData.oilFilter) {
+            await storage.updateProductStock("Filtro de aceite", 1);
+          } else if (!originalMaintenance.oilFilter && maintenanceData.oilFilter) {
+            await storage.updateProductStock("Filtro de aceite", -1);
+          }
+        }
+        
+        // Filtro hidráulico
+        if (maintenanceData.hydraulicFilter !== undefined && 
+            maintenanceData.hydraulicFilter !== originalMaintenance.hydraulicFilter) {
+          if (originalMaintenance.hydraulicFilter && !maintenanceData.hydraulicFilter) {
+            await storage.updateProductStock("Filtro hidráulico", 1);
+          } else if (!originalMaintenance.hydraulicFilter && maintenanceData.hydraulicFilter) {
+            await storage.updateProductStock("Filtro hidráulico", -1);
+          }
+        }
+        
+        // Filtro de combustible
+        if (maintenanceData.fuelFilter !== undefined && 
+            maintenanceData.fuelFilter !== originalMaintenance.fuelFilter) {
+          if (originalMaintenance.fuelFilter && !maintenanceData.fuelFilter) {
+            await storage.updateProductStock("Filtro de combustible", 1);
+          } else if (!originalMaintenance.fuelFilter && maintenanceData.fuelFilter) {
+            await storage.updateProductStock("Filtro de combustible", -1);
+          }
+        }
+        
+        // Filtro de aire
+        if (maintenanceData.airFilter !== undefined && 
+            maintenanceData.airFilter !== originalMaintenance.airFilter) {
+          if (originalMaintenance.airFilter && !maintenanceData.airFilter) {
+            await storage.updateProductStock("Filtro de aire", 1);
+          } else if (!originalMaintenance.airFilter && maintenanceData.airFilter) {
+            await storage.updateProductStock("Filtro de aire", -1);
+          }
+        }
       }
       
       res.json(updatedMaintenance);

@@ -36,6 +36,10 @@ export interface IStorage {
   updateMaintenance(id: number, maintenance: Partial<InsertMaintenance>): Promise<Maintenance | undefined>;
   deleteMaintenance(id: number): Promise<boolean>;
   
+  // Warehouse/Product Management
+  getProducts(): Promise<any[]>;
+  updateProductStock(productName: string, quantity: number): Promise<boolean>;
+  
   // Machine Finances
   getMachineFinances(machineId?: number): Promise<MachineFinance[]>;
   getMachineFinance(id: number): Promise<MachineFinance | undefined>;
@@ -305,6 +309,75 @@ export class MemStorage implements IStorage {
 
   async deleteMaintenance(id: number): Promise<boolean> {
     return this.maintenances.delete(id);
+  }
+  
+  // Warehouse/Product Management
+  async getProducts(): Promise<any[]> {
+    // Mock products (in a real implementation, this would come from a database)
+    return [
+      {
+        id: 1,
+        name: "Aceite de motor",
+        category: "fluidos",
+        quantity: 8,
+        unit: "litros",
+        unitPrice: 2400,
+      },
+      {
+        id: 2,
+        name: "Aceite hidráulico",
+        category: "fluidos",
+        quantity: 5,
+        unit: "litros",
+        unitPrice: 2000,
+      },
+      {
+        id: 3,
+        name: "Refrigerante",
+        category: "fluidos",
+        quantity: 10,
+        unit: "litros",
+        unitPrice: 1500,
+      },
+      {
+        id: 4,
+        name: "Filtro de aceite",
+        category: "repuestos",
+        quantity: 4,
+        unit: "unidades",
+        unitPrice: 1800,
+      },
+      {
+        id: 5,
+        name: "Filtro hidráulico",
+        category: "repuestos",
+        quantity: 3,
+        unit: "unidades",
+        unitPrice: 2200,
+      },
+      {
+        id: 6,
+        name: "Filtro de combustible",
+        category: "repuestos",
+        quantity: 5,
+        unit: "unidades",
+        unitPrice: 1500,
+      },
+      {
+        id: 7,
+        name: "Filtro de aire",
+        category: "repuestos",
+        quantity: 2,
+        unit: "unidades",
+        unitPrice: 2100,
+      },
+    ];
+  }
+  
+  async updateProductStock(productName: string, quantity: number): Promise<boolean> {
+    // En una implementación real, actualizaríamos el stock en la base de datos
+    console.log(`Actualizando stock de ${productName}: ${quantity}`);
+    return true;
   }
 
   // Machine Finances
