@@ -385,6 +385,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Warehouse/Products routes
+  app.get("/api/warehouse/products", async (req: Request, res: Response) => {
+    try {
+      const products = await storage.getProducts();
+      res.json(products);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      res.status(500).json({ message: "Error fetching products" });
+    }
+  });
+  
   // Machine Finance routes
   app.get("/api/machine-finances", async (req: Request, res: Response) => {
     try {

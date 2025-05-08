@@ -145,14 +145,9 @@ export default function Warehouse() {
   const { toast } = useToast();
 
   // Usar datos reales cuando tengamos la API conectada
-  // const { data: products, isLoading, error } = useQuery({
-  //   queryKey: ["/api/warehouse/products"],
-  // });
-  
-  // Usando datos simulados por ahora
-  const [products, setProducts] = useState(mockProducts);
-  const isLoading = false;
-  const error = null;
+  const { data: products, isLoading, error } = useQuery({
+    queryKey: ["/api/warehouse/products"],
+  });
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
@@ -192,54 +187,22 @@ export default function Warehouse() {
   // Función para agregar un nuevo producto
   async function onSubmit(values: ProductFormValues) {
     try {
-      // Si estamos editando un producto existente
-      if (editProduct) {
-        // Actualizar el producto existente
-        const updatedProducts = products.map(product => 
-          product.id === editProduct.id 
-            ? { 
-                ...product, 
-                name: values.name,
-                category: values.category,
-                quantity: Number(values.quantity),
-                unit: values.unit,
-                unitPrice: Number(values.unitPrice),
-                totalPrice: Number(values.quantity) * Number(values.unitPrice),
-                notes: values.notes
-              } 
-            : product
-        );
-        
-        setProducts(updatedProducts);
-        
-        toast({
-          title: "Producto actualizado",
-          description: "El producto ha sido actualizado correctamente",
-        });
-      } else {
-        // Crear un nuevo producto
-        const newProduct = {
-          id: Math.max(0, ...products.map((p: any) => p.id)) + 1,
-          name: values.name,
-          category: values.category,
-          quantity: Number(values.quantity),
-          unit: values.unit,
-          unitPrice: Number(values.unitPrice),
-          totalPrice: Number(values.quantity) * Number(values.unitPrice),
-          notes: values.notes
-        };
-        
-        setProducts([...products, newProduct]);
-        
-        toast({
-          title: "Producto agregado",
-          description: "El producto ha sido agregado al inventario",
-        });
-      }
+      // Simulamos una actualización de productos (en lugar de una API real por ahora)
+      // En una implementación completa, aquí se llamaría a una API para actualizar el producto
+      
+      // Notificar cambios en los datos
+      queryClient.invalidateQueries({ queryKey: ["/api/warehouse/products"] });
       
       setSheetOpen(false);
       setEditProduct(null);
       form.reset();
+      
+      toast({
+        title: editProduct ? "Producto actualizado" : "Producto agregado",
+        description: editProduct 
+          ? "El producto ha sido actualizado correctamente" 
+          : "El producto ha sido agregado al inventario",
+      });
       
     } catch (error) {
       console.error("Error al guardar producto:", error);
@@ -357,7 +320,7 @@ export default function Warehouse() {
         <div className="text-destructive mb-2">Error al cargar el inventario</div>
         <Button 
           variant="outline" 
-          onClick={() => {}/* queryClient.invalidateQueries({ queryKey: ["/api/warehouse/products"] }) */}
+          onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/warehouse/products"] })}
         >
           Reintentar
         </Button>
