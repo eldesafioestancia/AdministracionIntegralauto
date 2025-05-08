@@ -8,7 +8,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DatePicker } from "@/components/ui/date-picker";
+// import { DatePicker } from "@/components/ui/date-picker";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -35,7 +35,7 @@ const financeFormSchema = z.object({
   type: z.enum(["income", "expense"]),
   category: z.string().min(1, { message: "La categoría es requerida" }),
   subcategory: z.string().min(1, { message: "La subcategoría es requerida" }),
-  date: z.date(),
+  date: z.string().min(1, { message: "La fecha es requerida" }),
   description: z.string().min(1, { message: "La descripción es requerida" }),
   amount: z.string().min(1, { message: "El monto es requerido" }),
   paymentMethod: z.string().min(1, { message: "El método de pago es requerido" }),
@@ -144,6 +144,7 @@ export default function FinancesPage() {
       type: "income",
       category: "",
       subcategory: "",
+      date: new Date().toISOString().split('T')[0], // Formato YYYY-MM-DD
       description: "",
       amount: "",
       paymentMethod: "Efectivo",
@@ -427,10 +428,12 @@ export default function FinancesPage() {
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel>Fecha</FormLabel>
-                        <DatePicker
-                          date={field.value}
-                          setDate={field.onChange}
-                        />
+                        <FormControl>
+                          <Input 
+                            type="date" 
+                            {...field}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
