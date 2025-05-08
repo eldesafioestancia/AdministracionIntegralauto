@@ -188,10 +188,12 @@ export default function MachineDetail() {
                   <i className="ri-tools-line mr-1"></i> Mantenimiento
                 </Link>
               </Button>
-              <Button variant="outline" size="sm" asChild>
-                <Link href={`/machines/${id}/finances`}>
-                  <i className="ri-money-dollar-circle-line mr-1"></i> Finanzas
-                </Link>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => document.getElementById('finances-tab')?.click()}
+              >
+                <i className="ri-money-dollar-circle-line mr-1"></i> Finanzas
               </Button>
               <Button variant="outline" size="sm">
                 <i className="ri-edit-line mr-1"></i> Editar
@@ -237,7 +239,7 @@ export default function MachineDetail() {
       <Tabs defaultValue="maintenance" className="w-full">
         <TabsList className="grid grid-cols-2 mb-4">
           <TabsTrigger value="maintenance">Historial de Mantenimiento</TabsTrigger>
-          <TabsTrigger value="finances">Ingresos y Gastos</TabsTrigger>
+          <TabsTrigger id="finances-tab" value="finances">Ingresos y Gastos</TabsTrigger>
         </TabsList>
 
         {/* Maintenance History Tab */}
