@@ -192,8 +192,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const maintenanceData = insertMaintenanceSchema.parse(req.body);
       const newMaintenance = await storage.createMaintenance(maintenanceData);
       
-      // Actualizar el inventario si es un mantenimiento de tipo "oil_change"
-      if (maintenanceData.type === "oil_change") {
+      // Actualizar el inventario si es un mantenimiento de tipo "oil_filter_change"
+      if (maintenanceData.type === "oil_filter_change") {
         // Descontar productos usados
         if (maintenanceData.motorOil && maintenanceData.motorOilQuantity) {
           await storage.updateProductStock("Aceite de motor", -Number(maintenanceData.motorOilQuantity));
@@ -249,8 +249,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Actualizar el registro de mantenimiento
       const updatedMaintenance = await storage.updateMaintenance(id, maintenanceData);
       
-      // Si es mantenimiento tipo "oil_change", actualizar inventario
-      if (originalMaintenance.type === "oil_change" || maintenanceData.type === "oil_change") {
+      // Si es mantenimiento tipo "oil_filter_change", actualizar inventario
+      if (originalMaintenance.type === "oil_filter_change" || maintenanceData.type === "oil_filter_change") {
         // Productos que podrían haber cambiado
         
         // Aceite de motor
