@@ -323,6 +323,43 @@ export const insertPastureSchema = basePastureSchema.extend({
   ).optional().nullable(),
 });
 
+// Pasture Works Table (Trabajos agrícolas)
+export const pastureWorks = pgTable("pasture_works", {
+  id: serial("id").primaryKey(),
+  pastureId: integer("pasture_id").notNull(),
+  workType: text("work_type").notNull(), // siembra, cosecha, fumigación, labranza, fertilización, etc.
+  description: text("description").notNull(),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date"),
+  machineId: integer("machine_id"),
+  areaWorked: decimal("area_worked"), // hectáreas trabajadas
+  workingHours: decimal("working_hours"), // horas de trabajo
+  fuelUsed: decimal("fuel_used"), // litros de combustible
+  operativeCost: decimal("operative_cost"), // costo operativo
+  suppliesCost: decimal("supplies_cost"), // costo de insumos
+  totalCost: decimal("total_cost"), // costo total
+  weatherConditions: text("weather_conditions"), // condiciones climáticas
+  temperature: decimal("temperature"), // temperatura en °C
+  soilHumidity: decimal("soil_humidity"), // humedad del suelo en %
+  observations: text("observations"), // observaciones
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Schema for inserting pasture works
+const basePastureWorkSchema = createInsertSchema(pastureWorks).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertPastureWorkSchema = basePastureWorkSchema.extend({
+  startDate: z.string().or(z.date()).transform(val => 
+    typeof val === 'string' ? new Date(val) : val
+  ),
+  endDate: z.string().or(z.date()).transform(val => 
+    typeof val === 'string' ? new Date(val) : val
+  ).optional().nullable(),
+});
+
 // Pasture Financial Records
 export const pastureFinances = pgTable("pasture_finances", {
   id: serial("id").primaryKey(),
@@ -454,6 +491,9 @@ export type InsertAnimalFinance = z.infer<typeof insertAnimalFinanceSchema>;
 
 export type Pasture = typeof pastures.$inferSelect;
 export type InsertPasture = z.infer<typeof insertPastureSchema>;
+
+export type PastureWork = typeof pastureWorks.$inferSelect;
+export type InsertPastureWork = z.infer<typeof insertPastureWorkSchema>;
 
 export type PastureFinance = typeof pastureFinances.$inferSelect;
 export type InsertPastureFinance = z.infer<typeof insertPastureFinanceSchema>;

@@ -7,6 +7,7 @@ import {
   animalVeterinary, AnimalVeterinary, InsertAnimalVeterinary,
   animalFinances, AnimalFinance, InsertAnimalFinance,
   pastures, Pasture, InsertPasture,
+  pastureWorks, PastureWork, InsertPastureWork,
   pastureFinances, PastureFinance, InsertPastureFinance,
   investments, Investment, InsertInvestment,
   services, Service, InsertService,
@@ -69,6 +70,12 @@ export interface IStorage {
   createPasture(pasture: InsertPasture): Promise<Pasture>;
   updatePasture(id: number, pasture: Partial<InsertPasture>): Promise<Pasture | undefined>;
   deletePasture(id: number): Promise<boolean>;
+  
+  // Pasture Works (Trabajos agrícolas)
+  getPastureWorks(pastureId?: number): Promise<PastureWork[]>;
+  getPastureWork(id: number): Promise<PastureWork | undefined>;
+  createPastureWork(work: InsertPastureWork): Promise<PastureWork>;
+  deletePastureWork(id: number): Promise<boolean>;
   
   // Pasture Finances
   getPastureFinances(pastureId?: number): Promise<PastureFinance[]>;
@@ -143,6 +150,7 @@ export class MemStorage implements IStorage {
     animalVeterinary: number;
     animalFinance: number;
     pasture: number;
+    pastureWork: number;
     pastureFinance: number;
     investment: number;
     service: number;
@@ -152,6 +160,8 @@ export class MemStorage implements IStorage {
     capital: number;
   };
 
+  private pastureWorks: Map<number, PastureWork>;
+    
   constructor() {
     this.users = new Map();
     this.machines = new Map();
@@ -161,6 +171,7 @@ export class MemStorage implements IStorage {
     this.animalVeterinary = new Map();
     this.animalFinances = new Map();
     this.pastures = new Map();
+    this.pastureWorks = new Map();
     this.pastureFinances = new Map();
     this.investments = new Map();
     this.services = new Map();
@@ -178,6 +189,7 @@ export class MemStorage implements IStorage {
       animalVeterinary: 1,
       animalFinance: 1,
       pasture: 1,
+      pastureWork: 1,
       pastureFinance: 1,
       investment: 1,
       service: 1,
