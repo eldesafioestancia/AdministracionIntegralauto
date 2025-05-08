@@ -327,7 +327,7 @@ export const insertPastureSchema = basePastureSchema.extend({
 export const pastureWorks = pgTable("pasture_works", {
   id: serial("id").primaryKey(),
   pastureId: integer("pasture_id").notNull(),
-  workType: text("work_type").notNull(), // siembra, cosecha, fumigación, labranza, fertilización, etc.
+  workType: text("work_type").notNull(), // siembra, cosecha, fumigación, fertilización, rastra, arado, cincel, corte, rastrillado, enrollado
   description: text("description").notNull(),
   startDate: timestamp("start_date").notNull(),
   endDate: timestamp("end_date"),
@@ -342,6 +342,18 @@ export const pastureWorks = pgTable("pasture_works", {
   temperature: decimal("temperature"), // temperatura en °C
   soilHumidity: decimal("soil_humidity"), // humedad del suelo en %
   observations: text("observations"), // observaciones
+  
+  // Campos específicos para diferentes tipos de trabajo
+  seedType: text("seed_type"), // Tipo de semilla para siembra
+  seedQuantity: decimal("seed_quantity"), // Cantidad de semilla por hectárea (kg/ha)
+  harvestQuantity: decimal("harvest_quantity"), // Cantidad cosechada por hectárea (kg/ha)
+  chemicalType: text("chemical_type"), // Tipo de agroquímico para fumigación
+  chemicalQuantity: decimal("chemical_quantity"), // Cantidad de agroquímico por hectárea (L/ha)
+  fertilizerType: text("fertilizer_type"), // Tipo de fertilizante
+  fertilizerQuantity: decimal("fertilizer_quantity"), // Cantidad de fertilizante por hectárea (kg/ha)
+  baleCount: decimal("bale_count"), // Cantidad de rollos (enrollado)
+  threadRollsUsed: decimal("thread_rolls_used"), // Cantidad de rollos de hilo usados (enrollado)
+  
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

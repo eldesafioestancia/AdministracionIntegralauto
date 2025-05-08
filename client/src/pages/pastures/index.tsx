@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'wouter';
 import { 
@@ -115,6 +115,17 @@ const pastureWorkFormSchema = z.object({
   temperature: z.string().optional().nullable(),
   soilHumidity: z.string().optional().nullable(),
   observations: z.string().optional().nullable(),
+  
+  // Campos específicos para diferentes tipos de trabajo
+  seedType: z.string().optional().nullable(),
+  seedQuantity: z.string().optional().nullable(),
+  harvestQuantity: z.string().optional().nullable(),
+  chemicalType: z.string().optional().nullable(),
+  chemicalQuantity: z.string().optional().nullable(),
+  fertilizerType: z.string().optional().nullable(),
+  fertilizerQuantity: z.string().optional().nullable(),
+  baleCount: z.string().optional().nullable(),
+  threadRollsUsed: z.string().optional().nullable(),
 });
 
 type PastureFormValues = z.infer<typeof pastureFormSchema>;
@@ -178,8 +189,20 @@ export default function PasturesIndex() {
       temperature: null,
       soilHumidity: null,
       observations: null,
+      seedType: null,
+      seedQuantity: null,
+      harvestQuantity: null,
+      chemicalType: null,
+      chemicalQuantity: null,
+      fertilizerType: null,
+      fertilizerQuantity: null,
+      baleCount: null,
+      threadRollsUsed: null,
     },
   });
+  
+  // Observador para detectar cambios en el tipo de trabajo
+  const selectedWorkType = workForm.watch("workType");
 
   // Tipos de suelo
   const soilTypes = [
@@ -1230,6 +1253,207 @@ export default function PasturesIndex() {
                 />
               </div>
               
+              {/* Campos específicos basados en el tipo de trabajo */}
+              {selectedWorkType === "siembra" && (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField
+                      control={workForm.control}
+                      name="seedType"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tipo de Semilla</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Ej: Trigo/Cebada/Maíz"
+                              {...field}
+                              value={field.value || ""}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={workForm.control}
+                      name="seedQuantity"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Cantidad (kg/ha)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="120"
+                              step="0.1"
+                              {...field}
+                              value={field.value || ""}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </>
+              )}
+              
+              {selectedWorkType === "cosecha" && (
+                <FormField
+                  control={workForm.control}
+                  name="harvestQuantity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Rendimiento (kg/ha)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="3500"
+                          step="1"
+                          {...field}
+                          value={field.value || ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+              
+              {selectedWorkType === "fumigacion" && (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField
+                      control={workForm.control}
+                      name="chemicalType"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tipo de Agroquímico</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Ej: Glifosato/2-4D"
+                              {...field}
+                              value={field.value || ""}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={workForm.control}
+                      name="chemicalQuantity"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Cantidad (L/ha)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="2.5"
+                              step="0.1"
+                              {...field}
+                              value={field.value || ""}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </>
+              )}
+              
+              {selectedWorkType === "fertilizacion" && (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField
+                      control={workForm.control}
+                      name="fertilizerType"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tipo de Fertilizante</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Ej: Urea/Fosfato"
+                              {...field}
+                              value={field.value || ""}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={workForm.control}
+                      name="fertilizerQuantity"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Cantidad (kg/ha)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="200"
+                              step="1"
+                              {...field}
+                              value={field.value || ""}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </>
+              )}
+              
+              {selectedWorkType === "enrollado" && (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField
+                      control={workForm.control}
+                      name="threadRollsUsed"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Rollos de Hilo Usados</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="2"
+                              step="1"
+                              {...field}
+                              value={field.value || ""}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={workForm.control}
+                      name="baleCount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Rollos por Hectárea</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="15"
+                              step="1"
+                              {...field}
+                              value={field.value || ""}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </>
+              )}
+
               {/* Observaciones */}
               <FormField
                 control={workForm.control}
