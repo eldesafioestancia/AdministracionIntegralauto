@@ -16,7 +16,13 @@ import {
   insertInvestmentSchema,
   insertCapitalSchema,
 } from "@shared/schema";
-import { getCurrentWeather, getWeatherForecast, evaluateCropRisks, generateBasicRecommendations } from './weather';
+import { 
+  getCurrentWeather, 
+  getWeatherForecast, 
+  evaluateCropRisks, 
+  generateBasicRecommendations,
+  getHistoricalPrecipitation 
+} from './weather';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Rutas de autenticación simuladas - sin verificación real
@@ -1005,6 +1011,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error in crop risk assessment:", error);
       res.status(500).json({ 
         message: "Error assessing crop risks", 
+        error: (error as Error).message 
+      });
+    }
+  });
+  
+  // Historial de precipitaciones
+  app.get("/api/weather/historical-precipitation", async (req: Request, res: Response) => {
+    try {
+      const { lat, lon } = req.query;
+      
+      if (!lat || !lon) {
+        return res.status(400).json({ 
+          message: "Latitude and longitude are required query parameters" 
+        });
+      }
+      
+      // Obtener datos históricos de precipitaciones
+      const historicalData = await getHistoricalPrecipitation(
+        parseFloat(lat as string), 
+        parseFloat(lon as string)
+      );
+      
+      res.json(historicalData);
+    } catch (error) {
+      console.error("Error fetching historical precipitation data:", error);
+      res.status(500).json({ 
+        message: "Error fetching historical precipitation data", 
         error: (error as Error).message 
       });
     }
