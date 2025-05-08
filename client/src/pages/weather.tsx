@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { WeatherWidget } from "@/components/weather/WeatherWidget";
 import { AgriPlanningTool } from "@/components/weather/AgriPlanningTool";
+import { PrecipitationHistory } from "@/components/weather/PrecipitationHistory";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -96,9 +97,10 @@ export default function WeatherPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full md:w-[400px] grid-cols-2">
+        <TabsList className="grid w-full md:w-[600px] grid-cols-3">
           <TabsTrigger value="weather">Clima Actual</TabsTrigger>
           <TabsTrigger value="planning">Planificación Agrícola</TabsTrigger>
+          <TabsTrigger value="precipitation">Historial de Precipitaciones</TabsTrigger>
         </TabsList>
         
         <TabsContent value="weather" className="mt-6">
@@ -310,7 +312,73 @@ export default function WeatherPage() {
             </div>
           </div>
         </TabsContent>
-      </Tabs>
-    </div>
-  );
-}
+          <TabsContent value="precipitation" className="mt-6">
+            <div className="grid gap-6 md:grid-cols-12">
+              <div className="md:col-span-9">
+                <PrecipitationHistory location={customLocation || {
+                  lat: -34.6037,
+                  lon: -58.3816,
+                  name: "Buenos Aires"
+                }} />
+              </div>
+              
+              <div className="md:col-span-3 space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Uso de datos históricos</CardTitle>
+                    <CardDescription>
+                      Cómo aprovechar esta información en la gestión agrícola
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-medium text-slate-700">Análisis de tendencias</h3>
+                      <p className="text-xs text-slate-600">
+                        Utiliza los patrones históricos de precipitación para identificar ciclos y tendencias que ayuden a planificar rotaciones de cultivos y fechas de siembra.
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-medium text-slate-700">Manejo de riesgos</h3>
+                      <p className="text-xs text-slate-600">
+                        Evalúa la variabilidad histórica para prepararte ante eventos extremos y tomar medidas preventivas según la probabilidad de sequías o excesos hídricos.
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-medium text-slate-700">Decisiones económicas</h3>
+                      <p className="text-xs text-slate-600">
+                        Considera los datos históricos para decisiones de inversión en sistemas de riego, drenaje y selección de cultivos adaptados a las condiciones locales.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card className="bg-gradient-to-br from-blue-50 to-green-50 border-blue-100">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-blue-700">Impacto en cultivos</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-xs text-blue-800 space-y-3">
+                      <p>
+                        Los datos históricos de precipitación son fundamentales para la planificación agrícola a largo plazo.
+                      </p>
+                      <p>
+                        <strong>Las tendencias de 20 años</strong> permiten entender los ciclos climáticos regionales y adaptar las prácticas agrícolas.
+                      </p>
+                      <p>
+                        <strong>Los datos recientes (3 meses)</strong> proporcionan contexto para las decisiones inmediatas sobre manejo de cultivos, riego y aplicación de insumos.
+                      </p>
+                      <p>
+                        La comparación entre promedios históricos y valores actuales ayuda a identificar anomalías y ajustar estrategias.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    );
+  }
