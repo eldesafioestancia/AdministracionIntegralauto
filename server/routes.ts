@@ -16,7 +16,7 @@ import {
   insertInvestmentSchema,
   insertCapitalSchema,
 } from "@shared/schema";
-import { getCurrentWeather, getWeatherForecast, assessCropRisks } from './weather';
+import { getCurrentWeather, getWeatherForecast, evaluateCropRisks, generateBasicRecommendations } from './weather';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Rutas de autenticación simuladas - sin verificación real
@@ -994,7 +994,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ]);
       
       // Evaluar riesgos para cultivos
-      const riskAssessment = assessCropRisks(currentWeather, forecast);
+      const riskAssessment = evaluateCropRisks(currentWeather, forecast);
       
       res.json({
         currentWeather,
