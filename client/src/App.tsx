@@ -22,6 +22,7 @@ import Repairs from "@/pages/repairs";
 import Employees from "@/pages/employees/index";
 import Salaries from "@/pages/salaries";
 import Capital from "@/pages/capital";
+import Finances from "./pages/finances";
 import Warehouse from "@/pages/warehouse/index";
 import Weather from "@/pages/weather";
 import Reports from "@/pages/reports/index";
@@ -192,6 +193,13 @@ function App() {
         <Route path="/capital">
           <AppLayout>
             <Capital />
+          </AppLayout>
+        </Route>
+        
+        {/* Rutas para finanzas */}
+        <Route path="/finances">
+          <AppLayout>
+            <Finances />
           </AppLayout>
         </Route>
         
