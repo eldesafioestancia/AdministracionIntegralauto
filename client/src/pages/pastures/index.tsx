@@ -85,16 +85,61 @@ const pastureFormSchema = z.object({
   description: z.string().optional(),
 });
 
+// Esquema para el formulario de trabajos agrícolas
+const pastureWorkFormSchema = z.object({
+  pastureId: z.number({
+    required_error: "Debe seleccionar una parcela",
+  }),
+  workType: z.string({
+    required_error: "El tipo de trabajo es requerido",
+  }).min(1, {
+    message: "El tipo de trabajo es requerido"
+  }),
+  description: z.string({
+    required_error: "La descripción es requerida",
+  }).min(1, {
+    message: "La descripción es requerida"
+  }),
+  startDate: z.date({
+    required_error: "La fecha de inicio es requerida",
+  }),
+  endDate: z.date().optional().nullable(),
+  machineId: z.number().optional().nullable(),
+  areaWorked: z.string().optional().nullable(),
+  workingHours: z.string().optional().nullable(),
+  fuelUsed: z.string().optional().nullable(),
+  operativeCost: z.string().optional().nullable(),
+  suppliesCost: z.string().optional().nullable(),
+  totalCost: z.string().optional().nullable(),
+  weatherConditions: z.string().optional().nullable(),
+  temperature: z.string().optional().nullable(),
+  soilHumidity: z.string().optional().nullable(),
+  observations: z.string().optional().nullable(),
+});
+
 type PastureFormValues = z.infer<typeof pastureFormSchema>;
+type PastureWorkFormValues = z.infer<typeof pastureWorkFormSchema>;
 
 export default function PasturesIndex() {
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [workSheetOpen, setWorkSheetOpen] = useState(false);
+  const [selectedPastureId, setSelectedPastureId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState("parcels");
   const { toast } = useToast();
 
   // Consultar las pasturas
   const { data: pastures, isLoading } = useQuery({
     queryKey: ["/api/pastures"],
+  });
+  
+  // Consultar las máquinas para el formulario de trabajos
+  const { data: machines } = useQuery({
+    queryKey: ["/api/machines"],
+  });
+  
+  // Consultar los trabajos agrícolas de parcelas
+  const { data: pastureWorks } = useQuery({
+    queryKey: ["/api/pasture-works"],
   });
 
   const form = useForm<PastureFormValues>({
@@ -113,6 +158,29 @@ export default function PasturesIndex() {
     },
   });
 
+  // Formulario para trabajos agrícolas
+  const workForm = useForm<PastureWorkFormValues>({
+    resolver: zodResolver(pastureWorkFormSchema),
+    defaultValues: {
+      pastureId: 0,
+      workType: "",
+      description: "",
+      startDate: new Date(),
+      endDate: null,
+      machineId: null,
+      areaWorked: null,
+      workingHours: null,
+      fuelUsed: null,
+      operativeCost: null,
+      suppliesCost: null,
+      totalCost: null,
+      weatherConditions: null,
+      temperature: null,
+      soilHumidity: null,
+      observations: null,
+    },
+  });
+
   // Tipos de suelo
   const soilTypes = [
     { value: "arcilloso", label: "Arcilloso" },
@@ -120,6 +188,27 @@ export default function PasturesIndex() {
     { value: "limoso", label: "Limoso" },
     { value: "franco", label: "Franco" },
     { value: "humifero", label: "Humífero" },
+  ];
+  
+  // Tipos de trabajo
+  const workTypes = [
+    { value: "siembra", label: "Siembra" },
+    { value: "pulverizacion", label: "Pulverización" },
+    { value: "fertilizacion", label: "Fertilización" },
+    { value: "cosecha", label: "Cosecha" },
+    { value: "labranza", label: "Labranza" },
+    { value: "riego", label: "Riego" },
+    { value: "mantenimiento", label: "Mantenimiento" },
+    { value: "otro", label: "Otro" }
+  ];
+  
+  // Condiciones climáticas
+  const weatherConditionTypes = [
+    { value: "soleado", label: "Soleado" },
+    { value: "nublado", label: "Nublado" },
+    { value: "lluvioso", label: "Lluvioso" },
+    { value: "ventoso", label: "Ventoso" },
+    { value: "tormenta", label: "Tormenta" },
   ];
 
   // Fuentes de agua
@@ -181,6 +270,91 @@ export default function PasturesIndex() {
       toast({
         title: "Error",
         description: "No se pudo eliminar la parcela",
+        variant: "destructive",
+      });
+    }
+  }
+  
+  // Función para abrir el sheet de trabajo agrícola
+  function handleOpenWorkSheet(pastureId: number) {
+    setSelectedPastureId(pastureId);
+    workForm.setValue("pastureId", pastureId);
+    setWorkSheetOpen(true);
+  }
+  
+  // Función para manejar el envío del formulario de trabajo agrícola
+  async function handleWorkSubmit(values: PastureWorkFormValues) {
+    try {
+      // Calculamos el costo total si hay costos de suministros y operativos
+      if (values.operativeCost && values.suppliesCost) {
+        const operativeCost = parseFloat(values.operativeCost);
+        const suppliesCost = parseFloat(values.suppliesCost);
+        
+        if (!isNaN(operativeCost) && !isNaN(suppliesCost)) {
+          values.totalCost = (operativeCost + suppliesCost).toString();
+        }
+      }
+      
+      await apiRequest("POST", "/api/pasture-works", values);
+      
+      // Invalidamos la consulta de trabajos
+      queryClient.invalidateQueries({ queryKey: ["/api/pasture-works"] });
+      
+      toast({
+        title: "Trabajo registrado",
+        description: "El trabajo agrícola ha sido registrado exitosamente",
+      });
+      
+      setWorkSheetOpen(false);
+      workForm.reset({
+        pastureId: 0,
+        workType: "",
+        description: "",
+        startDate: new Date(),
+        endDate: null,
+        machineId: null,
+        areaWorked: null,
+        workingHours: null,
+        fuelUsed: null,
+        operativeCost: null,
+        suppliesCost: null,
+        totalCost: null,
+        weatherConditions: null,
+        temperature: null,
+        soilHumidity: null,
+        observations: null,
+      });
+      
+    } catch (error) {
+      console.error("Error registering work:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo registrar el trabajo agrícola",
+        variant: "destructive",
+      });
+    }
+  }
+  
+  // Función para eliminar un trabajo agrícola
+  async function handleDeleteWork(id: number) {
+    if (!confirm("¿Está seguro de eliminar este trabajo?")) return;
+    
+    try {
+      await apiRequest("DELETE", `/api/pasture-works/${id}`, {});
+      
+      // Invalidar consulta de trabajos
+      queryClient.invalidateQueries({ queryKey: ["/api/pasture-works"] });
+      
+      toast({
+        title: "Trabajo eliminado",
+        description: "El trabajo ha sido eliminado exitosamente",
+      });
+      
+    } catch (error) {
+      console.error("Error deleting work:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar el trabajo",
         variant: "destructive",
       });
     }
@@ -652,6 +826,7 @@ export default function PasturesIndex() {
                             size="icon"
                             className="h-8 w-8"
                             title="Trabajos Realizados"
+                            onClick={() => handleOpenWorkSheet(pasture.id)}
                           >
                             <i className="ri-tools-fill text-blue-500"></i>
                           </Button>
@@ -698,6 +873,388 @@ export default function PasturesIndex() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Formulario de Trabajo Agrícola */}
+      <Sheet open={workSheetOpen} onOpenChange={setWorkSheetOpen}>
+        <SheetContent className="sm:max-w-md overflow-y-auto h-full max-h-screen pb-24">
+          <SheetHeader>
+            <SheetTitle>Nuevo Trabajo Agrícola</SheetTitle>
+            <SheetDescription>
+              Registre un trabajo o labor realizada en la parcela seleccionada. Los campos marcados con * son obligatorios.
+            </SheetDescription>
+          </SheetHeader>
+          
+          <Form {...workForm}>
+            <form onSubmit={workForm.handleSubmit(handleWorkSubmit)} className="space-y-4 py-4 overflow-y-auto">
+              {/* Tipo de trabajo */}
+              <FormField
+                control={workForm.control}
+                name="workType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tipo de Trabajo *</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccione un tipo" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {workTypes.map(type => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              {/* Descripción */}
+              <FormField
+                control={workForm.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Descripción *</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Detalles del trabajo realizado"
+                        className="resize-none"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              {/* Fechas */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  control={workForm.control}
+                  name="startDate"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Fecha de Inicio *</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "dd/MM/yyyy", { locale: es })
+                              ) : (
+                                <span>dd/mm/aaaa</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date > new Date()}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={workForm.control}
+                  name="endDate"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Fecha de Finalización</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "dd/MM/yyyy", { locale: es })
+                              ) : (
+                                <span>dd/mm/aaaa</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value ? new Date(field.value) : undefined}
+                            onSelect={field.onChange}
+                            disabled={(date) => date > new Date()}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              {/* Máquina */}
+              <FormField
+                control={workForm.control}
+                name="machineId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Máquina Utilizada</FormLabel>
+                    <Select 
+                      onValueChange={(value) => field.onChange(value ? parseInt(value) : null)} 
+                      value={field.value?.toString() || ""}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccione una máquina" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="">Ninguna</SelectItem>
+                        {machines && Array.isArray(machines) && machines.map((machine: any) => (
+                          <SelectItem key={machine.id} value={machine.id.toString()}>
+                            {machine.brand} {machine.model}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Maquinaria utilizada para este trabajo
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              {/* Área trabajada y horas */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  control={workForm.control}
+                  name="areaWorked"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Superficie Trabajada (Ha)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="125.5"
+                          step="0.01"
+                          {...field}
+                          value={field.value || ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={workForm.control}
+                  name="workingHours"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Horas de Trabajo</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="8.5"
+                          step="0.5"
+                          {...field}
+                          value={field.value || ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              {/* Combustible y costos */}
+              <FormField
+                control={workForm.control}
+                name="fuelUsed"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Combustible Utilizado (L)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="150"
+                        step="0.1"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  control={workForm.control}
+                  name="operativeCost"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Costo Operativo ($)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="5000"
+                          step="100"
+                          {...field}
+                          value={field.value || ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={workForm.control}
+                  name="suppliesCost"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Costo de Insumos ($)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="15000"
+                          step="100"
+                          {...field}
+                          value={field.value || ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              {/* Condiciones ambientales */}
+              <FormField
+                control={workForm.control}
+                name="weatherConditions"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Condiciones Climáticas</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      value={field.value || ""}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccione condición" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {weatherConditionTypes.map(type => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  control={workForm.control}
+                  name="temperature"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Temperatura (°C)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="25"
+                          step="0.5"
+                          {...field}
+                          value={field.value || ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={workForm.control}
+                  name="soilHumidity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Humedad del Suelo (%)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="45"
+                          min="0"
+                          max="100"
+                          {...field}
+                          value={field.value || ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              {/* Observaciones */}
+              <FormField
+                control={workForm.control}
+                name="observations"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Observaciones</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Observaciones adicionales sobre el trabajo"
+                        className="resize-none"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <SheetFooter className="mt-4">
+                <Button type="submit">Registrar Trabajo</Button>
+              </SheetFooter>
+            </form>
+          </Form>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
