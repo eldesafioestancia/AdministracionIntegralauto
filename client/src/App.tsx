@@ -7,6 +7,7 @@ import MachinesIndex from "@/pages/machines/index";
 import MachineDetail from "@/pages/machines/[id]";
 import MachineMaintenance from "@/pages/machines/maintenance";
 import EditMaintenance from "@/pages/machines/maintenance/[id]";
+import MachineFinances from "@/pages/machines/finances/[id]";
 import AnimalsIndex from "@/pages/animals/index";
 import AnimalDetail from "@/pages/animals/[id]";
 import AnimalEdit from "@/pages/animals/[id]/edit";
@@ -66,6 +67,14 @@ function App() {
           {(params) => (
             <AppLayout>
               <EditMaintenance />
+            </AppLayout>
+          )}
+        </Route>
+
+        <Route path="/machines/:id/finances">
+          {(params) => (
+            <AppLayout>
+              <MachineFinances />
             </AppLayout>
           )}
         </Route>
