@@ -193,13 +193,15 @@ export default function PasturesIndex() {
   // Tipos de trabajo
   const workTypes = [
     { value: "siembra", label: "Siembra" },
-    { value: "pulverizacion", label: "Pulverización" },
-    { value: "fertilizacion", label: "Fertilización" },
     { value: "cosecha", label: "Cosecha" },
-    { value: "labranza", label: "Labranza" },
-    { value: "riego", label: "Riego" },
-    { value: "mantenimiento", label: "Mantenimiento" },
-    { value: "otro", label: "Otro" }
+    { value: "fumigacion", label: "Fumigación" },
+    { value: "fertilizacion", label: "Fertilización" },
+    { value: "rastra", label: "Rastra" },
+    { value: "arado", label: "Arado" },
+    { value: "cincel", label: "Cincel" },
+    { value: "corte", label: "Corte" },
+    { value: "rastrillado", label: "Rastrillado" },
+    { value: "enrollado", label: "Enrollado" }
   ];
   
   // Condiciones climáticas
