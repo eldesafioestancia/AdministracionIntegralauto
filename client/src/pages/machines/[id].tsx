@@ -18,6 +18,14 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import MachineFinanceForm from "@/components/machines/MachineFinanceForm";
+import {
   Form,
   FormControl,
   FormField,
@@ -50,6 +58,7 @@ export default function MachineDetail() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const [financeDialogOpen, setFinanceDialogOpen] = useState(false);
+  const [financeSheetOpen, setFinanceSheetOpen] = useState(false);
   const numericId = parseInt(id);
 
   // Get machine details
@@ -484,111 +493,24 @@ export default function MachineDetail() {
         <TabsContent value="finances" className="space-y-4">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-header font-semibold text-neutral-500">Ingresos y Gastos</h2>
-            <Dialog open={financeDialogOpen} onOpenChange={setFinanceDialogOpen}>
-              <DialogTrigger asChild>
+            <Sheet open={financeSheetOpen} onOpenChange={setFinanceSheetOpen}>
+              <SheetTrigger asChild>
                 <Button>
                   <i className="ri-add-line mr-1"></i> Nuevo registro
                 </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Registrar ingreso/gasto</DialogTitle>
-                  <DialogDescription>
-                    Complete los datos del nuevo registro financiero
-                  </DialogDescription>
-                </DialogHeader>
-
-                <Form {...financeForm}>
-                  <form onSubmit={financeForm.handleSubmit(onSubmitFinance)} className="space-y-4">
-                    <FormField
-                      control={financeForm.control}
-                      name="type"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Tipo</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Seleccione un tipo" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="income">Ingreso</SelectItem>
-                              <SelectItem value="expense">Gasto</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={financeForm.control}
-                      name="date"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Fecha</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="date"
-                              {...field}
-                              value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-                              onChange={(e) => {
-                                const date = e.target.value ? new Date(e.target.value) : null;
-                                field.onChange(date);
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={financeForm.control}
-                      name="concept"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Concepto</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Ej: Repuestos, Combustible, etc." {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={financeForm.control}
-                      name="amount"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Monto</FormLabel>
-                          <FormControl>
-                            <Input placeholder="0.00" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <DialogFooter>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setFinanceDialogOpen(false)}
-                      >
-                        Cancelar
-                      </Button>
-                      <Button type="submit">Guardar</Button>
-                    </DialogFooter>
-                  </form>
-                </Form>
-              </DialogContent>
-            </Dialog>
+              </SheetTrigger>
+              <SheetContent className="sm:max-w-lg overflow-y-auto">
+                <SheetHeader>
+                  <SheetTitle>Nuevo registro financiero</SheetTitle>
+                </SheetHeader>
+                <div className="mt-6">
+                  <MachineFinanceForm 
+                    machineId={numericId} 
+                    onSuccess={() => setFinanceSheetOpen(false)}
+                  />
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
 
           {financesLoading ? (
@@ -603,7 +525,7 @@ export default function MachineDetail() {
                 <i className="ri-money-dollar-circle-line text-4xl text-neutral-300 mb-2"></i>
                 <h3 className="text-lg font-medium text-neutral-500 mb-1">No hay registros financieros</h3>
                 <p className="text-neutral-400 mb-4">Registre el primer ingreso o gasto para esta unidad</p>
-                <Button onClick={() => setFinanceDialogOpen(true)}>
+                <Button onClick={() => setFinanceSheetOpen(true)}>
                   <i className="ri-add-line mr-1"></i> Nuevo registro
                 </Button>
               </CardContent>
