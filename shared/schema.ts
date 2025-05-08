@@ -168,9 +168,13 @@ export const machineFinances = pgTable("machine_finances", {
   id: serial("id").primaryKey(),
   machineId: integer("machine_id").notNull(),
   date: timestamp("date").notNull(),
-  type: text("type").notNull(), // expense, income
+  type: text("type").notNull(), // ingreso, egreso
+  paymentMethod: text("payment_method"), // efectivo, deposito, transferencia, cheque
+  originModule: text("origin_module").default("maquinarias"), // módulo de origen
+  machineType: text("machine_type"), // tractor, topadora, camion, etc
   concept: text("concept").notNull(),
   amount: decimal("amount").notNull(),
+  attachmentFile: text("attachment_file"), // archivo adjunto (path al archivo)
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
