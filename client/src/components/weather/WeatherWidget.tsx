@@ -191,8 +191,36 @@ export function WeatherWidget({ defaultLocation }: WeatherWidgetProps) {
   const { currentWeather, riskAssessment } = data;
   const currentDate = new Date(currentWeather.dt * 1000);
   const weatherIcon = weatherIcons[currentWeather.weather[0].icon] || "🌡️";
-  const riskLevel = riskAssessment.riskLevel;
+  const riskLevel = riskAssessment.level; // Cambiado de riskLevel a level
   const { color, bg, emoji } = riskLevelStyles[riskLevel] || riskLevelStyles.low;
+  
+  // Generar recomendaciones basadas en condiciones actuales
+  const recommendationsList = riskAssessment.factors && riskAssessment.factors.length > 0
+    ? [
+        // Recomendaciones según temperatura
+        currentWeather.main.temp > 30
+          ? "Riegue cultivos temprano en la mañana o al atardecer para minimizar la evaporación."
+          : currentWeather.main.temp < 5
+          ? "Proteja cultivos sensibles ante posibles heladas."
+          : "Las condiciones de temperatura son favorables para la mayoría de cultivos.",
+        
+        // Recomendaciones según humedad
+        currentWeather.main.humidity > 80
+          ? "Vigile posibles enfermedades fúngicas debido a la alta humedad."
+          : currentWeather.main.humidity < 30
+          ? "Considere aumentar el riego para compensar la baja humedad ambiental."
+          : "El nivel de humedad es adecuado para el desarrollo de cultivos.",
+        
+        // Recomendaciones según viento
+        currentWeather.wind.speed > 8
+          ? "Evite la aplicación de agroquímicos con estas condiciones de viento."
+          : "Las condiciones actuales son favorables para labores de fumigación."
+      ]
+    : [
+        "Las condiciones actuales son favorables para la mayoría de operaciones agrícolas.",
+        "Aproveche estas condiciones para realizar labores de campo pendientes.",
+        "Monitoree regularmente el pronóstico para planificar actividades futuras."
+      ];
 
   return (
     <Card className="shadow-md border-t-4" style={{ borderTopColor: riskLevel === 'low' ? '#10b981' : riskLevel === 'moderate' ? '#f59e0b' : '#ef4444' }}>
@@ -304,10 +332,10 @@ export function WeatherWidget({ defaultLocation }: WeatherWidgetProps) {
               </h3>
             </div>
             
-            {riskAssessment.riskFactors.length > 0 ? (
+            {riskAssessment.factors && riskAssessment.factors.length > 0 ? (
               <div className="space-y-3">
                 <h3 className="font-semibold">Factores de riesgo:</h3>
-                {riskAssessment.riskFactors.map((factor: any, index: number) => (
+                {riskAssessment.factors.map((factor: any, index: number) => (
                   <div key={index} className="border p-3 rounded-md">
                     <div className={`font-medium ${impactStyles[factor.impact]}`}>
                       {factor.factor}
@@ -326,7 +354,7 @@ export function WeatherWidget({ defaultLocation }: WeatherWidgetProps) {
             <div className="space-y-3">
               <h3 className="font-semibold">Recomendaciones:</h3>
               <ul className="space-y-2">
-                {riskAssessment.recommendations.map((rec: string, index: number) => (
+                {recommendationsList.map((rec: string, index: number) => (
                   <li key={index} className="bg-blue-50 p-3 rounded-md text-blue-700">
                     {rec}
                   </li>
