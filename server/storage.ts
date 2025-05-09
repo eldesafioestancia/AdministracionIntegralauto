@@ -876,7 +876,7 @@ export const storage = new MemStorage();
 // Cargar datos de ejemplo
 async function loadSampleData() {
   try {
-    // Crear una máquina de ejemplo
+    // Crear máquinas de ejemplo
     const machine = await storage.createMachine({
       brand: "John Deere",
       model: "5090E",
@@ -888,6 +888,131 @@ async function loadSampleData() {
       warrantyEnd: new Date("2022-05-15"),
     });
     console.log(`[Sample Data] Máquina creada: ${machine.brand} ${machine.model} (ID: ${machine.id})`);
+    
+    // Tractores adicionales
+    const tractor1 = await storage.createMachine({
+      type: "tractor",
+      brand: "John Deere",
+      model: "8R 410",
+      serialNumber: "JD8R410-2345678",
+      year: 2023,
+      hours: "150",
+      power: "410 HP",
+      fuelType: "Diesel",
+      licensePlate: "",
+      purchaseDate: new Date("2023-12-15"),
+      supplier: "Agro Center S.A.",
+      invoiceNumber: "F-23456",
+      purchasePrice: "85000000",
+      paymentMethod: "Crédito bancario",
+      warrantyStart: new Date("2023-12-15"),
+      warrantyEnd: new Date("2025-12-15"),
+    });
+    console.log(`[Sample Data] Máquina creada: ${tractor1.brand} ${tractor1.model} (ID: ${tractor1.id})`);
+    
+    const tractor2 = await storage.createMachine({
+      type: "tractor",
+      brand: "New Holland",
+      model: "T7.315",
+      serialNumber: "NH7315-6543210",
+      year: 2022,
+      hours: "320",
+      power: "315 HP",
+      fuelType: "Diesel",
+      licensePlate: "",
+      purchaseDate: new Date("2022-06-10"),
+      supplier: "Maquinarias del Sur",
+      invoiceNumber: "F-65432",
+      purchasePrice: "72000000",
+      paymentMethod: "Contado",
+      warrantyStart: new Date("2022-06-10"),
+      warrantyEnd: new Date("2024-06-10"),
+    });
+    console.log(`[Sample Data] Máquina creada: ${tractor2.brand} ${tractor2.model} (ID: ${tractor2.id})`);
+    
+    // Camiones
+    const camion1 = await storage.createMachine({
+      type: "camion",
+      brand: "Mercedes-Benz",
+      model: "Atego 1726",
+      serialNumber: "MB1726-123456",
+      year: 2022,
+      hours: "25000",
+      power: "260 HP",
+      fuelType: "Diesel",
+      licensePlate: "AB123CD",
+      purchaseDate: new Date("2022-03-15"),
+      supplier: "Automotores del Norte",
+      invoiceNumber: "F-34567",
+      purchasePrice: "28000000",
+      paymentMethod: "Financiación concesionario",
+      warrantyStart: new Date("2022-03-15"),
+      warrantyEnd: new Date("2024-03-15"),
+    });
+    console.log(`[Sample Data] Máquina creada: ${camion1.brand} ${camion1.model} (ID: ${camion1.id})`);
+    
+    // Topadoras
+    const topadora = await storage.createMachine({
+      type: "topadora",
+      brand: "Caterpillar",
+      model: "D6K2",
+      serialNumber: "CAT-D6K2-543210",
+      year: 2020,
+      hours: "1200",
+      power: "130 HP",
+      fuelType: "Diesel",
+      licensePlate: "",
+      purchaseDate: new Date("2020-11-10"),
+      supplier: "Finning CAT",
+      invoiceNumber: "F-67890",
+      purchasePrice: "40000000",
+      paymentMethod: "Leasing",
+      warrantyStart: new Date("2020-11-10"),
+      warrantyEnd: new Date("2022-11-10"),
+    });
+    console.log(`[Sample Data] Máquina creada: ${topadora.brand} ${topadora.model} (ID: ${topadora.id})`);
+    
+    // Vehículos
+    const vehiculo = await storage.createMachine({
+      type: "vehiculo",
+      brand: "Toyota",
+      model: "Hilux 4x4 SRX",
+      serialNumber: "TOY-HLX-876543",
+      year: 2023,
+      hours: "12000",
+      power: "204 HP",
+      fuelType: "Diesel",
+      licensePlate: "AD345FG",
+      purchaseDate: new Date("2023-01-25"),
+      supplier: "Toyota Misiones",
+      invoiceNumber: "F-89012",
+      purchasePrice: "15000000",
+      paymentMethod: "Financiación concesionario",
+      warrantyStart: new Date("2023-01-25"),
+      warrantyEnd: new Date("2026-01-25"),
+    });
+    console.log(`[Sample Data] Máquina creada: ${vehiculo.brand} ${vehiculo.model} (ID: ${vehiculo.id})`);
+    
+    // Accesorios
+    const accesorio = await storage.createMachine({
+      type: "accesorio",
+      brand: "John Deere",
+      model: "Sembradora 1755",
+      serialNumber: "JD-SEM-234567",
+      year: 2021,
+      hours: "320",
+      power: "N/A",
+      fuelType: "N/A",
+      licensePlate: "",
+      purchaseDate: new Date("2021-07-20"),
+      supplier: "Agro Center S.A.",
+      invoiceNumber: "F-01234",
+      purchasePrice: "18000000",
+      paymentMethod: "Contado",
+      warrantyStart: new Date("2021-07-20"),
+      warrantyEnd: new Date("2023-07-20"),
+    });
+    console.log(`[Sample Data] Máquina creada: ${accesorio.brand} ${accesorio.model} (ID: ${accesorio.id})`);
 
     // Crear registros de mantenimiento
     const maintenance1 = await storage.createMaintenance({
