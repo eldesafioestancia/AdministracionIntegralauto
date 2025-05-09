@@ -66,19 +66,33 @@ export default function FinancesPage() {
     },
   });
   
+  // Definir interface para máquinas
+  interface Machine {
+    id: number;
+    brand: string;
+    model: string;
+    type: string;
+    [key: string]: any;
+  }
+  
   // Procesar los tipos de máquinas y agruparlas por tipo
   useEffect(() => {
     if (machines && machines.length > 0) {
       // Extraer tipos únicos de máquinas con tipado correcto
-      const uniqueTypes = Array.from(
-        new Set(machines.map((machine: any) => machine.type as string))
-      ) as string[];
+      const typedMachines = machines as Machine[];
+      // Usamos reduce en lugar de Set para evitar problemas de compatibilidad
+      const uniqueTypes = typedMachines.reduce<string[]>((acc, machine) => {
+        if (!acc.includes(machine.type)) {
+          acc.push(machine.type);
+        }
+        return acc;
+      }, []);
       setMachineTypes(uniqueTypes);
       
       // Agrupar máquinas por tipo
-      const machineGroups: Record<string, any[]> = {};
-      uniqueTypes.forEach((type: string) => {
-        machineGroups[type] = machines.filter((machine: any) => machine.type === type);
+      const machineGroups: Record<string, Machine[]> = {};
+      uniqueTypes.forEach((type) => {
+        machineGroups[type] = typedMachines.filter(machine => machine.type === type);
       });
       
       setMachinesByType(machineGroups);
@@ -187,6 +201,8 @@ export default function FinancesPage() {
       amount: "",
       paymentMethod: "Efectivo",
       status: "completed",
+      machineId: "",
+      machineType: "",
     },
   });
 
@@ -337,6 +353,15 @@ export default function FinancesPage() {
   
   const handleMachineTypeChange = (type: string) => {
     setSelectedMachineType(type);
+    // Limpiar la selección de máquina cuando cambia el tipo
+    form.setValue("machineId", "");
+    // Guardar el tipo de máquina en el formulario
+    form.setValue("machineType", type);
+  };
+  
+  const handleMachineChange = (machineId: string) => {
+    // Guardar el ID de la máquina en el formulario
+    form.setValue("machineId", machineId);
   };
 
   // Funciones para formatear moneda y fechas
@@ -532,23 +557,30 @@ export default function FinancesPage() {
                       
                       {/* Selección de máquina específica si se ha seleccionado un tipo */}
                       {selectedMachineType && machinesByType[selectedMachineType] && (
-                        <FormItem>
-                          <FormLabel>Máquina</FormLabel>
-                          <Select>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Selecciona una máquina" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {machinesByType[selectedMachineType].map((machine) => (
-                                <SelectItem key={machine.id} value={machine.id.toString()}>
-                                  {machine.brand} {machine.model}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormItem>
+                        <FormField
+                          control={form.control}
+                          name="machineId"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Máquina</FormLabel>
+                              <Select onValueChange={handleMachineChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona una máquina" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {machinesByType[selectedMachineType].map((machine) => (
+                                    <SelectItem key={machine.id} value={machine.id.toString()}>
+                                      {machine.brand} {machine.model}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       )}
                     </div>
                   )}
