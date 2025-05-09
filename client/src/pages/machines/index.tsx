@@ -133,11 +133,11 @@ export default function MachinesIndex() {
 
   const getMachineTypeIcon = (type: string) => {
     switch (type) {
-      case "tractor": return "ri-truck-line";
-      case "topadora": return "ri-loader-line";
-      case "camion": return "ri-truck-fill";
-      case "vehiculo": return "ri-car-line";
-      case "accesorio": return "ri-tools-line";
+      case "tractor": return "ri-steering-2-fill"; // Icono de tractor
+      case "topadora": return "ri-loader-line"; // Icono de topadora
+      case "camion": return "ri-truck-fill"; // Icono de camión
+      case "vehiculo": return "ri-car-fill"; // Icono de vehículo
+      case "accesorio": return "ri-tools-fill"; // Icono de accesorio/herramienta
       default: return "ri-truck-line";
     }
   };
@@ -611,7 +611,18 @@ export default function MachinesIndex() {
                   <div className="flex flex-col">
                     <div className="flex items-center">
                       <h3 className="font-medium text-neutral-800">{machine.brand} {machine.model}</h3>
-                      <Badge className="ml-2 px-2 py-0 h-5">{getMachineTypeLabel(machine.type)}</Badge>
+                      <Badge 
+                        className={`ml-2 px-2 py-0 h-5 ${
+                          machine.type === "tractor" ? "bg-red-100 text-red-800 hover:bg-red-200" :
+                          machine.type === "camion" ? "bg-blue-100 text-blue-800 hover:bg-blue-200" :
+                          machine.type === "topadora" ? "bg-green-100 text-green-800 hover:bg-green-200" :
+                          machine.type === "vehiculo" ? "bg-amber-100 text-amber-800 hover:bg-amber-200" :
+                          machine.type === "accesorio" ? "bg-purple-100 text-purple-800 hover:bg-purple-200" :
+                          ""
+                        }`}
+                      >
+                        {getMachineTypeLabel(machine.type)}
+                      </Badge>
                     </div>
                     <div className="text-sm text-neutral-500 flex items-center space-x-3">
                       <span className="flex items-center">
