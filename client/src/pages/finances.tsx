@@ -154,10 +154,12 @@ export default function FinancesPage() {
 
   // Categorías disponibles para el formulario
   const incomeCategories = [
-    { value: "ventas", label: "Ventas" },
-    { value: "servicios", label: "Servicios" },
-    { value: "subsidios", label: "Subsidios" },
-    { value: "otros", label: "Otros" },
+    { value: "maquinarias", label: "Maquinarias" },
+    { value: "animales", label: "Animales" },
+    { value: "pasturas", label: "Pasturas" },
+    { value: "deposito", label: "Depósito" },
+    { value: "inversiones", label: "Inversiones" },
+    { value: "capital", label: "Capital" },
   ];
 
   const expenseCategories = [
@@ -171,19 +173,38 @@ export default function FinancesPage() {
 
   // Subcategorías según la categoría seleccionada
   const subcategories: Record<string, { value: string; label: string }[]> = {
-    ventas: [
-      { value: "ganado", label: "Ganado" },
-      { value: "granos", label: "Granos" },
-      { value: "otros_productos", label: "Otros productos" },
+    // Subcategorías para ingresos
+    maquinarias: [
+      { value: "venta", label: "Venta de maquinaria" },
+      { value: "alquiler", label: "Alquiler de maquinaria" },
+      { value: "servicio", label: "Servicio prestado" },
     ],
-    servicios: [
-      { value: "arrendamiento", label: "Arrendamiento" },
-      { value: "maquinaria", label: "Servicio de maquinaria" },
+    animales: [
+      { value: "venta_ganado", label: "Venta de ganado" },
+      { value: "productos_animales", label: "Productos animales" },
+      { value: "servicio_reproduccion", label: "Servicio de reproducción" },
     ],
-    subsidios: [
-      { value: "gubernamentales", label: "Gubernamentales" },
-      { value: "provinciales", label: "Provinciales" },
+    pasturas: [
+      { value: "venta_granos", label: "Venta de granos" },
+      { value: "venta_forraje", label: "Venta de forraje" },
+      { value: "pastoreo", label: "Arrendamiento para pastoreo" },
     ],
+    deposito: [
+      { value: "venta_insumos", label: "Venta de insumos" },
+      { value: "alquiler_deposito", label: "Alquiler de depósito" },
+    ],
+    inversiones: [
+      { value: "retorno_inversion", label: "Retorno de inversión" },
+      { value: "dividendos", label: "Dividendos" },
+      { value: "venta_activos", label: "Venta de activos" },
+    ],
+    capital: [
+      { value: "aporte_juan_carlos", label: "Aporte - Juan Carlos" },
+      { value: "aporte_juan_alberto", label: "Aporte - Juan Alberto" },
+      { value: "aporte_nacho", label: "Aporte - Nacho" },
+    ],
+    
+    // Subcategorías para gastos
     insumos: [
       { value: "semillas", label: "Semillas" },
       { value: "fertilizantes", label: "Fertilizantes" },
@@ -195,10 +216,25 @@ export default function FinancesPage() {
       { value: "reparaciones", label: "Reparaciones" },
       { value: "mantenimiento", label: "Mantenimiento" },
     ],
+    servicios: [
+      { value: "veterinario", label: "Servicios veterinarios" },
+      { value: "asesoria_tecnica", label: "Asesoría técnica" },
+      { value: "contratistas", label: "Contratistas" },
+    ],
     impuestos: [
       { value: "ganancias", label: "Ganancias" },
       { value: "iva", label: "IVA" },
       { value: "inmobiliario", label: "Inmobiliario" },
+    ],
+    salarios: [
+      { value: "permanentes", label: "Empleados permanentes" },
+      { value: "temporales", label: "Empleados temporales" },
+      { value: "contratistas", label: "Contratistas" },
+    ],
+    otros: [
+      { value: "seguros", label: "Seguros" },
+      { value: "servicios_publicos", label: "Servicios públicos" },
+      { value: "varios", label: "Gastos varios" },
     ],
   };
 
