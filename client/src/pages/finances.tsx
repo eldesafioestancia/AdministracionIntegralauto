@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -46,6 +47,30 @@ export default function FinancesPage() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
   const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
+  const [location] = useLocation();
+  
+  // Función para analizar parámetros de consulta (query params)
+  const parseQueryParams = () => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      return {
+        openForm: params.get('openForm') === 'true',
+        type: params.get('type') as "income" | "expense" | null,
+        category: params.get('category'),
+        subcategory: params.get('subcategory'),
+        description: params.get('description'),
+        machineId: params.get('machineId'),
+      };
+    }
+    return {
+      openForm: false,
+      type: null,
+      category: null,
+      subcategory: null,
+      description: null,
+      machineId: null,
+    };
+  };
 
   // Consultas para obtener datos
   const { data: financeData = [], isLoading } = useQuery({
@@ -287,6 +312,44 @@ export default function FinancesPage() {
     form.setValue("category", category);
     form.setValue("subcategory", "");
   };
+
+  // Efecto para detectar parámetros y autocompletar el formulario
+  useEffect(() => {
+    const params = parseQueryParams();
+    
+    // Si se solicita abrir el formulario desde la URL
+    if (params.openForm) {
+      // Establecer tipo (ingreso/gasto)
+      if (params.type) {
+        form.setValue("type", params.type);
+      }
+      
+      // Establecer categoría si existe
+      if (params.category) {
+        form.setValue("category", params.category);
+      }
+      
+      // Establecer subcategoría si existe y la categoría está establecida
+      if (params.subcategory && params.category) {
+        form.setValue("subcategory", params.subcategory);
+      }
+      
+      // Establecer descripción si existe
+      if (params.description) {
+        form.setValue("description", params.description);
+      }
+      
+      // Establecer categoría para gastos operativos si es específico de maquinaria
+      if (params.machineId && params.type === "expense") {
+        setActiveTab("expenses");
+      } else if (params.type === "income") {
+        setActiveTab("income");
+      }
+      
+      // Abrir el formulario
+      setIsAddSheetOpen(true);
+    }
+  }, [location]); // Se ejecuta cuando cambia la URL
 
   // Funciones para formatear moneda y fechas
   const formatCurrency = (amount: number | string) => {
