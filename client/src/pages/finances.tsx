@@ -157,7 +157,7 @@ export default function FinancesPage() {
   });
   
   // Consulta para obtener las máquinas disponibles
-  const { data: machines = [] } = useQuery({
+  const { data: machines = [] as Machine[] } = useQuery({
     queryKey: ["/api/machines"],
   });
 
@@ -378,7 +378,7 @@ export default function FinancesPage() {
     
     // Filtrar máquinas por el tipo seleccionado
     if (machines && machines.length > 0) {
-      const filtered = machines.filter((machine: any) => machine.type === type);
+      const filtered = machines.filter((machine: Machine) => machine.type === type);
       setFilteredMachines(filtered);
     }
   };
@@ -564,7 +564,8 @@ export default function FinancesPage() {
                     )}
                   />
 
-                  {form.watch("category") && (
+                  {/* Solo mostrar subcategoría si hay una categoría seleccionada y NO es maquinarias */}
+                  {form.watch("category") && form.watch("category") !== "maquinarias" && (
                     <FormField
                       control={form.control}
                       name="subcategory"
