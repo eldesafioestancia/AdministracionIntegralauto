@@ -31,11 +31,21 @@ interface FinanceEntry {
   createdAt: string;
 }
 
+// Tipos de maquinaria disponibles (mismos que en la sección Maquinarias)
+const machineTypes = [
+  { value: "tractor", label: "Tractor" },
+  { value: "topadora", label: "Topadora" },
+  { value: "camion", label: "Camión" },
+  { value: "vehiculo", label: "Vehículo" },
+  { value: "accesorio", label: "Accesorio" }
+];
+
 // Schema para el formulario
 const financeFormSchema = z.object({
   type: z.enum(["income", "expense"]),
   category: z.string().min(1, { message: "La categoría es requerida" }),
   subcategory: z.string().min(1, { message: "La subcategoría es requerida" }),
+  machineType: z.string().optional(), // Campo opcional para el tipo de maquinaria
   date: z.string().min(1, { message: "La fecha es requerida" }),
   description: z.string().min(1, { message: "La descripción es requerida" }),
   amount: z.string().min(1, { message: "El monto es requerido" }),
@@ -316,11 +326,17 @@ export default function FinancesPage() {
     form.setValue("type", type as "income" | "expense");
     form.setValue("category", "");
     form.setValue("subcategory", "");
+    form.setValue("machineType", ""); // Limpiar también el tipo de maquinaria
   };
 
   const handleCategoryChange = (category: string) => {
     form.setValue("category", category);
     form.setValue("subcategory", "");
+    
+    // Limpiar el tipo de maquinaria si se cambia a una categoría diferente de maquinarias
+    if (category !== "maquinarias") {
+      form.setValue("machineType", "");
+    }
   };
 
   // Efecto para detectar parámetros y autocompletar el formulario
@@ -521,6 +537,34 @@ export default function FinancesPage() {
                               {(subcategories[form.watch("category")] || []).map((subcategory) => (
                                 <SelectItem key={subcategory.value} value={subcategory.value}>
                                   {subcategory.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                  
+                  {/* Campo para el tipo de maquinaria - solo aparece cuando la categoría es "maquinarias" */}
+                  {form.watch("category") === "maquinarias" && (
+                    <FormField
+                      control={form.control}
+                      name="machineType"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tipo de maquinaria</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value || ""}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecciona un tipo de maquinaria" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {machineTypes.map((type) => (
+                                <SelectItem key={type.value} value={type.value}>
+                                  {type.label}
                                 </SelectItem>
                               ))}
                             </SelectContent>
