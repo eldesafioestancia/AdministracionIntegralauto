@@ -177,89 +177,99 @@ export default function FinancesPage() {
     },
   });
 
-  // Categorías disponibles para el formulario
-  const incomeCategories = [
+  // Categorías disponibles para el formulario (unificadas como en el menú lateral)
+  const allCategories = [
     { value: "maquinarias", label: "Maquinarias" },
     { value: "animales", label: "Animales" },
     { value: "pasturas", label: "Pasturas" },
     { value: "deposito", label: "Depósito" },
     { value: "inversiones", label: "Inversiones" },
+    { value: "servicios", label: "Servicios" },
+    { value: "impuestos", label: "Impuestos" },
+    { value: "reparaciones", label: "Reparaciones" },
+    { value: "sueldos", label: "Sueldos" },
     { value: "capital", label: "Capital" },
   ];
 
-  const expenseCategories = [
-    { value: "insumos", label: "Insumos" },
-    { value: "operaciones", label: "Operaciones" },
-    { value: "servicios", label: "Servicios contratados" },
-    { value: "impuestos", label: "Impuestos" },
-    { value: "salarios", label: "Salarios" },
-    { value: "otros", label: "Otros" },
-  ];
+  // Usamos las mismas categorías tanto para ingresos como para gastos
+  const incomeCategories = allCategories;
+  const expenseCategories = allCategories;
 
   // Subcategorías según la categoría seleccionada
   const subcategories: Record<string, { value: string; label: string }[]> = {
-    // Subcategorías para ingresos
+    // Categorías comunes para todos los tipos de operaciones
     maquinarias: [
       { value: "venta", label: "Venta de maquinaria" },
+      { value: "compra", label: "Compra de maquinaria" },
       { value: "alquiler", label: "Alquiler de maquinaria" },
       { value: "servicio", label: "Servicio prestado" },
+      { value: "mantenimiento", label: "Mantenimiento" },
+      { value: "combustible", label: "Combustible" },
     ],
     animales: [
       { value: "venta_ganado", label: "Venta de ganado" },
+      { value: "compra_ganado", label: "Compra de ganado" },
       { value: "productos_animales", label: "Productos animales" },
       { value: "servicio_reproduccion", label: "Servicio de reproducción" },
+      { value: "veterinario", label: "Servicios veterinarios" },
+      { value: "alimento", label: "Alimento animal" },
     ],
     pasturas: [
       { value: "venta_granos", label: "Venta de granos" },
       { value: "venta_forraje", label: "Venta de forraje" },
+      { value: "compra_semillas", label: "Compra de semillas" },
+      { value: "fertilizantes", label: "Fertilizantes" },
+      { value: "herbicidas", label: "Herbicidas" },
+      { value: "siembra", label: "Siembra" },
+      { value: "cosecha", label: "Cosecha" },
       { value: "pastoreo", label: "Arrendamiento para pastoreo" },
     ],
     deposito: [
       { value: "venta_insumos", label: "Venta de insumos" },
+      { value: "compra_insumos", label: "Compra de insumos" },
       { value: "alquiler_deposito", label: "Alquiler de depósito" },
+      { value: "mantenimiento", label: "Mantenimiento" },
     ],
     inversiones: [
       { value: "retorno_inversion", label: "Retorno de inversión" },
+      { value: "nueva_inversion", label: "Nueva inversión" },
       { value: "dividendos", label: "Dividendos" },
       { value: "venta_activos", label: "Venta de activos" },
-    ],
-    capital: [
-      { value: "aporte_juan_carlos", label: "Aporte - Juan Carlos" },
-      { value: "aporte_juan_alberto", label: "Aporte - Juan Alberto" },
-      { value: "aporte_nacho", label: "Aporte - Nacho" },
-    ],
-    
-    // Subcategorías para gastos
-    insumos: [
-      { value: "semillas", label: "Semillas" },
-      { value: "fertilizantes", label: "Fertilizantes" },
-      { value: "herbicidas", label: "Herbicidas" },
-      { value: "alimento_animal", label: "Alimento animal" },
-    ],
-    operaciones: [
-      { value: "combustible", label: "Combustible" },
-      { value: "reparaciones", label: "Reparaciones" },
-      { value: "mantenimiento", label: "Mantenimiento" },
     ],
     servicios: [
       { value: "veterinario", label: "Servicios veterinarios" },
       { value: "asesoria_tecnica", label: "Asesoría técnica" },
       { value: "contratistas", label: "Contratistas" },
+      { value: "legal", label: "Servicios legales" },
+      { value: "seguros", label: "Seguros" },
     ],
     impuestos: [
       { value: "ganancias", label: "Ganancias" },
       { value: "iva", label: "IVA" },
       { value: "inmobiliario", label: "Inmobiliario" },
+      { value: "municipal", label: "Tasas municipales" },
+      { value: "retencion", label: "Retenciones" },
     ],
-    salarios: [
+    reparaciones: [
+      { value: "maquinarias", label: "Reparación de maquinarias" },
+      { value: "instalaciones", label: "Reparación de instalaciones" },
+      { value: "infraestructura", label: "Reparación de infraestructura" },
+      { value: "repuestos", label: "Compra de repuestos" },
+    ],
+    sueldos: [
       { value: "permanentes", label: "Empleados permanentes" },
       { value: "temporales", label: "Empleados temporales" },
       { value: "contratistas", label: "Contratistas" },
+      { value: "aguinaldo", label: "Aguinaldo" },
+      { value: "vacaciones", label: "Vacaciones" },
     ],
-    otros: [
-      { value: "seguros", label: "Seguros" },
-      { value: "servicios_publicos", label: "Servicios públicos" },
-      { value: "varios", label: "Gastos varios" },
+    capital: [
+      { value: "aporte_juan_carlos", label: "Aporte - Juan Carlos" },
+      { value: "aporte_juan_alberto", label: "Aporte - Juan Alberto" },
+      { value: "aporte_nacho", label: "Aporte - Nacho" },
+      { value: "retiro_juan_carlos", label: "Retiro - Juan Carlos" },
+      { value: "retiro_juan_alberto", label: "Retiro - Juan Alberto" },
+      { value: "retiro_nacho", label: "Retiro - Nacho" },
     ],
   };
 
