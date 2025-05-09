@@ -871,7 +871,12 @@ export class MemStorage implements IStorage {
 }
 
 // Inicializar el almacenamiento
-export const storage = new MemStorage();
+import { DatabaseStorage } from "./dbStorage";
+
+// Usar DatabaseStorage si hay una conexión de base de datos disponible
+export const storage = process.env.DATABASE_URL 
+  ? new DatabaseStorage() 
+  : new MemStorage();
 
 // Cargar datos de ejemplo
 async function loadSampleData() {
