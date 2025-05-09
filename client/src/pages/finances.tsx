@@ -17,6 +17,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
+// Definir el tipo para máquinas
+interface Machine {
+  id: number;
+  brand: string;
+  model: string;
+  type: string;
+  year: number;
+  [key: string]: any; // Para otras propiedades que pueda tener una máquina
+}
+
 // Definición de tipos
 interface FinanceEntry {
   id: number;
@@ -44,8 +54,12 @@ const machineTypes = [
 const financeFormSchema = z.object({
   type: z.enum(["income", "expense"]),
   category: z.string().min(1, { message: "La categoría es requerida" }),
-  subcategory: z.string().min(1, { message: "La subcategoría es requerida" }),
-  machineType: z.string().optional(), // Campo opcional para el tipo de maquinaria
+  // Para categorías que no sean maquinarias
+  subcategory: z.string().optional(),
+  // Campos específicos para maquinarias
+  machineType: z.string().optional(),
+  machineId: z.string().optional(),
+  // Campos comunes
   date: z.string().min(1, { message: "La fecha es requerida" }),
   description: z.string().min(1, { message: "La descripción es requerida" }),
   amount: z.string().min(1, { message: "El monto es requerido" }),
@@ -58,6 +72,8 @@ export default function FinancesPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
   const [location] = useLocation();
+  const [selectedMachineType, setSelectedMachineType] = useState<string>("");
+  const [filteredMachines, setFilteredMachines] = useState<Machine[]>([]);
   
   // Función para analizar parámetros de consulta (query params)
   const parseQueryParams = () => {
@@ -138,6 +154,11 @@ export default function FinancesPage() {
         },
       ] as FinanceEntry[];
     },
+  });
+  
+  // Consulta para obtener las máquinas disponibles
+  const { data: machines = [] } = useQuery({
+    queryKey: ["/api/machines"],
   });
 
   // Calcular sumarios
@@ -331,11 +352,34 @@ export default function FinancesPage() {
 
   const handleCategoryChange = (category: string) => {
     form.setValue("category", category);
-    form.setValue("subcategory", "");
     
-    // Limpiar el tipo de maquinaria si se cambia a una categoría diferente de maquinarias
-    if (category !== "maquinarias") {
+    // Limpiar campos específicos según la categoría seleccionada
+    if (category === "maquinarias") {
+      // Si selecciona maquinarias, limpiamos subcategoría ya que no se mostrará
+      form.setValue("subcategory", "");
       form.setValue("machineType", "");
+      form.setValue("machineId", "");
+      setSelectedMachineType("");
+      setFilteredMachines([]);
+    } else {
+      // Si selecciona otra categoría, limpiamos los campos específicos de maquinarias
+      form.setValue("machineType", "");
+      form.setValue("machineId", "");
+      setSelectedMachineType("");
+      setFilteredMachines([]);
+    }
+  };
+  
+  // Función para manejar el cambio de tipo de maquinaria
+  const handleMachineTypeChange = (type: string) => {
+    form.setValue("machineType", type);
+    form.setValue("machineId", ""); // Resetear la máquina seleccionada
+    setSelectedMachineType(type);
+    
+    // Filtrar máquinas por el tipo seleccionado
+    if (machines && machines.length > 0) {
+      const filtered = machines.filter((machine: any) => machine.type === type);
+      setFilteredMachines(filtered);
     }
   };
 
@@ -549,30 +593,60 @@ export default function FinancesPage() {
                   
                   {/* Campo para el tipo de maquinaria - solo aparece cuando la categoría es "maquinarias" */}
                   {form.watch("category") === "maquinarias" && (
-                    <FormField
-                      control={form.control}
-                      name="machineType"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Tipo de maquinaria</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value || ""}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Selecciona un tipo de maquinaria" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {machineTypes.map((type) => (
-                                <SelectItem key={type.value} value={type.value}>
-                                  {type.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
+                    <>
+                      <FormField
+                        control={form.control}
+                        name="machineType"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Tipo de maquinaria</FormLabel>
+                            <Select onValueChange={handleMachineTypeChange} value={field.value || ""}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecciona un tipo de maquinaria" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {machineTypes.map((type) => (
+                                  <SelectItem key={type.value} value={type.value}>
+                                    {type.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      {/* Campo para seleccionar una máquina específica, solo aparece cuando hay un tipo de máquina seleccionado */}
+                      {selectedMachineType && filteredMachines.length > 0 && (
+                        <FormField
+                          control={form.control}
+                          name="machineId"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Máquina</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value || ""}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona una máquina" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {filteredMachines.map((machine) => (
+                                    <SelectItem key={machine.id} value={machine.id.toString()}>
+                                      {machine.brand} {machine.model}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       )}
-                    />
+                    </>
                   )}
 
                   <FormField
