@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -46,6 +46,38 @@ export default function FinancesPage() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
   const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
+  const [machineTypes, setMachineTypes] = useState<string[]>([]);
+  const [selectedMachineType, setSelectedMachineType] = useState<string>("");
+  const [machinesByType, setMachinesByType] = useState<Record<string, any[]>>({});
+  
+  // Consulta para obtener las máquinas
+  const { data: machines = [], isLoading: machinesLoading } = useQuery({
+    queryKey: ["/api/machines"],
+    queryFn: async () => {
+      const response = await fetch("/api/machines");
+      if (!response.ok) {
+        throw new Error('Error al cargar las máquinas');
+      }
+      return await response.json();
+    },
+  });
+  
+  // Procesar los tipos de máquinas y agruparlas por tipo
+  useEffect(() => {
+    if (machines && machines.length > 0) {
+      // Extraer tipos únicos de máquinas
+      const types = [...new Set(machines.map((machine: any) => machine.type))];
+      setMachineTypes(types);
+      
+      // Agrupar máquinas por tipo
+      const machineGroups: Record<string, any[]> = {};
+      types.forEach(type => {
+        machineGroups[type] = machines.filter((machine: any) => machine.type === type);
+      });
+      
+      setMachinesByType(machineGroups);
+    }
+  }, [machines]);
 
   // Consultas para obtener datos
   const { data: financeData = [], isLoading } = useQuery({
@@ -163,12 +195,16 @@ export default function FinancesPage() {
   ];
 
   const expenseCategories = [
-    { value: "insumos", label: "Insumos" },
-    { value: "operaciones", label: "Operaciones" },
-    { value: "servicios", label: "Servicios contratados" },
+    { value: "maquinarias", label: "Maquinarias" },
+    { value: "animales", label: "Animales" },
+    { value: "pasturas", label: "Pasturas" },
+    { value: "deposito", label: "Depósito" },
+    { value: "inversiones", label: "Inversiones" },
+    { value: "servicios", label: "Servicios" },
     { value: "impuestos", label: "Impuestos" },
-    { value: "salarios", label: "Salarios" },
-    { value: "otros", label: "Otros" },
+    { value: "reparaciones", label: "Reparaciones" },
+    { value: "sueldos", label: "Sueldos" },
+    { value: "capital", label: "Capital" },
   ];
 
   // Subcategorías según la categoría seleccionada
@@ -286,6 +322,15 @@ export default function FinancesPage() {
   const handleCategoryChange = (category: string) => {
     form.setValue("category", category);
     form.setValue("subcategory", "");
+    
+    // Resetear selección de tipo de máquina si cambia la categoría
+    if (category !== "maquinarias") {
+      setSelectedMachineType("");
+    }
+  };
+  
+  const handleMachineTypeChange = (type: string) => {
+    setSelectedMachineType(type);
   };
 
   // Funciones para formatear moneda y fechas
