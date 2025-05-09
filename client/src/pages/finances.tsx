@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,8 +28,6 @@ interface FinanceEntry {
   paymentMethod: string;
   status: string;
   createdAt: string;
-  machineId?: number;
-  machineType?: string;
 }
 
 // Schema para el formulario
@@ -42,62 +40,12 @@ const financeFormSchema = z.object({
   amount: z.string().min(1, { message: "El monto es requerido" }),
   paymentMethod: z.string().min(1, { message: "El método de pago es requerido" }),
   status: z.string().optional(),
-  machineId: z.string().optional(),
-  machineType: z.string().optional(),
 });
 
 export default function FinancesPage() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
   const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
-  const [machineTypes, setMachineTypes] = useState<string[]>([]);
-  const [selectedMachineType, setSelectedMachineType] = useState<string>("");
-  const [machinesByType, setMachinesByType] = useState<Record<string, any[]>>({});
-  
-  // Consulta para obtener las máquinas
-  const { data: machines = [], isLoading: machinesLoading } = useQuery({
-    queryKey: ["/api/machines"],
-    queryFn: async () => {
-      const response = await fetch("/api/machines");
-      if (!response.ok) {
-        throw new Error('Error al cargar las máquinas');
-      }
-      return await response.json();
-    },
-  });
-  
-  // Definir interface para máquinas
-  interface Machine {
-    id: number;
-    brand: string;
-    model: string;
-    type: string;
-    [key: string]: any;
-  }
-  
-  // Procesar los tipos de máquinas y agruparlas por tipo
-  useEffect(() => {
-    if (machines && machines.length > 0) {
-      // Extraer tipos únicos de máquinas con tipado correcto
-      const typedMachines = machines as Machine[];
-      // Usamos reduce en lugar de Set para evitar problemas de compatibilidad
-      const uniqueTypes = typedMachines.reduce<string[]>((acc, machine) => {
-        if (!acc.includes(machine.type)) {
-          acc.push(machine.type);
-        }
-        return acc;
-      }, []);
-      setMachineTypes(uniqueTypes);
-      
-      // Agrupar máquinas por tipo
-      const machineGroups: Record<string, Machine[]> = {};
-      uniqueTypes.forEach((type) => {
-        machineGroups[type] = typedMachines.filter(machine => machine.type === type);
-      });
-      
-      setMachinesByType(machineGroups);
-    }
-  }, [machines]);
 
   // Consultas para obtener datos
   const { data: financeData = [], isLoading } = useQuery({
@@ -201,8 +149,6 @@ export default function FinancesPage() {
       amount: "",
       paymentMethod: "Efectivo",
       status: "completed",
-      machineId: "",
-      machineType: "",
     },
   });
 
@@ -217,16 +163,12 @@ export default function FinancesPage() {
   ];
 
   const expenseCategories = [
-    { value: "maquinarias", label: "Maquinarias" },
-    { value: "animales", label: "Animales" },
-    { value: "pasturas", label: "Pasturas" },
-    { value: "deposito", label: "Depósito" },
-    { value: "inversiones", label: "Inversiones" },
-    { value: "servicios", label: "Servicios" },
+    { value: "insumos", label: "Insumos" },
+    { value: "operaciones", label: "Operaciones" },
+    { value: "servicios", label: "Servicios contratados" },
     { value: "impuestos", label: "Impuestos" },
-    { value: "reparaciones", label: "Reparaciones" },
-    { value: "sueldos", label: "Sueldos" },
-    { value: "capital", label: "Capital" },
+    { value: "salarios", label: "Salarios" },
+    { value: "otros", label: "Otros" },
   ];
 
   // Subcategorías según la categoría seleccionada
@@ -344,24 +286,6 @@ export default function FinancesPage() {
   const handleCategoryChange = (category: string) => {
     form.setValue("category", category);
     form.setValue("subcategory", "");
-    
-    // Resetear selección de tipo de máquina si cambia la categoría
-    if (category !== "maquinarias") {
-      setSelectedMachineType("");
-    }
-  };
-  
-  const handleMachineTypeChange = (type: string) => {
-    setSelectedMachineType(type);
-    // Limpiar la selección de máquina cuando cambia el tipo
-    form.setValue("machineId", "");
-    // Guardar el tipo de máquina en el formulario
-    form.setValue("machineType", type);
-  };
-  
-  const handleMachineChange = (machineId: string) => {
-    // Guardar el ID de la máquina en el formulario
-    form.setValue("machineId", machineId);
   };
 
   // Funciones para formatear moneda y fechas
@@ -532,57 +456,6 @@ export default function FinancesPage() {
                         </FormItem>
                       )}
                     />
-                  )}
-                  
-                  {/* Selección de tipo de máquina si la categoría es "maquinarias" */}
-                  {form.watch("category") === "maquinarias" && (
-                    <div className="space-y-4">
-                      <FormItem>
-                        <FormLabel>Tipo de Máquina</FormLabel>
-                        <Select onValueChange={handleMachineTypeChange} value={selectedMachineType}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecciona un tipo de máquina" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {machineTypes.map((type) => (
-                              <SelectItem key={type} value={type}>
-                                {type}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
-                      
-                      {/* Selección de máquina específica si se ha seleccionado un tipo */}
-                      {selectedMachineType && machinesByType[selectedMachineType] && (
-                        <FormField
-                          control={form.control}
-                          name="machineId"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Máquina</FormLabel>
-                              <Select onValueChange={handleMachineChange} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Selecciona una máquina" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {machinesByType[selectedMachineType].map((machine) => (
-                                    <SelectItem key={machine.id} value={machine.id.toString()}>
-                                      {machine.brand} {machine.model}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      )}
-                    </div>
                   )}
 
                   <FormField
