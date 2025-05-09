@@ -28,6 +28,8 @@ interface FinanceEntry {
   paymentMethod: string;
   status: string;
   createdAt: string;
+  machineId?: number;
+  machineType?: string;
 }
 
 // Schema para el formulario
@@ -40,6 +42,8 @@ const financeFormSchema = z.object({
   amount: z.string().min(1, { message: "El monto es requerido" }),
   paymentMethod: z.string().min(1, { message: "El método de pago es requerido" }),
   status: z.string().optional(),
+  machineId: z.string().optional(),
+  machineType: z.string().optional(),
 });
 
 export default function FinancesPage() {
@@ -65,13 +69,15 @@ export default function FinancesPage() {
   // Procesar los tipos de máquinas y agruparlas por tipo
   useEffect(() => {
     if (machines && machines.length > 0) {
-      // Extraer tipos únicos de máquinas
-      const types = [...new Set(machines.map((machine: any) => machine.type))];
-      setMachineTypes(types);
+      // Extraer tipos únicos de máquinas con tipado correcto
+      const uniqueTypes = Array.from(
+        new Set(machines.map((machine: any) => machine.type as string))
+      ) as string[];
+      setMachineTypes(uniqueTypes);
       
       // Agrupar máquinas por tipo
       const machineGroups: Record<string, any[]> = {};
-      types.forEach(type => {
+      uniqueTypes.forEach((type: string) => {
         machineGroups[type] = machines.filter((machine: any) => machine.type === type);
       });
       
@@ -501,6 +507,50 @@ export default function FinancesPage() {
                         </FormItem>
                       )}
                     />
+                  )}
+                  
+                  {/* Selección de tipo de máquina si la categoría es "maquinarias" */}
+                  {form.watch("category") === "maquinarias" && (
+                    <div className="space-y-4">
+                      <FormItem>
+                        <FormLabel>Tipo de Máquina</FormLabel>
+                        <Select onValueChange={handleMachineTypeChange} value={selectedMachineType}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecciona un tipo de máquina" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {machineTypes.map((type) => (
+                              <SelectItem key={type} value={type}>
+                                {type}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                      
+                      {/* Selección de máquina específica si se ha seleccionado un tipo */}
+                      {selectedMachineType && machinesByType[selectedMachineType] && (
+                        <FormItem>
+                          <FormLabel>Máquina</FormLabel>
+                          <Select>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecciona una máquina" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {machinesByType[selectedMachineType].map((machine) => (
+                                <SelectItem key={machine.id} value={machine.id.toString()}>
+                                  {machine.brand} {machine.model}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormItem>
+                      )}
+                    </div>
                   )}
 
                   <FormField
