@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { setupUploadRoutes } from "./upload";
 // Import sample data
 import "../sample-data";
 // Import pastures data loader
@@ -41,6 +42,9 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Configurar rutas para servir archivos subidos
+  setupUploadRoutes(app);
+  
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
