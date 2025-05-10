@@ -9,6 +9,8 @@ import {
   CardDescription 
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ImageUpload } from "@/components/ui/image-upload";
+import { uploadFile } from "@/lib/fileUpload";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -91,6 +93,7 @@ const pastureFormSchema = z.object({
   acquisitionDate: z.date().optional(),
   acquisitionValue: z.string().optional(),
   description: z.string().optional(),
+  photo: z.string().optional(),
 });
 
 // Esquema para el formulario de trabajos agrícolas
@@ -183,6 +186,8 @@ export default function PasturesIndex() {
   const [selectedPastureId, setSelectedPastureId] = useState<number | null>(null);
   const [selectedPasture, setSelectedPasture] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("parcels");
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string>("");
   const { toast } = useToast();
 
   // Consultar las pasturas
