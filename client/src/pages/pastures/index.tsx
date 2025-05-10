@@ -1108,11 +1108,11 @@ export default function PasturesIndex() {
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="0">Ninguna</SelectItem>
-                        {machines && Array.isArray(machines) && machines.map((machine: any) => (
+                        {machines && Array.isArray(machines) ? machines.map((machine: any) => (
                           <SelectItem key={machine.id} value={machine.id.toString()}>
                             {machine.brand} {machine.model}
                           </SelectItem>
-                        ))}
+                        )) : null}
                       </SelectContent>
                     </Select>
                     <FormDescription>

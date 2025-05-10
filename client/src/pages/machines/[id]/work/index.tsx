@@ -556,11 +556,11 @@ export default function MachineWorkIndex() {
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="0">Ninguna</SelectItem>
-                        {pastures && Array.isArray(pastures) && pastures.map((pasture: any) => (
+                        {pastures && Array.isArray(pastures) ? pastures.map((pasture: any) => (
                           <SelectItem key={pasture.id} value={pasture.id.toString()}>
                             {pasture.name}
                           </SelectItem>
-                        ))}
+                        )) : null}
                       </SelectContent>
                     </Select>
                     <FormMessage />
