@@ -84,6 +84,8 @@ export default function AnimalsIndex() {
   const [transferSheetOpen, setTransferSheetOpen] = useState(false);
   const [selectedAnimal, setSelectedAnimal] = useState<any>(null);
   const [transferLocation, setTransferLocation] = useState("");
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string>("");
   const { toast } = useToast();
   
   const { data: animals, isLoading, error } = useQuery({
@@ -120,6 +122,21 @@ export default function AnimalsIndex() {
 
   async function onSubmit(values: AnimalFormValues) {
     try {
+      // Upload photo if available
+      if (photoFile) {
+        try {
+          const photoPath = await uploadFile(photoFile);
+          values.photo = photoPath;
+        } catch (uploadError) {
+          console.error("Error uploading photo:", uploadError);
+          toast({
+            title: "Error en la carga de imagen",
+            description: "No se pudo cargar la foto, pero se continuará con la creación del animal",
+            variant: "destructive",
+          });
+        }
+      }
+      
       await apiRequest("POST", "/api/animals", values);
       
       // Invalidate animals query to refresh the list
@@ -131,6 +148,8 @@ export default function AnimalsIndex() {
       });
       
       setSheetOpen(false);
+      setPhotoFile(null);
+      setPhotoPreview("");
       form.reset();
       
     } catch (error) {
@@ -142,6 +161,11 @@ export default function AnimalsIndex() {
       });
     }
   }
+  
+  const handlePhotoChange = (file: File | null, preview: string) => {
+    setPhotoFile(file);
+    setPhotoPreview(preview);
+  };
 
   const getCategoryLabel = (category: string) => {
     switch (category) {
