@@ -117,6 +117,7 @@ export interface IStorage {
   getDashboardStats(): Promise<{
     machineCount: number;
     animalCount: number;
+    pastureCount: number;
     monthlyIncome: number;
     monthlyExpense: number;
   }>;
@@ -796,11 +797,13 @@ export class MemStorage implements IStorage {
   async getDashboardStats(): Promise<{
     machineCount: number;
     animalCount: number;
+    pastureCount: number;
     monthlyIncome: number;
     monthlyExpense: number;
   }> {
     const machines = await this.getMachines();
     const animals = await this.getAnimals();
+    const pastures = await this.getPastures();
     
     // Calculate financial stats for the current month
     const now = new Date();
@@ -837,6 +840,7 @@ export class MemStorage implements IStorage {
     return {
       machineCount: machines.length,
       animalCount: animals.length,
+      pastureCount: pastures.length,
       monthlyIncome,
       monthlyExpense,
     };

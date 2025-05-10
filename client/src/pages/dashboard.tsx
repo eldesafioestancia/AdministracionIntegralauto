@@ -100,9 +100,9 @@ export default function Dashboard() {
 
   // Farm overview stats
   const farmStats = {
-    livestock: 243,
-    pastures: 158,
-    machinery: 12,
+    livestock: stats.animalCount,
+    pastures: stats.pastureCount || 0,
+    machinery: stats.machineCount,
     investments: 245800
   };
 
@@ -209,7 +209,7 @@ export default function Dashboard() {
       </div>
       
       {/* Dashboard Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
         <SummaryCard 
           title="Maquinarias"
           value={stats.machineCount}
@@ -224,6 +224,14 @@ export default function Dashboard() {
           icon={<i className="ri-bear-smile-line text-xl text-secondary"></i>}
           color="secondary"
           change={{ value: 12.7, type: "increase" }}
+        />
+        
+        <SummaryCard 
+          title="Parcelas"
+          value={stats.pastureCount || 0}
+          icon={<i className="ri-landscape-line text-xl text-blue-600"></i>}
+          color="blue"
+          change={{ value: 5.4, type: "increase" }}
         />
         
         <SummaryCard 
