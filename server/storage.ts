@@ -3,7 +3,6 @@ import {
   machines, Machine, InsertMachine,
   maintenance, Maintenance, InsertMaintenance,
   machineFinances, MachineFinance, InsertMachineFinance,
-  machineWorks, MachineWork, InsertMachineWork,
   animals, Animal, InsertAnimal,
   animalVeterinary, AnimalVeterinary, InsertAnimalVeterinary,
   animalFinances, AnimalFinance, InsertAnimalFinance,
@@ -47,12 +46,6 @@ export interface IStorage {
   getMachineFinance(id: number): Promise<MachineFinance | undefined>;
   createMachineFinance(finance: InsertMachineFinance): Promise<MachineFinance>;
   deleteMachineFinance(id: number): Promise<boolean>;
-  
-  // Machine Works (Trabajos realizados con máquinas)
-  getMachineWorks(machineId?: number): Promise<MachineWork[]>;
-  getMachineWork(id: number): Promise<MachineWork | undefined>;
-  createMachineWork(work: InsertMachineWork): Promise<MachineWork>;
-  deleteMachineWork(id: number): Promise<boolean>;
   
   // Animals
   getAnimals(): Promise<Animal[]>;
@@ -153,7 +146,6 @@ export class MemStorage implements IStorage {
     machine: number;
     maintenance: number;
     machineFinance: number;
-    machineWork: number;
     animal: number;
     animalVeterinary: number;
     animalFinance: number;
@@ -169,14 +161,12 @@ export class MemStorage implements IStorage {
   };
 
   private pastureWorks: Map<number, PastureWork>;
-  private machineWorks: Map<number, MachineWork>;
     
   constructor() {
     this.users = new Map();
     this.machines = new Map();
     this.maintenances = new Map();
     this.machineFinances = new Map();
-    this.machineWorks = new Map();
     this.animals = new Map();
     this.animalVeterinary = new Map();
     this.animalFinances = new Map();
@@ -195,7 +185,6 @@ export class MemStorage implements IStorage {
       machine: 1,
       maintenance: 1,
       machineFinance: 1,
-      machineWork: 1,
       animal: 1,
       animalVeterinary: 1,
       animalFinance: 1,
@@ -538,35 +527,6 @@ export class MemStorage implements IStorage {
   async deleteMachineFinance(id: number): Promise<boolean> {
     return this.machineFinances.delete(id);
   }
-  
-  // Machine Works
-  async getMachineWorks(machineId?: number): Promise<MachineWork[]> {
-    const works = Array.from(this.machineWorks.values());
-    if (machineId) {
-      return works.filter(w => w.machineId === machineId);
-    }
-    return works;
-  }
-
-  async getMachineWork(id: number): Promise<MachineWork | undefined> {
-    return this.machineWorks.get(id);
-  }
-
-  async createMachineWork(insertWork: InsertMachineWork): Promise<MachineWork> {
-    const id = this.currentIds.machineWork++;
-    const now = new Date();
-    const work: MachineWork = {
-      ...insertWork,
-      id,
-      createdAt: now
-    };
-    this.machineWorks.set(id, work);
-    return work;
-  }
-
-  async deleteMachineWork(id: number): Promise<boolean> {
-    return this.machineWorks.delete(id);
-  }
 
   // Animals
   async getAnimals(): Promise<Animal[]> {
@@ -698,65 +658,10 @@ export class MemStorage implements IStorage {
     const now = new Date();
     const work: PastureWork = { ...insertWork, id, createdAt: now };
     this.pastureWorks.set(id, work);
-    
-    // Si se usó una máquina, creamos también un registro de trabajo para esa máquina
-    if (insertWork.machineId) {
-      try {
-        // Creamos un registro de trabajo en máquina con los mismos datos
-        await this.createMachineWork({
-          machineId: insertWork.machineId,
-          pastureWorkId: id,
-          pastureId: insertWork.pastureId,
-          workType: insertWork.workType,
-          description: insertWork.description,
-          startDate: insertWork.startDate,
-          endDate: insertWork.endDate || null,
-          areaWorked: insertWork.areaWorked || null,
-          workingHours: insertWork.workingHours || null,
-          fuelUsed: insertWork.fuelUsed || null,
-          operativeCost: insertWork.operativeCost || null,
-          suppliesCost: insertWork.suppliesCost || null,
-          totalCost: insertWork.totalCost || null,
-          weatherConditions: insertWork.weatherConditions || null,
-          temperature: insertWork.temperature || null,
-          soilHumidity: insertWork.soilHumidity || null,
-          observations: insertWork.observations || null,
-          seedType: insertWork.seedType || null,
-          seedQuantity: insertWork.seedQuantity || null,
-          harvestQuantity: insertWork.harvestQuantity || null,
-          chemicalType: insertWork.chemicalType || null,
-          chemicalQuantity: insertWork.chemicalQuantity || null,
-          fertilizerType: insertWork.fertilizerType || null,
-          fertilizerQuantity: insertWork.fertilizerQuantity || null,
-          baleCount: insertWork.baleCount || null,
-          threadRollsUsed: insertWork.threadRollsUsed || null
-        });
-      } catch (error) {
-        console.error("Error al crear el trabajo en la máquina asociada:", error);
-        // No fallamos la operación principal si falla la creación del trabajo en máquina
-      }
-    }
-    
     return work;
   }
 
   async deletePastureWork(id: number): Promise<boolean> {
-    // Primero, obtener el trabajo para saber si tiene asociado un trabajo de máquina
-    const work = await this.getPastureWork(id);
-    
-    // Si el trabajo existe y tiene asociada una máquina, eliminar también el trabajo de máquina
-    if (work && work.machineId) {
-      // Buscar trabajos de máquina asociados a este trabajo de parcela
-      const machineWorks = Array.from(this.machineWorks.values())
-        .filter(mw => mw.pastureWorkId === id);
-      
-      // Eliminar los trabajos de máquina asociados
-      for (const mw of machineWorks) {
-        this.machineWorks.delete(mw.id);
-      }
-    }
-    
-    // Eliminar el trabajo de parcela
     return this.pastureWorks.delete(id);
   }
 
@@ -966,12 +871,7 @@ export class MemStorage implements IStorage {
 }
 
 // Inicializar el almacenamiento
-import { DatabaseStorage } from "./dbStorage";
-
-// Usar DatabaseStorage si hay una conexión de base de datos disponible
-export const storage = process.env.DATABASE_URL 
-  ? new DatabaseStorage() 
-  : new MemStorage();
+export const storage = new MemStorage();
 
 // Cargar datos de ejemplo
 async function loadSampleData() {

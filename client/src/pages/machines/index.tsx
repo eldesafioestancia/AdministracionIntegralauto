@@ -649,7 +649,7 @@ export default function MachinesIndex() {
                   </Button>
                   
                   <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Trabajos">
-                    <Link href={`/machines/works/${machine.id}`}>
+                    <Link href={`/machines/${machine.id}/work`}>
                       <i className="ri-truck-line text-lg"></i>
                     </Link>
                   </Button>

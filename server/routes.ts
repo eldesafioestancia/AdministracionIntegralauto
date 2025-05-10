@@ -7,7 +7,6 @@ import {
   insertMachineSchema,
   insertMaintenanceSchema,
   insertMachineFinanceSchema,
-  insertMachineWorkSchema,
   insertAnimalSchema,
   insertAnimalVeterinarySchema,
   insertAnimalFinanceSchema,
@@ -417,78 +416,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Machine Works routes
-  app.get("/api/machine-works", async (req: Request, res: Response) => {
-    try {
-      const machineId = req.query.machineId ? parseInt(req.query.machineId as string) : undefined;
-      const works = await storage.getMachineWorks(machineId);
-      res.json(works);
-    } catch (error) {
-      console.error("Error fetching machine works:", error);
-      res.status(500).json({ message: "Error fetching machine works" });
-    }
-  });
-  
-  app.get("/api/machine-works/:id", async (req: Request, res: Response) => {
-    try {
-      const id = parseInt(req.params.id);
-      const work = await storage.getMachineWork(id);
-      
-      if (!work) {
-        return res.status(404).json({ message: "Machine work not found" });
-      }
-      
-      res.json(work);
-    } catch (error) {
-      console.error("Error fetching machine work:", error);
-      res.status(500).json({ message: "Error fetching machine work" });
-    }
-  });
-  
-  app.post("/api/machine-works", async (req: Request, res: Response) => {
-    try {
-      const workData = insertMachineWorkSchema.parse(req.body);
-      
-      // Si el trabajo ya está relacionado con un trabajo de parcela, no lo duplicamos
-      if (workData.pastureWorkId) {
-        // Verificamos si ya existe un trabajo para esta máquina relacionado con este trabajo de parcela
-        const existingWorks = await storage.getMachineWorks(workData.machineId);
-        const existingWork = existingWorks.find(w => w.pastureWorkId === workData.pastureWorkId);
-        
-        if (existingWork) {
-          return res.status(200).json(existingWork); // Devolvemos el trabajo existente
-        }
-      }
-      
-      // Si no existe o no está relacionado con un trabajo de parcela, lo creamos
-      const newWork = await storage.createMachineWork(workData);
-      res.status(201).json(newWork);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid machine work data", errors: error.errors });
-      }
-      
-      console.error("Error creating machine work:", error);
-      res.status(500).json({ message: "Error creating machine work" });
-    }
-  });
-  
-  app.delete("/api/machine-works/:id", async (req: Request, res: Response) => {
-    try {
-      const id = parseInt(req.params.id);
-      const deleted = await storage.deleteMachineWork(id);
-      
-      if (!deleted) {
-        return res.status(404).json({ message: "Machine work not found" });
-      }
-      
-      res.status(204).send();
-    } catch (error) {
-      console.error("Error deleting machine work:", error);
-      res.status(500).json({ message: "Error deleting machine work" });
-    }
-  });
-  
   app.post("/api/machine-finances", async (req: Request, res: Response) => {
     try {
       const financeData = insertMachineFinanceSchema.parse(req.body);
@@ -807,16 +734,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/pasture-works", async (req: Request, res: Response) => {
     try {
       const pastureId = req.query.pastureId ? parseInt(req.query.pastureId as string) : undefined;
-      const machineId = req.query.machineId ? parseInt(req.query.machineId as string) : undefined;
-      
-      // Obtener trabajos por pastureId (comportamiento original)
-      let works = await storage.getPastureWorks(pastureId);
-      
-      // Si se especifica machineId, filtramos también por máquina
-      if (machineId) {
-        works = works.filter(work => work.machineId === machineId);
-      }
-      
+      const works = await storage.getPastureWorks(pastureId);
       res.json(works);
     } catch (error) {
       console.error("Error fetching pasture works:", error);
@@ -844,41 +762,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const workData = insertPastureWorkSchema.parse(req.body);
       const newWork = await storage.createPastureWork(workData);
-      
-      // Si el trabajo de pasturas tiene asignada una máquina, crear automáticamente un trabajo de máquina
-      if (workData.machineId) {
-        // Crear un trabajo de máquina con los mismos datos
-        const machineWorkData = {
-          machineId: workData.machineId,
-          pastureWorkId: newWork.id, // Referencia al trabajo de pastura
-          pastureId: workData.pastureId,
-          workType: workData.workType,
-          description: workData.description,
-          startDate: workData.startDate,
-          endDate: workData.endDate || null,
-          workArea: workData.workArea || null,
-          workTime: workData.workTime || null,
-          fuelUsed: workData.fuelUsed || null,
-          operationalCost: workData.operationalCost || null,
-          suppliesCost: workData.suppliesCost || null,
-          totalCost: workData.totalCost || null,
-          weatherConditions: workData.weatherConditions || null,
-          temperature: workData.temperature || null,
-          soilHumidity: workData.soilHumidity || null,
-          observations: workData.observations || null,
-          // Campos específicos dependiendo del tipo de trabajo
-          seedType: workData.seedType || null,
-          seedPerHectare: workData.seedPerHectare || null,
-          agrochemicalType: workData.agrochemicalType || null,
-          agrochemicalPerHectare: workData.agrochemicalPerHectare || null,
-          fertilizerType: workData.fertilizerType || null,
-          fertilizerPerHectare: workData.fertilizerPerHectare || null,
-          threadRollsUsed: workData.threadRollsUsed || null
-        };
-        
-        await storage.createMachineWork(machineWorkData);
-      }
-      
       res.status(201).json(newWork);
     } catch (error) {
       if (error instanceof z.ZodError) {
