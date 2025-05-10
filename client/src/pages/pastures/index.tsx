@@ -303,8 +303,38 @@ export default function PasturesIndex() {
     { value: "inactive", label: "Inactiva" },
   ];
 
+  const handlePhotoChange = (file: File | null) => {
+    setPhotoFile(file);
+    
+    // Generar vista previa si hay un archivo
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setPhotoPreview("");
+    }
+  };
+
   async function onSubmit(values: PastureFormValues) {
     try {
+      // Upload photo if available
+      if (photoFile) {
+        try {
+          const photoPath = await uploadFile(photoFile, "pastures");
+          values.photo = photoPath;
+        } catch (uploadError) {
+          console.error("Error uploading photo:", uploadError);
+          toast({
+            title: "Error en la carga de imagen",
+            description: "No se pudo cargar la foto, pero se continuará con la creación de la parcela",
+            variant: "destructive",
+          });
+        }
+      }
+      
       await apiRequest("POST", "/api/pastures", values);
 
       // Invalidar consulta de pasturas
@@ -316,6 +346,8 @@ export default function PasturesIndex() {
       });
       
       setSheetOpen(false);
+      setPhotoFile(null);
+      setPhotoPreview("");
       form.reset();
       
     } catch (error) {
@@ -763,6 +795,16 @@ export default function PasturesIndex() {
                       </FormItem>
                     )}
                   />
+                  
+                  {/* Sección de fotografía */}
+                  <div className="space-y-2 pt-4">
+                    <h3 className="text-lg font-medium">Fotografía</h3>
+                    <ImageUpload 
+                      onChange={handlePhotoChange} 
+                      value={photoPreview}
+                      className="w-full max-w-sm mx-auto"
+                    />
+                  </div>
                   
                   <div className="pt-6 pb-8">
                     <Button type="submit" className="w-full">Guardar Parcela</Button>

@@ -99,6 +99,7 @@ export default function AnimalsIndex() {
     reproductiveDetail?: string;
     origin?: string;
     weight?: number;
+    currentWeight?: number;
     purchaseDate?: string;
     purchasePrice?: number;
     location?: string;
