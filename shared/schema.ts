@@ -142,6 +142,9 @@ export const maintenance = pgTable("maintenance", {
   fuelFilter: boolean("fuel_filter").default(false),
   airFilter: boolean("air_filter").default(false),
   
+  // Imágenes de mantenimiento
+  photos: text("photos"), // URLs de fotografías separadas por comas
+  
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -213,6 +216,7 @@ export const animals = pgTable("animals", {
   color: text("color"),
   location: text("location"), // Ubicación del animal (potrero, corral, etc.)
   status: text("status").default("active").notNull(), // active, sold, dead
+  photo: text("photo"), // Fotografía del animal
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -307,6 +311,7 @@ export const pastures = pgTable("pastures", {
   acquisitionDate: timestamp("acquisition_date"), // fecha de adquisición
   acquisitionValue: decimal("acquisition_value"), // valor de adquisición
   description: text("description"), // observaciones
+  photo: text("photo"), // Fotografía de la parcela
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -353,6 +358,9 @@ export const pastureWorks = pgTable("pasture_works", {
   fertilizerQuantity: decimal("fertilizer_quantity"), // Cantidad de fertilizante por hectárea (kg/ha)
   baleCount: decimal("bale_count"), // Cantidad de rollos (enrollado)
   threadRollsUsed: decimal("thread_rolls_used"), // Cantidad de rollos de hilo usados (enrollado)
+  
+  // Fotografías del trabajo
+  photos: text("photos"), // URLs de fotografías separadas por comas
   
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

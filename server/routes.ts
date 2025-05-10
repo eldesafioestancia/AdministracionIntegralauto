@@ -26,6 +26,11 @@ import {
 import { handleFileUpload, setupUploadRoutes } from './upload';
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Configurar rutas para cargas de archivos
+  setupUploadRoutes(app);
+  
+  // Ruta para subir archivos
+  app.post("/api/upload", handleFileUpload);
   // Rutas de autenticación simuladas - sin verificación real
   app.post("/api/auth/login", async (req: Request, res: Response) => {
     try {
