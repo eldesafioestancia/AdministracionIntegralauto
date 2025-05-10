@@ -3,6 +3,7 @@ import {
   machines, Machine, InsertMachine,
   maintenance, Maintenance, InsertMaintenance,
   machineFinances, MachineFinance, InsertMachineFinance,
+  machineWorks, MachineWork, InsertMachineWork,
   animals, Animal, InsertAnimal,
   animalVeterinary, AnimalVeterinary, InsertAnimalVeterinary,
   animalFinances, AnimalFinance, InsertAnimalFinance,
@@ -46,6 +47,12 @@ export interface IStorage {
   getMachineFinance(id: number): Promise<MachineFinance | undefined>;
   createMachineFinance(finance: InsertMachineFinance): Promise<MachineFinance>;
   deleteMachineFinance(id: number): Promise<boolean>;
+  
+  // Machine Works (Trabajos realizados con máquinas)
+  getMachineWorks(machineId?: number): Promise<MachineWork[]>;
+  getMachineWork(id: number): Promise<MachineWork | undefined>;
+  createMachineWork(work: InsertMachineWork): Promise<MachineWork>;
+  deleteMachineWork(id: number): Promise<boolean>;
   
   // Animals
   getAnimals(): Promise<Animal[]>;

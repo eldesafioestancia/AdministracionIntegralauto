@@ -6,6 +6,7 @@ import {
   machines, Machine, InsertMachine,
   maintenance, Maintenance, InsertMaintenance,
   machineFinances, MachineFinance, InsertMachineFinance,
+  machineWorks, MachineWork, InsertMachineWork,
   animals, Animal, InsertAnimal,
   animalVeterinary, AnimalVeterinary, InsertAnimalVeterinary,
   animalFinances, AnimalFinance, InsertAnimalFinance,
@@ -295,11 +296,91 @@ export class DatabaseStorage implements IStorage {
       .insert(pastureWorks)
       .values(work)
       .returning();
+    
+    // Si se usó una máquina, creamos también un registro de trabajo para esa máquina
+    if (work.machineId) {
+      try {
+        // Creamos un registro de trabajo en máquina con los mismos datos
+        await this.createMachineWork({
+          machineId: work.machineId,
+          pastureWorkId: item.id,
+          pastureId: work.pastureId,
+          workType: work.workType,
+          description: work.description,
+          startDate: work.startDate,
+          endDate: work.endDate,
+          areaWorked: work.areaWorked,
+          workingHours: work.workingHours,
+          fuelUsed: work.fuelUsed,
+          operativeCost: work.operativeCost,
+          suppliesCost: work.suppliesCost,
+          totalCost: work.totalCost,
+          weatherConditions: work.weatherConditions,
+          temperature: work.temperature,
+          soilHumidity: work.soilHumidity,
+          observations: work.observations,
+          seedType: work.seedType,
+          seedQuantity: work.seedQuantity,
+          harvestQuantity: work.harvestQuantity,
+          chemicalType: work.chemicalType,
+          chemicalQuantity: work.chemicalQuantity,
+          fertilizerType: work.fertilizerType,
+          fertilizerQuantity: work.fertilizerQuantity,
+          baleCount: work.baleCount,
+          threadRollsUsed: work.threadRollsUsed
+        });
+      } catch (error) {
+        console.error("Error al crear el trabajo en la máquina asociada:", error);
+        // No fallamos la operación principal si falla la creación del trabajo en máquina
+      }
+    }
+    
     return item;
   }
 
   async deletePastureWork(id: number): Promise<boolean> {
+    // Primero, obtenemos el trabajo para saber si tiene asociado un trabajo de máquina
+    const work = await this.getPastureWork(id);
+    
+    if (work?.machineId) {
+      // Buscamos trabajos de máquina asociados a este trabajo de parcela
+      const machineWorksRecords = await db.select()
+        .from(machineWorks)
+        .where(eq(machineWorks.pastureWorkId, id));
+      
+      // Eliminamos los trabajos de máquina asociados
+      for (const mw of machineWorksRecords) {
+        await db.delete(machineWorks).where(eq(machineWorks.id, mw.id));
+      }
+    }
+    
     const result = await db.delete(pastureWorks).where(eq(pastureWorks.id, id));
+    return result.count > 0;
+  }
+  
+  // Machine Works
+  async getMachineWorks(machineId?: number): Promise<MachineWork[]> {
+    if (machineId) {
+      return await db.select().from(machineWorks).where(eq(machineWorks.machineId, machineId));
+    }
+    return await db.select().from(machineWorks);
+  }
+
+  async getMachineWork(id: number): Promise<MachineWork | undefined> {
+    const [work] = await db.select().from(machineWorks).where(eq(machineWorks.id, id));
+    return work || undefined;
+  }
+
+  async createMachineWork(work: InsertMachineWork): Promise<MachineWork> {
+    const [item] = await db
+      .insert(machineWorks)
+      .values(work)
+      .returning();
+    return item;
+  }
+
+  async deleteMachineWork(id: number): Promise<boolean> {
+    const result = await db.delete(machineWorks).where(eq(machineWorks.id, id));
     return result.count > 0;
   }
 
