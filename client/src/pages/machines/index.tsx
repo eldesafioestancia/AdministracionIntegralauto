@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { ImageUpload } from "@/components/ui/image-upload";
+import { uploadFile } from "@/lib/fileUpload";
 import {
   Sheet,
   SheetContent,
@@ -65,6 +67,8 @@ export default function MachinesIndex() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   
   const { data: machines, isLoading, error } = useQuery({
@@ -97,7 +101,19 @@ export default function MachinesIndex() {
 
   async function onSubmit(values: MachineFormValues) {
     try {
-      await apiRequest("POST", "/api/machines", values);
+      setIsSubmitting(true);
+      
+      // Si hay un archivo de foto, súbelo primero
+      let photoUrl = values.photo;
+      if (photoFile) {
+        photoUrl = await uploadFile(photoFile, "machines");
+      }
+      
+      // Enviar los datos con la URL de la foto
+      await apiRequest("POST", "/api/machines", {
+        ...values,
+        photo: photoUrl
+      });
       
       // Invalidate machines query to refresh the list
       queryClient.invalidateQueries({ queryKey: ["/api/machines"] });
@@ -108,6 +124,7 @@ export default function MachinesIndex() {
       });
       
       setSheetOpen(false);
+      setPhotoFile(null);
       form.reset();
       
     } catch (error) {
@@ -117,6 +134,8 @@ export default function MachinesIndex() {
         description: "No se pudo crear la unidad productiva",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -521,9 +540,20 @@ export default function MachinesIndex() {
                   name="photo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Fotografía (URL)</FormLabel>
+                      <FormLabel>Fotografía</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="https://ejemplo.com/foto.jpg" />
+                        <div className="mt-2">
+                          <ImageUpload
+                            value={field.value}
+                            onChange={(file) => {
+                              setPhotoFile(file);
+                              // Si hay un archivo, guardamos un valor temporal para validación
+                              // La URL real se asignará después de la carga
+                              field.onChange(file ? "uploading" : "");
+                            }}
+                            label="Fotografía de la unidad"
+                          />
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
