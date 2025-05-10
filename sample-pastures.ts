@@ -173,4 +173,7 @@ async function seedPastures() {
   console.log("[Sample Data] Datos de ejemplo para pasturas cargados exitosamente.");
 }
 
+// Ejecutar la función al importar el archivo
+seedPastures().catch(err => console.error("Error al sembrar parcelas:", err));
+
 export { seedPastures };
