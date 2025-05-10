@@ -138,10 +138,29 @@ export default function MachineWorkForm({ machineId, onSuccess }: MachineWorkFor
     setIsSubmitting(true);
     
     try {
+      // Obtenemos los trabajos de parcela asociados a la máquina para comprobar si ya existe
+      const response = await apiRequest("GET", `/api/pasture-works?machineId=${machineId}`);
+      const existingWorks = response as any[];
+      let pastureWorkId = null;
+      
+      // Si existe algún trabajo de parcela relacionado, usamos su ID
+      if (existingWorks && existingWorks.length > 0) {
+        // Buscamos un trabajo que coincida con el mismo tipo y fecha aproximada
+        const matchingWork = existingWorks.find((w: any) => 
+          w.workType === values.workType && 
+          new Date(w.startDate).toDateString() === new Date(values.startDate).toDateString()
+        );
+        
+        if (matchingWork) {
+          pastureWorkId = matchingWork.id;
+        }
+      }
+      
       // Crear el registro de trabajo
       await apiRequest("POST", "/api/machine-works", {
         ...values,
         machineId,
+        pastureWorkId
       });
       
       toast({

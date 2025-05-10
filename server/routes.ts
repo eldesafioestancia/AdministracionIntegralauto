@@ -448,6 +448,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/machine-works", async (req: Request, res: Response) => {
     try {
       const workData = insertMachineWorkSchema.parse(req.body);
+      
+      // Si el trabajo ya está relacionado con un trabajo de parcela, no lo duplicamos
+      if (workData.pastureWorkId) {
+        // Verificamos si ya existe un trabajo para esta máquina relacionado con este trabajo de parcela
+        const existingWorks = await storage.getMachineWorks(workData.machineId);
+        const existingWork = existingWorks.find(w => w.pastureWorkId === workData.pastureWorkId);
+        
+        if (existingWork) {
+          return res.status(200).json(existingWork); // Devolvemos el trabajo existente
+        }
+      }
+      
+      // Si no existe o no está relacionado con un trabajo de parcela, lo creamos
       const newWork = await storage.createMachineWork(workData);
       res.status(201).json(newWork);
     } catch (error) {
@@ -794,7 +807,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/pasture-works", async (req: Request, res: Response) => {
     try {
       const pastureId = req.query.pastureId ? parseInt(req.query.pastureId as string) : undefined;
-      const works = await storage.getPastureWorks(pastureId);
+      const machineId = req.query.machineId ? parseInt(req.query.machineId as string) : undefined;
+      
+      // Obtener trabajos por pastureId (comportamiento original)
+      let works = await storage.getPastureWorks(pastureId);
+      
+      // Si se especifica machineId, filtramos también por máquina
+      if (machineId) {
+        works = works.filter(work => work.machineId === machineId);
+      }
+      
       res.json(works);
     } catch (error) {
       console.error("Error fetching pasture works:", error);
