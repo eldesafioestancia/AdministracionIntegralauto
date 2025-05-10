@@ -88,7 +88,33 @@ export default function AnimalsIndex() {
   const [photoPreview, setPhotoPreview] = useState<string>("");
   const { toast } = useToast();
   
-  const { data: animals, isLoading, error } = useQuery({
+  interface Animal {
+    id: number;
+    cartagena: string;
+    cartagenaColor: string;
+    category: string;
+    race: string;
+    birthDate: string;
+    reproductiveStatus?: string;
+    reproductiveDetail?: string;
+    origin?: string;
+    weight?: number;
+    purchaseDate?: string;
+    purchasePrice?: number;
+    location?: string;
+    lastServiceDate?: string;
+    lastServiceType?: string;
+    expectedDeliveryDate?: string;
+    motherCartagena?: string;
+    fatherCartagena?: string;
+    marks?: string;
+    description?: string;
+    color?: string;
+    status: string;
+    photo?: string;
+  }
+
+  const { data: animals, isLoading, error } = useQuery<Animal[]>({
     queryKey: ["/api/animals"],
   });
 
@@ -125,7 +151,7 @@ export default function AnimalsIndex() {
       // Upload photo if available
       if (photoFile) {
         try {
-          const photoPath = await uploadFile(photoFile);
+          const photoPath = await uploadFile(photoFile, "animals");
           values.photo = photoPath;
         } catch (uploadError) {
           console.error("Error uploading photo:", uploadError);
@@ -162,9 +188,19 @@ export default function AnimalsIndex() {
     }
   }
   
-  const handlePhotoChange = (file: File | null, preview: string) => {
+  const handlePhotoChange = (file: File | null) => {
     setPhotoFile(file);
-    setPhotoPreview(preview);
+    
+    // Generar vista previa si hay un archivo
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setPhotoPreview("");
+    }
   };
 
   const getCategoryLabel = (category: string) => {
@@ -263,7 +299,7 @@ export default function AnimalsIndex() {
   };
 
   // Filter animals
-  const filteredAnimals = animals ? animals.filter((animal: any) => {
+  const filteredAnimals = animals ? animals.filter((animal) => {
     const matchesSearch = 
       animal.cartagena?.toLowerCase().includes(search.toLowerCase()) ||
       animal.race?.toLowerCase().includes(search.toLowerCase()) ||
@@ -760,6 +796,16 @@ export default function AnimalsIndex() {
                   />
                 )}
                 
+                {/* Sección de fotografía */}
+                <div className="space-y-2 pt-4">
+                  <h3 className="text-lg font-medium">Fotografía</h3>
+                  <ImageUpload 
+                    onChange={handlePhotoChange} 
+                    value={photoPreview}
+                    className="w-full max-w-sm mx-auto"
+                  />
+                </div>
+                
                 <SheetFooter className="pt-4">
                   <Button type="submit">Guardar animal</Button>
                 </SheetFooter>
@@ -838,7 +884,7 @@ export default function AnimalsIndex() {
         </div>
       ) : (
         <div className="space-y-3">
-          {filteredAnimals.map((animal: any) => (
+          {filteredAnimals.map((animal) => (
             <Card key={animal.id} className="p-0 overflow-hidden">
               <div className="flex items-center">
                 <div 
