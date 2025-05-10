@@ -188,6 +188,11 @@ export default function MachineDetail() {
                   <i className="ri-tools-line mr-1"></i> Mantenimiento
                 </Link>
               </Button>
+              <Button variant="outline" size="sm" asChild>
+                <Link href={`/machines/works/${id}`}>
+                  <i className="ri-truck-line mr-1"></i> Trabajos
+                </Link>
+              </Button>
               <Button variant="outline" size="sm">
                 <i className="ri-edit-line mr-1"></i> Editar
               </Button>
