@@ -1015,7 +1015,7 @@ export default function PasturesIndex() {
                               )}
                             >
                               {field.value ? (
-                                format(field.value, "dd/MM/yyyy", { locale: es })
+                                format(new Date(field.value), "dd/MM/yyyy", { locale: es })
                               ) : (
                                 <span>dd/mm/aaaa</span>
                               )}
@@ -1026,8 +1026,8 @@ export default function PasturesIndex() {
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
                             mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
+                            selected={field.value ? new Date(field.value) : undefined}
+                            onSelect={(date) => field.onChange(date)}
                             disabled={(date) => date > new Date()}
                             initialFocus
                           />
