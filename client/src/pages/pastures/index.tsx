@@ -126,6 +126,7 @@ const pastureWorkFormSchema = z.object({
   temperature: z.string().optional().nullable(),
   soilHumidity: z.string().optional().nullable(),
   observations: z.string().optional().nullable(),
+  photo: z.string().optional().nullable(),
   
   // Campos específicos para diferentes tipos de trabajo
   seedType: z.string().optional().nullable(),
@@ -188,6 +189,8 @@ export default function PasturesIndex() {
   const [activeTab, setActiveTab] = useState("parcels");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>("");
+  const [workPhotoFile, setWorkPhotoFile] = useState<File | null>(null);
+  const [workPhotoPreview, setWorkPhotoPreview] = useState<string>("");
   const { toast } = useToast();
 
   // Consultar las pasturas
@@ -241,6 +244,7 @@ export default function PasturesIndex() {
       temperature: null,
       soilHumidity: null,
       observations: null,
+      photo: null,
       seedType: null,
       seedQuantity: null,
       harvestQuantity: null,
@@ -315,6 +319,21 @@ export default function PasturesIndex() {
       reader.readAsDataURL(file);
     } else {
       setPhotoPreview("");
+    }
+  };
+  
+  const handleWorkPhotoChange = (file: File | null) => {
+    setWorkPhotoFile(file);
+    
+    // Generar vista previa si hay un archivo
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setWorkPhotoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setWorkPhotoPreview("");
     }
   };
 
