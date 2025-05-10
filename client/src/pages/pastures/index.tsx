@@ -413,6 +413,21 @@ export default function PasturesIndex() {
   // Función para manejar el envío del formulario de trabajo agrícola
   async function handleWorkSubmit(values: PastureWorkFormValues) {
     try {
+      // Subir foto si está disponible
+      if (workPhotoFile) {
+        try {
+          const photoPath = await uploadFile(workPhotoFile, "pasture-works");
+          values.photo = photoPath;
+        } catch (uploadError) {
+          console.error("Error uploading photo:", uploadError);
+          toast({
+            title: "Error en la carga de imagen",
+            description: "No se pudo cargar la foto, pero se continuará con el registro del trabajo",
+            variant: "destructive",
+          });
+        }
+      }
+      
       // Calculamos el costo total si hay costos de suministros y operativos
       if (values.operativeCost && values.suppliesCost) {
         const operativeCost = parseFloat(values.operativeCost);
@@ -434,6 +449,8 @@ export default function PasturesIndex() {
       });
       
       setWorkSheetOpen(false);
+      setWorkPhotoFile(null);
+      setWorkPhotoPreview("");
       workForm.reset({
         pastureId: 0,
         workType: "",
@@ -1642,6 +1659,16 @@ export default function PasturesIndex() {
                 )}
               />
               
+              {/* Sección de fotografía para el trabajo */}
+              <div className="space-y-2 pt-4">
+                <h3 className="text-lg font-medium">Fotografía del trabajo</h3>
+                <ImageUpload 
+                  onChange={handleWorkPhotoChange} 
+                  value={workPhotoPreview}
+                  className="w-full max-w-sm mx-auto"
+                />
+              </div>
+              
               <SheetFooter className="mt-4">
                 <Button type="submit">Registrar Trabajo</Button>
               </SheetFooter>
@@ -1731,6 +1758,7 @@ export default function PasturesIndex() {
                           <TableHead>Fecha inicio</TableHead>
                           <TableHead>Máquina</TableHead>
                           <TableHead>Descripción</TableHead>
+                          <TableHead>Foto</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
