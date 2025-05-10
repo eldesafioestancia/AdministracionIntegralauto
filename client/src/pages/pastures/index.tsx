@@ -139,30 +139,19 @@ export default function PasturesIndex() {
   const { toast } = useToast();
 
   // Consultar las pasturas
-  const { data: pastures, isLoading, isError } = useQuery({
+  const { data: pastures, isLoading } = useQuery({
     queryKey: ["/api/pastures"],
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
   });
   
   // Consultar las máquinas para el formulario de trabajos
   const { data: machines } = useQuery({
     queryKey: ["/api/machines"],
-    refetchOnMount: true,
   });
   
   // Consultar los trabajos agrícolas de parcelas
-  const { data: pastureWorks, isLoading: isLoadingWorks } = useQuery({
+  const { data: pastureWorks } = useQuery({
     queryKey: ["/api/pasture-works"],
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
   });
-  
-  // Log para depuración
-  useEffect(() => {
-    console.log("Pasturas cargadas:", pastures);
-    console.log("Trabajos cargados:", pastureWorks);
-  }, [pastures, pastureWorks]);
 
   const form = useForm<PastureFormValues>({
     resolver: zodResolver(pastureFormSchema),
@@ -786,36 +775,10 @@ export default function PasturesIndex() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-1">
-              {pastureWorks && Array.isArray(pastureWorks) && pastureWorks.length > 0 ? (
-                pastureWorks.slice(0, 3).map((work: any) => {
-                  const pasture = pasturesArray.find((p: any) => p.id === work.pastureId);
-                  return (
-                    <div key={work.id} className="py-2 border-b last:border-0">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="text-sm font-medium">
-                            {work.workType.charAt(0).toUpperCase() + work.workType.slice(1)} - {pasture?.name || `Parcela #${work.pastureId}`}
-                          </p>
-                          <p className="text-xs text-neutral-500">
-                            {new Date(work.startDate).toLocaleDateString('es-ES')} 
-                            {work.machineId && ` - Máquina #${work.machineId}`}
-                          </p>
-                        </div>
-                        <Badge variant="outline" className="text-xs">
-                          {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'ARS' }).format(parseFloat(work.totalCost || "0"))}
-                        </Badge>
-                      </div>
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="h-12 flex items-center">
-                  <p className="text-sm text-neutral-400 italic">
-                    No hay trabajos recientes
-                  </p>
-                </div>
-              )}
+            <div className="space-y-1 h-12 flex items-center">
+              <p className="text-sm text-neutral-400 italic">
+                No hay trabajos recientes
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -1015,7 +978,7 @@ export default function PasturesIndex() {
                               )}
                             >
                               {field.value ? (
-                                format(new Date(field.value), "dd/MM/yyyy", { locale: es })
+                                format(field.value, "dd/MM/yyyy", { locale: es })
                               ) : (
                                 <span>dd/mm/aaaa</span>
                               )}
@@ -1026,8 +989,8 @@ export default function PasturesIndex() {
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
                             mode="single"
-                            selected={field.value ? new Date(field.value) : undefined}
-                            onSelect={(date) => field.onChange(date)}
+                            selected={field.value}
+                            onSelect={field.onChange}
                             disabled={(date) => date > new Date()}
                             initialFocus
                           />
@@ -1055,7 +1018,7 @@ export default function PasturesIndex() {
                               )}
                             >
                               {field.value ? (
-                                format(new Date(field.value), "dd/MM/yyyy", { locale: es })
+                                format(field.value, "dd/MM/yyyy", { locale: es })
                               ) : (
                                 <span>dd/mm/aaaa</span>
                               )}
@@ -1067,7 +1030,7 @@ export default function PasturesIndex() {
                           <Calendar
                             mode="single"
                             selected={field.value ? new Date(field.value) : undefined}
-                            onSelect={(date) => field.onChange(date)}
+                            onSelect={field.onChange}
                             disabled={(date) => date > new Date()}
                             initialFocus
                           />
