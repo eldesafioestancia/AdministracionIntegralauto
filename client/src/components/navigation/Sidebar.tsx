@@ -21,6 +21,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
       className={`${
         open ? "block absolute inset-y-0 left-0 z-50" : "hidden"
       } lg:block lg:relative lg:w-64 bg-white border-r border-neutral-200 shadow-sm overflow-y-auto flex-shrink-0 h-full`}
+      style={{ backgroundColor: "rgb(255, 255, 255)" }}
     >
       {open && (
         <div

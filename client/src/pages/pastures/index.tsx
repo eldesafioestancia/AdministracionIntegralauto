@@ -139,19 +139,30 @@ export default function PasturesIndex() {
   const { toast } = useToast();
 
   // Consultar las pasturas
-  const { data: pastures, isLoading } = useQuery({
+  const { data: pastures, isLoading, isError } = useQuery({
     queryKey: ["/api/pastures"],
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
   
   // Consultar las máquinas para el formulario de trabajos
   const { data: machines } = useQuery({
     queryKey: ["/api/machines"],
+    refetchOnMount: true,
   });
   
   // Consultar los trabajos agrícolas de parcelas
-  const { data: pastureWorks } = useQuery({
+  const { data: pastureWorks, isLoading: isLoadingWorks } = useQuery({
     queryKey: ["/api/pasture-works"],
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
+  
+  // Log para depuración
+  useEffect(() => {
+    console.log("Pasturas cargadas:", pastures);
+    console.log("Trabajos cargados:", pastureWorks);
+  }, [pastures, pastureWorks]);
 
   const form = useForm<PastureFormValues>({
     resolver: zodResolver(pastureFormSchema),
