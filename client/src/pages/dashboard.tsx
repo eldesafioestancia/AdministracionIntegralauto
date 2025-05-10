@@ -6,6 +6,11 @@ import { es } from "date-fns/locale";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { PieChart, Pie, Cell } from "recharts";
 
+// Componentes de Clima
+import { WeatherWidget } from "@/components/weather/WeatherWidget";
+import { PrecipitationHistory } from "@/components/weather/PrecipitationHistory";
+import { AgriPlanningTool } from "@/components/weather/AgriPlanningTool";
+
 // UI Components
 import {
   Card,
@@ -1184,23 +1189,236 @@ export default function Dashboard() {
         
         {/* Weather Tab */}
         <TabsContent value="weather" className="space-y-6">
+          {/* Climate Overview & Forecasts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Weather Widget */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center">
+                  <i className="ri-sun-fill mr-2 text-xl text-amber-500"></i> Clima Actual y Pronóstico
+                </CardTitle>
+                <CardDescription>
+                  Condiciones actuales y previsión a corto plazo
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="pt-2">
+                  <WeatherWidget />
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Agricultural Planning Tool */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center">
+                  <i className="ri-plant-line mr-2 text-xl text-green-500"></i> Planificación Agrícola
+                </CardTitle>
+                <CardDescription>
+                  Recomendaciones basadas en clima y fenología de cultivos
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="pt-2">
+                  <AgriPlanningTool />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Historical Precipitation */}
           <Card>
             <CardHeader>
-              <CardTitle>Información Climática</CardTitle>
+              <CardTitle className="text-lg flex items-center">
+                <i className="ri-water-flash-line mr-2 text-xl text-blue-500"></i> Histórico de Precipitaciones
+              </CardTitle>
               <CardDescription>
-                Datos meteorológicos y pronósticos
+                Datos de precipitaciones históricas y tendencias
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12 text-neutral-500">
-                <div className="mb-3">
-                  <i className="ri-cloudy-fill text-5xl text-blue-500"></i>
+              <div className="pt-2">
+                <PrecipitationHistory />
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Crop Risk Assessment */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center">
+                <i className="ri-alert-line mr-2 text-xl text-red-500"></i> Evaluación de Riesgos para Cultivos
+              </CardTitle>
+              <CardDescription>
+                Análisis de riesgos meteorológicos para la producción agrícola
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-4">
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <h3 className="text-lg font-semibold text-green-700 mb-1">Riesgo Actual</h3>
+                    <div className="text-3xl font-bold text-green-600">Bajo</div>
+                    <p className="text-sm text-green-600 mt-1">Condiciones favorables para operaciones agrícolas</p>
+                  </div>
+                  
+                  <div className="p-4 bg-slate-50 rounded-lg">
+                    <h3 className="font-medium mb-2">Temperatura</h3>
+                    <div className="flex items-center">
+                      <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div className="bg-green-600 h-2.5 rounded-full" style={{ width: "70%" }}></div>
+                      </div>
+                      <span className="ml-2">24°C</span>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-1">Rango óptimo: 18°C - 28°C</p>
+                  </div>
+                  
+                  <div className="p-4 bg-slate-50 rounded-lg">
+                    <h3 className="font-medium mb-2">Humedad</h3>
+                    <div className="flex items-center">
+                      <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div className="bg-green-600 h-2.5 rounded-full" style={{ width: "65%" }}></div>
+                      </div>
+                      <span className="ml-2">65%</span>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-1">Rango óptimo: 50% - 75%</p>
+                  </div>
                 </div>
-                <h3 className="text-lg font-semibold">Módulo en desarrollo</h3>
-                <p className="max-w-md mx-auto mt-2">
-                  Estamos trabajando en la integración de datos climáticos históricos, 
-                  pronósticos extendidos y alertas para condiciones críticas.
-                </p>
+                
+                <div className="md:col-span-2 space-y-4">
+                  <h3 className="font-semibold">Riesgos a considerar</h3>
+                  <div className="space-y-2">
+                    <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                      <div className="font-medium text-yellow-800 flex items-center">
+                        <i className="ri-alert-line mr-1"></i> Ligero aumento de temperatura previsto
+                      </div>
+                      <p className="text-sm text-yellow-700">Se espera un incremento de 3-4°C en los próximos 2 días. Considere aumentar el riego en cultivos sensibles.</p>
+                    </div>
+                    
+                    <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="font-medium text-blue-800 flex items-center">
+                        <i className="ri-drop-line mr-1"></i> Probabilidad de precipitaciones
+                      </div>
+                      <p className="text-sm text-blue-700">40% de probabilidad de lluvias ligeras en las próximas 48 horas. Planifique actividades de campo acordemente.</p>
+                    </div>
+                    
+                    <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                      <div className="font-medium text-green-800 flex items-center">
+                        <i className="ri-windy-line mr-1"></i> Condiciones de viento favorables
+                      </div>
+                      <p className="text-sm text-green-700">Vientos suaves (8-12 km/h) previstos. Condiciones adecuadas para aplicación de agroquímicos.</p>
+                    </div>
+                  </div>
+                  
+                  <h3 className="font-semibold mt-4">Recomendaciones</h3>
+                  <ul className="space-y-1">
+                    <li className="flex items-start">
+                      <i className="ri-check-line text-green-600 mt-0.5 mr-1.5"></i>
+                      <span className="text-sm">Aproveche las próximas 24 horas para aplicaciones de producto si es necesario</span>
+                    </li>
+                    <li className="flex items-start">
+                      <i className="ri-check-line text-green-600 mt-0.5 mr-1.5"></i>
+                      <span className="text-sm">Monitore cultivos sensibles ante el incremento de temperatura previsto</span>
+                    </li>
+                    <li className="flex items-start">
+                      <i className="ri-check-line text-green-600 mt-0.5 mr-1.5"></i>
+                      <span className="text-sm">Preparar equipos de riego como precaución ante posible estrés hídrico</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Weather Alerts and Warnings */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center">
+                <i className="ri-notification-4-line mr-2 text-xl text-orange-500"></i> Alertas Meteorológicas
+              </CardTitle>
+              <CardDescription>
+                Avisos y alertas para condiciones climáticas significativas
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Select defaultValue="all">
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Filtrar por tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas las alertas</SelectItem>
+                      <SelectItem value="severe">Alertas graves</SelectItem>
+                      <SelectItem value="warning">Advertencias</SelectItem>
+                      <SelectItem value="watch">Vigilancia</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Button variant="outline" size="sm" className="flex items-center">
+                    <i className="ri-notification-badge-line mr-1.5"></i>
+                    Configurar notificaciones
+                  </Button>
+                </div>
+                
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Tipo</TableHead>
+                      <TableHead>Alerta</TableHead>
+                      <TableHead>Área afectada</TableHead>
+                      <TableHead>Periodo</TableHead>
+                      <TableHead>Estado</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>
+                        <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                          Advertencia
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-medium">Temperaturas elevadas</TableCell>
+                      <TableCell>Región norte</TableCell>
+                      <TableCell>12 May - 14 May</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                          Activa
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                          Vigilancia
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-medium">Posibles precipitaciones</TableCell>
+                      <TableCell>Región centro-este</TableCell>
+                      <TableCell>15 May - 16 May</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                          Pendiente
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>
+                        <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
+                          Informativa
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-medium">Vientos moderados</TableCell>
+                      <TableCell>Toda la región</TableCell>
+                      <TableCell>12 May - 13 May</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
+                          Finalizada
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
               </div>
             </CardContent>
           </Card>
