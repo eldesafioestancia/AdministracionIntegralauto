@@ -873,12 +873,30 @@ export default function PasturesIndex() {
                       <TableCell className="hidden md:table-cell">{pasture.location || '-'}</TableCell>
                       <TableCell className="hidden md:table-cell">{pasture.soilType ? getSoilTypeLabel(pasture.soilType) : '-'}</TableCell>
                       <TableCell>
-                        <Badge variant={pasture.waterSource === 'disponible' ? 'outline' : 'secondary'}>
+                        <Badge 
+                          variant="outline"
+                          className={
+                            pasture.waterSource && 
+                            (pasture.waterSource === 'pozo' || 
+                             pasture.waterSource === 'laguna' || 
+                             pasture.waterSource === 'rio' || 
+                             pasture.waterSource === 'tajamar') 
+                              ? 'bg-green-100 text-green-800 hover:bg-green-200 border-green-200' 
+                              : 'bg-gray-100 text-gray-800'
+                          }
+                        >
                           {pasture.waterSource ? getWaterLabel(pasture.waterSource) : '-'}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge className={pasture.status === 'active' ? 'bg-green-100 text-green-800 hover:bg-green-200' : ''} variant={pasture.status === 'active' ? 'outline' : 'secondary'}>
+                        <Badge 
+                          variant="outline"
+                          className={
+                            pasture.status === 'activo' 
+                              ? 'bg-green-100 text-green-800 hover:bg-green-200 border-green-200' 
+                              : 'bg-red-100 text-red-800 hover:bg-red-200 border-red-200'
+                          }
+                        >
                           {getStatusLabel(pasture.status)}
                         </Badge>
                       </TableCell>
