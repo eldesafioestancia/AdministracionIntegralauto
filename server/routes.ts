@@ -7,6 +7,7 @@ import {
   insertMachineSchema,
   insertMaintenanceSchema,
   insertMachineFinanceSchema,
+  insertMachineWorkSchema,
   insertAnimalSchema,
   insertAnimalVeterinarySchema,
   insertAnimalFinanceSchema,
@@ -413,6 +414,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching machine finances:", error);
       res.status(500).json({ message: "Error fetching machine finances" });
+    }
+  });
+  
+  // Machine Works routes
+  app.get("/api/machine-works", async (req: Request, res: Response) => {
+    try {
+      const machineId = req.query.machineId ? parseInt(req.query.machineId as string) : undefined;
+      const works = await storage.getMachineWorks(machineId);
+      res.json(works);
+    } catch (error) {
+      console.error("Error fetching machine works:", error);
+      res.status(500).json({ message: "Error fetching machine works" });
+    }
+  });
+  
+  app.get("/api/machine-works/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const work = await storage.getMachineWork(id);
+      
+      if (!work) {
+        return res.status(404).json({ message: "Machine work not found" });
+      }
+      
+      res.json(work);
+    } catch (error) {
+      console.error("Error fetching machine work:", error);
+      res.status(500).json({ message: "Error fetching machine work" });
+    }
+  });
+  
+  app.post("/api/machine-works", async (req: Request, res: Response) => {
+    try {
+      const workData = insertMachineWorkSchema.parse(req.body);
+      const newWork = await storage.createMachineWork(workData);
+      res.status(201).json(newWork);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid machine work data", errors: error.errors });
+      }
+      
+      console.error("Error creating machine work:", error);
+      res.status(500).json({ message: "Error creating machine work" });
+    }
+  });
+  
+  app.delete("/api/machine-works/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteMachineWork(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Machine work not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting machine work:", error);
+      res.status(500).json({ message: "Error deleting machine work" });
     }
   });
   
