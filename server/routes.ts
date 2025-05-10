@@ -822,6 +822,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const workData = insertPastureWorkSchema.parse(req.body);
       const newWork = await storage.createPastureWork(workData);
+      
+      // Si el trabajo de pasturas tiene asignada una máquina, crear automáticamente un trabajo de máquina
+      if (workData.machineId) {
+        // Crear un trabajo de máquina con los mismos datos
+        const machineWorkData = {
+          machineId: workData.machineId,
+          pastureWorkId: newWork.id, // Referencia al trabajo de pastura
+          pastureId: workData.pastureId,
+          workType: workData.workType,
+          description: workData.description,
+          startDate: workData.startDate,
+          endDate: workData.endDate || null,
+          workArea: workData.workArea || null,
+          workTime: workData.workTime || null,
+          fuelUsed: workData.fuelUsed || null,
+          operationalCost: workData.operationalCost || null,
+          suppliesCost: workData.suppliesCost || null,
+          totalCost: workData.totalCost || null,
+          weatherConditions: workData.weatherConditions || null,
+          temperature: workData.temperature || null,
+          soilHumidity: workData.soilHumidity || null,
+          observations: workData.observations || null,
+          // Campos específicos dependiendo del tipo de trabajo
+          seedType: workData.seedType || null,
+          seedPerHectare: workData.seedPerHectare || null,
+          agrochemicalType: workData.agrochemicalType || null,
+          agrochemicalPerHectare: workData.agrochemicalPerHectare || null,
+          fertilizerType: workData.fertilizerType || null,
+          fertilizerPerHectare: workData.fertilizerPerHectare || null,
+          threadRollsUsed: workData.threadRollsUsed || null
+        };
+        
+        await storage.createMachineWork(machineWorkData);
+      }
+      
       res.status(201).json(newWork);
     } catch (error) {
       if (error instanceof z.ZodError) {
