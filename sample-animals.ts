@@ -125,4 +125,5 @@ async function seedAnimals() {
   }
 }
 
-seedAnimals();
+// Exportar la función para poder usarla en sample-data.ts
+export { seedAnimals };

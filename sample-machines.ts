@@ -270,5 +270,5 @@ async function seedMachines() {
   console.log("[Sample Data] Máquinas aleatorias creadas exitosamente.");
 }
 
-// Ejecutar la función
-seedMachines().catch(console.error);
+// Exportar la función para poder usarla en sample-data.ts
+export { seedMachines };
