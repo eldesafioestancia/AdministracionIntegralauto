@@ -528,47 +528,655 @@ export default function Dashboard() {
         
         {/* Production Tab */}
         <TabsContent value="production" className="space-y-6">
+          {/* Production Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center">
+                  <i className="ri-cow-line mr-2 text-xl text-purple-500"></i> Producción Ganadera
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center p-3 bg-purple-50 rounded-md">
+                      <div className="text-2xl font-semibold text-purple-600">{stats.animalCount}</div>
+                      <div className="text-sm text-gray-500">Animales</div>
+                    </div>
+                    <div className="text-center p-3 bg-blue-50 rounded-md">
+                      <div className="text-2xl font-semibold text-blue-600">23</div>
+                      <div className="text-sm text-gray-500">Nacimientos</div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-medium text-gray-500">Distribución por categoría</h4>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Vacas</span>
+                        <span className="text-sm font-medium">142</span>
+                      </div>
+                      <Progress value={58} className="h-2" />
+                      
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Toros</span>
+                        <span className="text-sm font-medium">18</span>
+                      </div>
+                      <Progress value={7} className="h-2" />
+                      
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Terneros</span>
+                        <span className="text-sm font-medium">45</span>
+                      </div>
+                      <Progress value={18} className="h-2" />
+                      
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Novillos</span>
+                        <span className="text-sm font-medium">41</span>
+                      </div>
+                      <Progress value={17} className="h-2" />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button asChild variant="outline" className="w-full mt-1">
+                  <Link href="/animals">
+                    <i className="ri-arrow-right-line mr-1"></i> Gestionar animales
+                  </Link>
+                </Button>
+              </CardFooter>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center">
+                  <i className="ri-plant-line mr-2 text-xl text-green-500"></i> Producción Agrícola
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center p-3 bg-green-50 rounded-md">
+                      <div className="text-2xl font-semibold text-green-600">{stats.pastureCount}</div>
+                      <div className="text-sm text-gray-500">Parcelas</div>
+                    </div>
+                    <div className="text-center p-3 bg-amber-50 rounded-md">
+                      <div className="text-2xl font-semibold text-amber-600">438</div>
+                      <div className="text-sm text-gray-500">Hectáreas</div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-medium text-gray-500">Distribución de cultivos</h4>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Maíz</span>
+                        <span className="text-sm font-medium">120 ha</span>
+                      </div>
+                      <Progress value={27} className="h-2 bg-amber-100">
+                        <div className="h-full bg-amber-500" style={{ width: '27%' }} />
+                      </Progress>
+                      
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Soja</span>
+                        <span className="text-sm font-medium">95 ha</span>
+                      </div>
+                      <Progress value={22} className="h-2 bg-green-100">
+                        <div className="h-full bg-green-500" style={{ width: '22%' }} />
+                      </Progress>
+                      
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Alfalfa</span>
+                        <span className="text-sm font-medium">78 ha</span>
+                      </div>
+                      <Progress value={18} className="h-2 bg-lime-100">
+                        <div className="h-full bg-lime-500" style={{ width: '18%' }} />
+                      </Progress>
+                      
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Otros</span>
+                        <span className="text-sm font-medium">145 ha</span>
+                      </div>
+                      <Progress value={33} className="h-2 bg-neutral-100">
+                        <div className="h-full bg-neutral-500" style={{ width: '33%' }} />
+                      </Progress>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button asChild variant="outline" className="w-full mt-1">
+                  <Link href="/pastures">
+                    <i className="ri-arrow-right-line mr-1"></i> Gestionar parcelas
+                  </Link>
+                </Button>
+              </CardFooter>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center">
+                  <i className="ri-line-chart-line mr-2 text-xl text-blue-500"></i> Rendimiento
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="text-center p-3 bg-blue-50 rounded-md">
+                    <div className="text-2xl font-semibold text-blue-600">7,450 kg</div>
+                    <div className="text-sm text-gray-500">Rendimiento promedio</div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-medium text-gray-500">Rendimiento por cultivo</h4>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Maíz</span>
+                        <div className="flex items-center">
+                          <span className="text-sm font-medium mr-1">9,200 kg/ha</span>
+                          <i className="ri-arrow-up-fill text-green-500"></i>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Soja</span>
+                        <div className="flex items-center">
+                          <span className="text-sm font-medium mr-1">3,800 kg/ha</span>
+                          <i className="ri-arrow-up-fill text-green-500"></i>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Alfalfa</span>
+                        <div className="flex items-center">
+                          <span className="text-sm font-medium mr-1">11,500 kg/ha</span>
+                          <i className="ri-arrow-down-fill text-red-500"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-medium text-gray-500">Ciclo actual</h4>
+                    <Table>
+                      <TableBody className="text-sm">
+                        <TableRow>
+                          <TableCell className="py-1.5">Fecha de siembra</TableCell>
+                          <TableCell className="py-1.5 font-medium">15 Oct 2024</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="py-1.5">Fecha estimada de cosecha</TableCell>
+                          <TableCell className="py-1.5 font-medium">20 Mar 2025</TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Work Activities */}
           <Card>
             <CardHeader>
-              <CardTitle>Gestión de la Producción</CardTitle>
-              <CardDescription>
-                Panel de control de operaciones productivas
-              </CardDescription>
+              <CardTitle className="text-lg flex items-center">
+                <i className="ri-calendar-check-line mr-2 text-xl text-purple-500"></i> Actividades Agropecuarias Recientes
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12 text-neutral-500">
-                <div className="mb-3">
-                  <i className="ri-plant-fill text-5xl text-green-500"></i>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Tipo</TableHead>
+                    <TableHead>Descripción</TableHead>
+                    <TableHead>Ubicación</TableHead>
+                    <TableHead>Fecha</TableHead>
+                    <TableHead>Responsable</TableHead>
+                    <TableHead>Estado</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {pastureWorks && pastureWorks.slice(0, 5).map((work, index) => (
+                    <TableRow key={`work-${work.id}`}>
+                      <TableCell>
+                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                          {work.workType}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-medium">{work.description || '-'}</TableCell>
+                      <TableCell>Parcela ID: {work.pastureId}</TableCell>
+                      <TableCell>
+                        {new Date(work.startDate).toLocaleDateString('es-AR', { 
+                          day: '2-digit', 
+                          month: '2-digit', 
+                          year: 'numeric' 
+                        })}
+                      </TableCell>
+                      <TableCell>{work.driver || 'No asignado'}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                          {work.endDate ? 'Completado' : 'En progreso'}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+            <CardFooter className="flex justify-end">
+              <Button asChild variant="outline">
+                <Link href="/pastures">Ver todas las actividades</Link>
+              </Button>
+            </CardFooter>
+          </Card>
+          
+          {/* Machinery Utilization */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center">
+                <i className="ri-truck-line mr-2 text-xl text-blue-500"></i> Utilización de Maquinaria
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div className="space-y-3">
+                  <h4 className="text-sm font-medium text-gray-500">Tractor John Deere 6130M</h4>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Utilización</span>
+                    <span className="text-sm font-medium">78%</span>
+                  </div>
+                  <Progress value={78} className="h-2" />
+                  <div className="text-sm text-gray-500">Último servicio: 15/04/2025</div>
                 </div>
-                <h3 className="text-lg font-semibold">Módulo en desarrollo</h3>
-                <p className="max-w-md mx-auto mt-2">
-                  Estamos trabajando en el análisis detallado de producción agrícola y ganadera.
-                  Este panel incluirá indicadores de rendimiento, comparativas históricas y proyecciones.
-                </p>
+                
+                <div className="space-y-3">
+                  <h4 className="text-sm font-medium text-gray-500">Cosechadora New Holland CR6.80</h4>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Utilización</span>
+                    <span className="text-sm font-medium">45%</span>
+                  </div>
+                  <Progress value={45} className="h-2" />
+                  <div className="text-sm text-gray-500">Último servicio: 02/05/2025</div>
+                </div>
+                
+                <div className="space-y-3">
+                  <h4 className="text-sm font-medium text-gray-500">Camión Ford F-350</h4>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Utilización</span>
+                    <span className="text-sm font-medium">92%</span>
+                  </div>
+                  <Progress value={92} className="h-2" />
+                  <div className="text-sm text-gray-500">Último servicio: 28/03/2025</div>
+                </div>
               </div>
             </CardContent>
+            <CardFooter className="flex justify-end">
+              <Button asChild variant="outline">
+                <Link href="/machines">Ver todas las maquinarias</Link>
+              </Button>
+            </CardFooter>
           </Card>
         </TabsContent>
         
         {/* Finances Tab */}
         <TabsContent value="finances" className="space-y-6">
+          {/* Financial Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center">
+                  <i className="ri-money-dollar-circle-line mr-2 text-xl text-green-500"></i> Resumen Financiero
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center p-3 bg-green-50 rounded-md">
+                      <div className="text-2xl font-semibold text-green-600">${stats.monthlyIncome.toLocaleString()}</div>
+                      <div className="text-sm text-gray-500">Ingresos</div>
+                    </div>
+                    <div className="text-center p-3 bg-red-50 rounded-md">
+                      <div className="text-2xl font-semibold text-red-600">${stats.monthlyExpense.toLocaleString()}</div>
+                      <div className="text-sm text-gray-500">Gastos</div>
+                    </div>
+                  </div>
+                  
+                  <div className="text-center p-3 bg-blue-50 rounded-md">
+                    <div className="text-2xl font-semibold text-blue-600">
+                      ${(stats.monthlyIncome - stats.monthlyExpense).toLocaleString()}
+                    </div>
+                    <div className="text-sm text-gray-500">Balance</div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-gray-500">Periodo actual</h4>
+                    <div className="text-sm">
+                      <span className="font-medium">1 de Mayo - 31 de Mayo, 2025</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button asChild variant="outline" className="w-full mt-1">
+                  <Link href="/finances">
+                    <i className="ri-arrow-right-line mr-1"></i> Ver todas las finanzas
+                  </Link>
+                </Button>
+              </CardFooter>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center">
+                  <i className="ri-pie-chart-line mr-2 text-xl text-purple-500"></i> Distribución de Ingresos
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pb-0">
+                <div className="w-full pt-2">
+                  <ResponsiveContainer width="100%" height={120}>
+                    <PieChart>
+                      <Pie
+                        data={[
+                          { name: 'Animales', value: 45000 },
+                          { name: 'Cultivos', value: 27000 },
+                          { name: 'Servicios', value: 8000 },
+                        ]}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={40}
+                        fill="#8884d8"
+                        dataKey="value"
+                      >
+                        <Cell fill="#8b5cf6" />
+                        <Cell fill="#10b981" />
+                        <Cell fill="#3b82f6" />
+                      </Pie>
+                      <Tooltip formatter={(value) => [`$${Number(value).toLocaleString()}`, 'Monto']} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-2 text-xs text-center">
+                  <div>
+                    <div className="w-3 h-3 bg-purple-500 rounded-full mx-auto mb-1"></div>
+                    <div className="font-medium">Animales</div>
+                    <div>$45,000</div>
+                  </div>
+                  <div>
+                    <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                    <div className="font-medium">Cultivos</div>
+                    <div>$27,000</div>
+                  </div>
+                  <div>
+                    <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                    <div className="font-medium">Servicios</div>
+                    <div>$8,000</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center">
+                  <i className="ri-pie-chart-line mr-2 text-xl text-red-500"></i> Distribución de Gastos
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pb-0">
+                <div className="w-full pt-2">
+                  <ResponsiveContainer width="100%" height={120}>
+                    <PieChart>
+                      <Pie
+                        data={[
+                          { name: 'Sueldos', value: 18000 },
+                          { name: 'Insumos', value: 12000 },
+                          { name: 'Maquinaria', value: 7000 },
+                          { name: 'Impuestos', value: 5350 },
+                        ]}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={40}
+                        fill="#8884d8"
+                        dataKey="value"
+                      >
+                        <Cell fill="#ef4444" />
+                        <Cell fill="#f59e0b" />
+                        <Cell fill="#3b82f6" />
+                        <Cell fill="#6b7280" />
+                      </Pie>
+                      <Tooltip formatter={(value) => [`$${Number(value).toLocaleString()}`, 'Monto']} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                
+                <div className="grid grid-cols-4 gap-2 text-xs text-center">
+                  <div>
+                    <div className="w-3 h-3 bg-red-500 rounded-full mx-auto mb-1"></div>
+                    <div className="font-medium">Sueldos</div>
+                    <div>$18,000</div>
+                  </div>
+                  <div>
+                    <div className="w-3 h-3 bg-amber-500 rounded-full mx-auto mb-1"></div>
+                    <div className="font-medium">Insumos</div>
+                    <div>$12,000</div>
+                  </div>
+                  <div>
+                    <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                    <div className="font-medium">Maquinaria</div>
+                    <div>$7,000</div>
+                  </div>
+                  <div>
+                    <div className="w-3 h-3 bg-gray-500 rounded-full mx-auto mb-1"></div>
+                    <div className="font-medium">Impuestos</div>
+                    <div>$5,350</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Recent Transactions */}
           <Card>
             <CardHeader>
-              <CardTitle>Gestión Financiera</CardTitle>
-              <CardDescription>
-                Panel de control de operaciones financieras
-              </CardDescription>
+              <CardTitle className="text-lg flex items-center">
+                <i className="ri-exchange-line mr-2 text-xl text-blue-500"></i> Transacciones Recientes
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12 text-neutral-500">
-                <div className="mb-3">
-                  <i className="ri-money-dollar-circle-fill text-5xl text-green-500"></i>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Concepto</TableHead>
+                    <TableHead>Categoría</TableHead>
+                    <TableHead>Fecha</TableHead>
+                    <TableHead>Monto</TableHead>
+                    <TableHead>Tipo</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="font-medium">Venta de terneros</TableCell>
+                    <TableCell>Animales</TableCell>
+                    <TableCell>15/05/2025</TableCell>
+                    <TableCell className="font-medium text-green-600">$25,800</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                        Ingreso
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Compra de semillas</TableCell>
+                    <TableCell>Pasturas</TableCell>
+                    <TableCell>12/05/2025</TableCell>
+                    <TableCell className="font-medium text-red-600">$4,560</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+                        Gasto
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Sueldo Pincheira</TableCell>
+                    <TableCell>Sueldos</TableCell>
+                    <TableCell>10/05/2025</TableCell>
+                    <TableCell className="font-medium text-red-600">$3,200</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+                        Gasto
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Venta de rollos</TableCell>
+                    <TableCell>Pasturas</TableCell>
+                    <TableCell>05/05/2025</TableCell>
+                    <TableCell className="font-medium text-green-600">$8,750</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                        Ingreso
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Mantenimiento tractor</TableCell>
+                    <TableCell>Maquinaria</TableCell>
+                    <TableCell>01/05/2025</TableCell>
+                    <TableCell className="font-medium text-red-600">$2,450</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+                        Gasto
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </CardContent>
+            <CardFooter className="flex justify-end">
+              <Button asChild variant="outline">
+                <Link href="/finances">Ver todas las transacciones</Link>
+              </Button>
+            </CardFooter>
+          </Card>
+          
+          {/* Financial Indicators */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center">
+                <i className="ri-line-chart-line mr-2 text-xl text-purple-500"></i> Indicadores Financieros
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-4">
+                  <div className="text-center p-3 bg-purple-50 rounded-md">
+                    <div className="text-sm text-gray-500 mb-1">Margen de ganancia</div>
+                    <div className="text-2xl font-semibold text-purple-600">38.4%</div>
+                    <div className="flex items-center justify-center text-xs text-green-600 mt-1">
+                      <i className="ri-arrow-up-line mr-1"></i> 2.1% vs mes anterior
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-medium text-gray-500">Rentabilidad por área</h4>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Ganadería</span>
+                        <div className="flex items-center">
+                          <span className="text-sm font-medium mr-1">42%</span>
+                          <i className="ri-arrow-up-fill text-green-500"></i>
+                        </div>
+                      </div>
+                      <Progress value={42} className="h-2 bg-purple-100">
+                        <div className="h-full bg-purple-500" style={{ width: '42%' }} />
+                      </Progress>
+                      
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Agricultura</span>
+                        <div className="flex items-center">
+                          <span className="text-sm font-medium mr-1">36%</span>
+                          <i className="ri-arrow-up-fill text-green-500"></i>
+                        </div>
+                      </div>
+                      <Progress value={36} className="h-2 bg-green-100">
+                        <div className="h-full bg-green-500" style={{ width: '36%' }} />
+                      </Progress>
+                      
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Servicios</span>
+                        <div className="flex items-center">
+                          <span className="text-sm font-medium mr-1">28%</span>
+                          <i className="ri-arrow-down-fill text-red-500"></i>
+                        </div>
+                      </div>
+                      <Progress value={28} className="h-2 bg-blue-100">
+                        <div className="h-full bg-blue-500" style={{ width: '28%' }} />
+                      </Progress>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="text-lg font-semibold">Módulo en desarrollo</h3>
-                <p className="max-w-md mx-auto mt-2">
-                  Estamos trabajando en la implementación de análisis financieros detallados, 
-                  flujos de caja proyectados y comparativas entre períodos.
-                </p>
+                
+                <div className="space-y-4">
+                  <div className="text-center p-3 bg-blue-50 rounded-md">
+                    <div className="text-sm text-gray-500 mb-1">ROI</div>
+                    <div className="text-2xl font-semibold text-blue-600">24.7%</div>
+                    <div className="flex items-center justify-center text-xs text-green-600 mt-1">
+                      <i className="ri-arrow-up-line mr-1"></i> 1.3% vs año anterior
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-medium text-gray-500">Inversiones activas</h4>
+                    <Table>
+                      <TableBody className="text-sm">
+                        <TableRow>
+                          <TableCell className="py-1.5">Maquinaria nueva</TableCell>
+                          <TableCell className="py-1.5 font-medium">$120,000</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="py-1.5">Mejoras en pasturas</TableCell>
+                          <TableCell className="py-1.5 font-medium">$45,000</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="py-1.5">Sistema de riego</TableCell>
+                          <TableCell className="py-1.5 font-medium">$68,000</TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="text-center p-3 bg-green-50 rounded-md">
+                    <div className="text-sm text-gray-500 mb-1">Flujo de caja mensual</div>
+                    <div className="text-2xl font-semibold text-green-600">$33,430</div>
+                    <div className="flex items-center justify-center text-xs text-green-600 mt-1">
+                      <i className="ri-arrow-up-line mr-1"></i> 8.5% vs mes anterior
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-medium text-gray-500">Proyección próximos 3 meses</h4>
+                    <Table>
+                      <TableBody className="text-sm">
+                        <TableRow>
+                          <TableCell className="py-1.5">Junio 2025</TableCell>
+                          <TableCell className="py-1.5 font-medium text-green-600">$38,200</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="py-1.5">Julio 2025</TableCell>
+                          <TableCell className="py-1.5 font-medium text-green-600">$41,500</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="py-1.5">Agosto 2025</TableCell>
+                          <TableCell className="py-1.5 font-medium text-green-600">$36,800</TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
