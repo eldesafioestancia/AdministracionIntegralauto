@@ -786,10 +786,36 @@ export default function PasturesIndex() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-1 h-12 flex items-center">
-              <p className="text-sm text-neutral-400 italic">
-                No hay trabajos recientes
-              </p>
+            <div className="space-y-1">
+              {pastureWorks && Array.isArray(pastureWorks) && pastureWorks.length > 0 ? (
+                pastureWorks.slice(0, 3).map((work: any) => {
+                  const pasture = pasturesArray.find((p: any) => p.id === work.pastureId);
+                  return (
+                    <div key={work.id} className="py-2 border-b last:border-0">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="text-sm font-medium">
+                            {work.workType.charAt(0).toUpperCase() + work.workType.slice(1)} - {pasture?.name || `Parcela #${work.pastureId}`}
+                          </p>
+                          <p className="text-xs text-neutral-500">
+                            {new Date(work.startDate).toLocaleDateString('es-ES')} 
+                            {work.machineId && ` - Máquina #${work.machineId}`}
+                          </p>
+                        </div>
+                        <Badge variant="outline" className="text-xs">
+                          {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'ARS' }).format(parseFloat(work.totalCost || "0"))}
+                        </Badge>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="h-12 flex items-center">
+                  <p className="text-sm text-neutral-400 italic">
+                    No hay trabajos recientes
+                  </p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -1029,7 +1055,7 @@ export default function PasturesIndex() {
                               )}
                             >
                               {field.value ? (
-                                format(field.value, "dd/MM/yyyy", { locale: es })
+                                format(new Date(field.value), "dd/MM/yyyy", { locale: es })
                               ) : (
                                 <span>dd/mm/aaaa</span>
                               )}
@@ -1041,7 +1067,7 @@ export default function PasturesIndex() {
                           <Calendar
                             mode="single"
                             selected={field.value ? new Date(field.value) : undefined}
-                            onSelect={field.onChange}
+                            onSelect={(date) => field.onChange(date)}
                             disabled={(date) => date > new Date()}
                             initialFocus
                           />
