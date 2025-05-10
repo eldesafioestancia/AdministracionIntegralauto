@@ -895,6 +895,7 @@ export default function PasturesIndex() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Imagen</TableHead>
                   <TableHead>Nombre</TableHead>
                   <TableHead>Superficie (Ha)</TableHead>
                   <TableHead className="hidden md:table-cell">Ubicación</TableHead>
@@ -915,6 +916,19 @@ export default function PasturesIndex() {
                         setDetailsDialogOpen(true);
                       }}
                     >
+                      <TableCell>
+                        {pasture.photo ? (
+                          <img 
+                            src={pasture.photo} 
+                            alt={pasture.name} 
+                            className="w-10 h-10 rounded-md object-cover"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-md bg-muted flex items-center justify-center">
+                            <i className="ri-landscape-line text-muted-foreground"></i>
+                          </div>
+                        )}
+                      </TableCell>
                       <TableCell className="font-medium">{pasture.name}</TableCell>
                       <TableCell>{parseFloat(pasture.area).toFixed(2)}</TableCell>
                       <TableCell className="hidden md:table-cell">{pasture.location || '-'}</TableCell>
@@ -1629,6 +1643,15 @@ export default function PasturesIndex() {
           
           {selectedPasture && (
             <div className="space-y-6">
+              {selectedPasture.photo && (
+                <div className="max-w-md mx-auto">
+                  <img 
+                    src={selectedPasture.photo}
+                    alt={`Foto de ${selectedPasture.name}`}
+                    className="w-full rounded-lg h-56 object-cover"
+                  />
+                </div>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <h3 className="font-semibold text-sm text-muted-foreground">Datos generales</h3>
