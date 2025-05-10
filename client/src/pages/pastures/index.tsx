@@ -59,6 +59,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -131,10 +139,49 @@ const pastureWorkFormSchema = z.object({
 type PastureFormValues = z.infer<typeof pastureFormSchema>;
 type PastureWorkFormValues = z.infer<typeof pastureWorkFormSchema>;
 
+// Funciones auxiliares para la visualización de etiquetas
+const getSoilTypeLabel = (soilType: string): string => {
+  const soilTypeMap: Record<string, string> = {
+    'arcilloso': 'Arcilloso',
+    'arenoso': 'Arenoso',
+    'franco': 'Franco',
+    'limoso': 'Limoso',
+    'humifero': 'Humífero',
+    'calizo': 'Calizo',
+    'otro': 'Otro'
+  };
+  return soilTypeMap[soilType] || soilType;
+};
+
+const getWaterLabel = (waterSource: string): string => {
+  const waterMap: Record<string, string> = {
+    'pozo': 'Pozo',
+    'laguna': 'Laguna natural',
+    'rio': 'Río/arroyo',
+    'tajamar': 'Tajamar',
+    'otro': 'Otro',
+    'ninguno': 'Sin fuente de agua'
+  };
+  return waterMap[waterSource] || waterSource;
+};
+
+const getStatusLabel = (status: string): string => {
+  const statusMap: Record<string, string> = {
+    'activo': 'Activo',
+    'barbecho': 'En barbecho',
+    'descanso': 'En descanso',
+    'arrendado': 'Arrendado',
+    'inactivo': 'Inactivo'
+  };
+  return statusMap[status] || status;
+};
+
 export default function PasturesIndex() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [workSheetOpen, setWorkSheetOpen] = useState(false);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedPastureId, setSelectedPastureId] = useState<number | null>(null);
+  const [selectedPasture, setSelectedPasture] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("parcels");
   const { toast } = useToast();
 
@@ -835,6 +882,10 @@ export default function PasturesIndex() {
                             size="icon"
                             className="h-8 w-8"
                             title="Ver detalles"
+                            onClick={() => {
+                              setSelectedPasture(pasture);
+                              setDetailsDialogOpen(true);
+                            }}
                           >
                             <i className="ri-eye-line text-blue-500"></i>
                           </Button>
@@ -1055,7 +1106,9 @@ export default function PasturesIndex() {
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Seleccione una máquina" />
+                          <SelectValue placeholder="Seleccione una máquina">
+                            {field.value ? `Máquina ID: ${field.value}` : "Seleccione una máquina"}
+                          </SelectValue>
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -1503,6 +1556,128 @@ export default function PasturesIndex() {
           </Form>
         </SheetContent>
       </Sheet>
+      
+      {/* Diálogo de detalles de la parcela */}
+      <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
+        <DialogContent className="max-w-[800px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl">{selectedPasture?.name || 'Detalle de parcela'}</DialogTitle>
+            <DialogDescription>
+              Información detallada de la parcela y sus trabajos agrícolas
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedPasture && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-sm text-muted-foreground">Datos generales</h3>
+                  <div className="bg-muted rounded-lg p-4 space-y-2">
+                    <div>
+                      <span className="font-semibold">Superficie:</span> {parseFloat(selectedPasture.area).toFixed(2)} hectáreas
+                    </div>
+                    <div>
+                      <span className="font-semibold">Ubicación:</span> {selectedPasture.location || 'No especificada'}
+                    </div>
+                    <div>
+                      <span className="font-semibold">Tipo de suelo:</span> {selectedPasture.soilType ? getSoilTypeLabel(selectedPasture.soilType) : 'No especificado'}
+                    </div>
+                    <div>
+                      <span className="font-semibold">Disponibilidad de agua:</span> {selectedPasture.waterSource ? getWaterLabel(selectedPasture.waterSource) : 'No especificada'}
+                    </div>
+                    <div>
+                      <span className="font-semibold">Estado:</span> {getStatusLabel(selectedPasture.status)}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-sm text-muted-foreground">Información adicional</h3>
+                  <div className="bg-muted rounded-lg p-4 space-y-2">
+                    {selectedPasture.acquisitionDate && (
+                      <div>
+                        <span className="font-semibold">Fecha de adquisición:</span> {format(new Date(selectedPasture.acquisitionDate), 'dd/MM/yyyy', { locale: es })}
+                      </div>
+                    )}
+                    {selectedPasture.acquisitionValue && (
+                      <div>
+                        <span className="font-semibold">Valor de adquisición:</span> ${parseFloat(selectedPasture.acquisitionValue).toLocaleString()}
+                      </div>
+                    )}
+                    {selectedPasture.latitude && selectedPasture.longitude && (
+                      <div>
+                        <span className="font-semibold">Coordenadas:</span> {selectedPasture.latitude}, {selectedPasture.longitude}
+                      </div>
+                    )}
+                    {selectedPasture.description && (
+                      <div>
+                        <span className="font-semibold">Descripción:</span> {selectedPasture.description}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <h3 className="font-semibold text-sm text-muted-foreground">Trabajos agrícolas realizados</h3>
+                {pastureWorks && Array.isArray(pastureWorks) && pastureWorks.filter((work: any) => work.pastureId === selectedPasture.id).length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Tipo</TableHead>
+                          <TableHead>Fecha inicio</TableHead>
+                          <TableHead>Máquina</TableHead>
+                          <TableHead>Descripción</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {pastureWorks
+                          .filter((work: any) => work.pastureId === selectedPasture.id)
+                          .map((work: any) => {
+                            // Encontrar los datos de la máquina usada
+                            const machine = machines && Array.isArray(machines) 
+                              ? machines.find((m: any) => m.id === work.machineId) 
+                              : null;
+                              
+                            return (
+                              <TableRow key={work.id}>
+                                <TableCell>{work.workType}</TableCell>
+                                <TableCell>{format(new Date(work.startDate), 'dd/MM/yyyy', { locale: es })}</TableCell>
+                                <TableCell>{machine ? `${machine.brand} ${machine.model}` : 'No asignada'}</TableCell>
+                                <TableCell className="max-w-[200px] truncate">{work.description}</TableCell>
+                              </TableRow>
+                            );
+                          })}
+                      </TableBody>
+                    </Table>
+                  </div>
+                ) : (
+                  <div className="bg-muted rounded-lg p-4 text-center">
+                    No hay trabajos registrados para esta parcela
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button 
+              onClick={() => {
+                setWorkSheetOpen(true);
+                setSelectedPastureId(selectedPasture?.id || null);
+                workForm.setValue('pastureId', selectedPasture?.id || 0);
+              }}
+              className="mr-2"
+            >
+              Registrar trabajo
+            </Button>
+            <Button onClick={() => setDetailsDialogOpen(false)} variant="outline">
+              Cerrar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
