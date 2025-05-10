@@ -1238,7 +1238,11 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="pt-2">
-                <PrecipitationHistory />
+                <PrecipitationHistory location={{
+                  lat: -38.7183,
+                  lon: -62.2661,
+                  name: "Bahía Blanca"
+                }} />
               </div>
             </CardContent>
           </Card>

@@ -84,16 +84,32 @@ interface HistoricalWeatherData {
   }[];
 }
 
+interface PrecipitationHistoryProps {
+  location?: {
+    lat: number;
+    lon: number;
+    name: string;
+  };
+}
+
 export function PrecipitationHistory({ location }: PrecipitationHistoryProps) {
+  const defaultLocation = {
+    lat: -38.7183, // Buenos Aires (default)
+    lon: -62.2661,
+    name: "Bahía Blanca"
+  };
   const [activeTab, setActiveTab] = useState("monthly");
   const [selectedYear, setSelectedYear] = useState<string>("all");
   const [selectedPeriod, setSelectedPeriod] = useState<string>("all");
   
+  // Usar la ubicación por defecto si no se proporciona una
+  const locationData = location || defaultLocation;
+  
   const { data, isLoading, error } = useQuery<HistoricalWeatherData>({
-    queryKey: ['/api/weather/historical-precipitation', location.lat, location.lon],
+    queryKey: ['/api/weather/historical-precipitation', locationData.lat, locationData.lon],
     queryFn: async () => {
       const response = await fetch(
-        `/api/weather/historical-precipitation?lat=${location.lat}&lon=${location.lon}`
+        `/api/weather/historical-precipitation?lat=${locationData.lat}&lon=${locationData.lon}`
       );
       if (!response.ok) {
         throw new Error('Error al obtener datos históricos de precipitaciones');
