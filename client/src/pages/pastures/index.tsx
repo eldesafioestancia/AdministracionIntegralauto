@@ -860,7 +860,14 @@ export default function PasturesIndex() {
               <TableBody>
                 {pasturesArray.length > 0 ? (
                   pasturesArray.map((pasture: any) => (
-                    <TableRow key={pasture.id}>
+                    <TableRow 
+                      key={pasture.id}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => {
+                        setSelectedPasture(pasture);
+                        setDetailsDialogOpen(true);
+                      }}
+                    >
                       <TableCell className="font-medium">{pasture.name}</TableCell>
                       <TableCell>{parseFloat(pasture.area).toFixed(2)}</TableCell>
                       <TableCell className="hidden md:table-cell">{pasture.location || '-'}</TableCell>
@@ -875,20 +882,8 @@ export default function PasturesIndex() {
                           {getStatusLabel(pasture.status)}
                         </Badge>
                       </TableCell>
-                      <TableCell>
+                      <TableCell onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center space-x-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            title="Ver detalles"
-                            onClick={() => {
-                              setSelectedPasture(pasture);
-                              setDetailsDialogOpen(true);
-                            }}
-                          >
-                            <i className="ri-eye-line text-blue-500"></i>
-                          </Button>
                           <Button
                             variant="ghost"
                             size="icon"
