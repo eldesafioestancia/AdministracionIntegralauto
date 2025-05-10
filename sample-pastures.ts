@@ -55,9 +55,10 @@ async function seedPastures() {
       soilType,
       status: "activo",
       location: `Sector ${String.fromCharCode(64 + getRandomNumber(1, 4))}`,
-      coordinates: `${getRandomNumber(-34, -33)}.${getRandomNumber(100000, 999999)}, ${getRandomNumber(-59, -58)}.${getRandomNumber(100000, 999999)}`,
+      latitude: `${getRandomNumber(-34, -33)}.${getRandomNumber(100000, 999999)}`,
+      longitude: `${getRandomNumber(-59, -58)}.${getRandomNumber(100000, 999999)}`,
       description: `Lote de ${area} hectáreas con suelo ${soilType.toLowerCase()}`,
-      waterAvailability: hasWater ? "Sí" : "No",
+      waterSource: hasWater ? "Sí" : "No",
       acquisitionDate: getRandomDate(new Date(2000, 0, 1), new Date(2022, 0, 1)),
       acquisitionValue: hasWater ? (parseInt(area) * getRandomNumber(3000, 5000)).toString() : (parseInt(area) * getRandomNumber(2000, 3500)).toString(),
     });

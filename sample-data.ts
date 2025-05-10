@@ -77,10 +77,22 @@ async function seedData() {
     console.log(`[Sample Data] Finanza 2 creada: ${finance2.concept} (ID: ${finance2.id})`);
     
     // Cargar datos de pasturas y trabajos
-    await seedPastures();
+    console.log("[Sample Data] Iniciando carga de datos de pasturas...");
+    try {
+      await seedPastures();
+      console.log("[Sample Data] Datos de pasturas cargados exitosamente.");
+    } catch (error) {
+      console.error("[Sample Data] Error al cargar datos de pasturas:", error);
+    }
     
     // Cargar datos de animales
-    await seedAnimals();
+    console.log("[Sample Data] Iniciando carga de datos de animales...");
+    try {
+      await seedAnimals();
+      console.log("[Sample Data] Datos de animales cargados exitosamente.");
+    } catch (error) {
+      console.error("[Sample Data] Error al cargar datos de animales:", error);
+    }
 
     console.log("[Sample Data] Datos de ejemplo cargados exitosamente.");
   } catch (error) {
