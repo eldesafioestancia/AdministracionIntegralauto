@@ -1,6 +1,10 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+// Import sample data
+import "../sample-data";
+// Import pastures data loader
+import "../load-pastures";
 
 const app = express();
 app.use(express.json());

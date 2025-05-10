@@ -100,4 +100,17 @@ async function seedData() {
   }
 }
 
-seedData();
+// Ejecutar el seedData principal
+seedData().then(() => {
+  console.log("[Extra Seed] Ejecutando seedPastures...");
+  // Importamos y ejecutamos seedPastures explícitamente
+  import('./sample-pastures').then(module => {
+    module.seedPastures().then(() => {
+      console.log("[Extra Seed] seedPastures completado con éxito");
+    }).catch(err => {
+      console.error("[Extra Seed] Error en seedPastures:", err);
+    });
+  }).catch(err => {
+    console.error("[Extra Seed] Error al importar sample-pastures:", err);
+  });
+});
