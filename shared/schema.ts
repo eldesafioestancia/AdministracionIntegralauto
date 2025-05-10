@@ -372,6 +372,58 @@ export const insertPastureWorkSchema = basePastureWorkSchema.extend({
   ).optional().nullable(),
 });
 
+// Machine Works Table (Trabajos realizados con maquinaria)
+// Comparte la misma estructura que los trabajos de pastura pero referenciados a la máquina
+export const machineWorks = pgTable("machine_works", {
+  id: serial("id").primaryKey(),
+  machineId: integer("machine_id").notNull(),
+  pastureWorkId: integer("pasture_work_id"), // ID del trabajo de pastura relacionado (opcional)
+  pastureId: integer("pasture_id"), // ID de la pastura donde se realizó el trabajo (opcional)
+  workType: text("work_type").notNull(), // siembra, cosecha, fumigación, fertilización, rastra, arado, cincel, corte, rastrillado, enrollado
+  description: text("description").notNull(),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date"),
+  areaWorked: decimal("area_worked"), // hectáreas trabajadas
+  workingHours: decimal("working_hours"), // horas de trabajo
+  fuelUsed: decimal("fuel_used"), // litros de combustible
+  operativeCost: decimal("operative_cost"), // costo operativo
+  suppliesCost: decimal("supplies_cost"), // costo de insumos
+  totalCost: decimal("total_cost"), // costo total
+  weatherConditions: text("weather_conditions"), // condiciones climáticas
+  temperature: decimal("temperature"), // temperatura en °C
+  soilHumidity: decimal("soil_humidity"), // humedad del suelo en %
+  observations: text("observations"), // observaciones
+  
+  // Campos específicos para diferentes tipos de trabajo
+  seedType: text("seed_type"), // Tipo de semilla para siembra
+  seedQuantity: decimal("seed_quantity"), // Cantidad de semilla por hectárea (kg/ha)
+  harvestQuantity: decimal("harvest_quantity"), // Cantidad cosechada por hectárea (kg/ha)
+  chemicalType: text("chemical_type"), // Tipo de agroquímico para fumigación
+  chemicalQuantity: decimal("chemical_quantity"), // Cantidad de agroquímico por hectárea (L/ha)
+  fertilizerType: text("fertilizer_type"), // Tipo de fertilizante
+  fertilizerQuantity: decimal("fertilizer_quantity"), // Cantidad de fertilizante por hectárea (kg/ha)
+  baleCount: decimal("bale_count"), // Cantidad de rollos (enrollado)
+  threadRollsUsed: decimal("thread_rolls_used"), // Cantidad de rollos de hilo usados (enrollado)
+  
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Base machine work schema
+const baseMachineWorkSchema = createInsertSchema(machineWorks).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Extended schema with date transformations
+export const insertMachineWorkSchema = baseMachineWorkSchema.extend({
+  startDate: z.string().or(z.date()).transform(val => 
+    typeof val === 'string' ? new Date(val) : val
+  ),
+  endDate: z.string().or(z.date()).transform(val => 
+    typeof val === 'string' ? new Date(val) : val
+  ).optional().nullable(),
+});
+
 // Pasture Financial Records
 export const pastureFinances = pgTable("pasture_finances", {
   id: serial("id").primaryKey(),
@@ -506,6 +558,9 @@ export type InsertPasture = z.infer<typeof insertPastureSchema>;
 
 export type PastureWork = typeof pastureWorks.$inferSelect;
 export type InsertPastureWork = z.infer<typeof insertPastureWorkSchema>;
+
+export type MachineWork = typeof machineWorks.$inferSelect;
+export type InsertMachineWork = z.infer<typeof insertMachineWorkSchema>;
 
 export type PastureFinance = typeof pastureFinances.$inferSelect;
 export type InsertPastureFinance = z.infer<typeof insertPastureFinanceSchema>;
