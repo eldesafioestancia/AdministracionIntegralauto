@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { ImageUpload } from "@/components/ui/image-upload";
+import { uploadFile } from "@/lib/fileUpload";
 import {
   Sheet,
   SheetContent,
@@ -70,6 +72,7 @@ const animalFormSchema = z.object({
   description: z.string().optional(),
   color: z.string().optional(),
   status: z.string().default("active"),
+  photo: z.string().optional(),
 });
 
 type AnimalFormValues = z.infer<typeof animalFormSchema>;
@@ -111,6 +114,7 @@ export default function AnimalsIndex() {
       description: "",
       color: "",
       status: "active",
+      photo: "",
     },
   });
 
