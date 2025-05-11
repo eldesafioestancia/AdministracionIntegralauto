@@ -80,6 +80,23 @@ export const updateNotificationPreferences = async (req: Request, res: Response)
 };
 
 /**
+ * Obtiene las preferencias de notificación de un usuario
+ */
+export const getNotificationPreferences = async (req: Request, res: Response) => {
+  try {
+    const userId = req.query.userId as string || 'anonymous';
+    
+    // Obtener preferencias desde la base de datos
+    const preferences = await storage.getNotificationPreferences(userId);
+    
+    res.status(200).json(preferences || {});
+  } catch (error) {
+    console.error('Error getting notification preferences:', error);
+    res.status(500).json({ error: 'Failed to get notification preferences' });
+  }
+};
+
+/**
  * Envía una notificación a un único usuario
  */
 export const sendNotificationToUser = async (userId: string, notification: any) => {
