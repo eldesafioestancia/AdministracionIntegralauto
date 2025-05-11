@@ -397,6 +397,30 @@ export default function FinancesPage() {
       // Establecer categoría si existe
       if (params.category) {
         form.setValue("category", params.category);
+        
+        // Si la categoría es maquinarias y existe un ID de máquina
+        if (params.category === "maquinarias" && params.machineId) {
+          // Buscar la máquina por ID
+          const machineId = params.machineId;
+          
+          // Ahora necesitamos encontrar la máquina y su tipo
+          if (machines && Array.isArray(machines) && machines.length > 0) {
+            const machine = machines.find((m: any) => m.id.toString() === machineId);
+            
+            if (machine) {
+              // Establecer el tipo de máquina y actualizar estado
+              form.setValue("machineType", machine.type);
+              setSelectedMachineType(machine.type);
+              
+              // Filtrar máquinas por tipo
+              const filtered = machines.filter((m: any) => m.type === machine.type);
+              setFilteredMachines(filtered);
+              
+              // Seleccionar la máquina específica
+              form.setValue("machineId", machineId);
+            }
+          }
+        }
       }
       
       // Establecer subcategoría si existe y la categoría está establecida
@@ -419,7 +443,7 @@ export default function FinancesPage() {
       // Abrir el formulario
       setIsAddSheetOpen(true);
     }
-  }, [location]); // Se ejecuta cuando cambia la URL
+  }, [location, machines]); // Se ejecuta cuando cambia la URL o las máquinas están disponibles
 
   // Funciones para formatear moneda y fechas
   const formatCurrency = (amount: number | string) => {

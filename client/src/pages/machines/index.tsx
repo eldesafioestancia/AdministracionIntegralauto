@@ -685,7 +685,7 @@ export default function MachinesIndex() {
                   </Button>
                   
                   <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Registrar movimiento financiero">
-                    <Link href={`/finances?openForm=true&type=expense&category=operaciones&subcategory=mantenimiento&description=Mantenimiento - ${machine.brand} ${machine.model}&machineId=${machine.id}`}>
+                    <Link href={`/finances?openForm=true&type=expense&category=maquinarias&description=Gasto - ${machine.brand} ${machine.model}&machineId=${machine.id}`}>
                       <i className="ri-money-dollar-circle-line text-lg"></i>
                     </Link>
                   </Button>
