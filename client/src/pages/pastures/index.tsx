@@ -182,6 +182,46 @@ const getStatusLabel = (status: string): string => {
   return statusMap[status] || status;
 };
 
+// Tipos de trabajo por defecto (tractores)
+const defaultWorkTypes = [
+  { value: "siembra", label: "Siembra" },
+  { value: "cosecha", label: "Cosecha" },
+  { value: "fumigacion", label: "Fumigación" },
+  { value: "fertilizacion", label: "Fertilización" },
+  { value: "rastra", label: "Rastra" },
+  { value: "arado", label: "Arado" },
+  { value: "cincel", label: "Cincel" },
+  { value: "corte", label: "Corte" },
+  { value: "rastrillado", label: "Rastrillado" },
+  { value: "enrollado", label: "Enrollado" }
+];
+
+// Tipos de trabajo para topadoras
+const bulldozerWorkTypes = [
+  { value: "topado", label: "Topado" },
+  { value: "rolado", label: "Rolado" },
+  { value: "escardificado", label: "Escardificado" },
+  { value: "movimiento_tierra", label: "Movimiento de tierra" }
+];
+
+// Tipos de trabajo para otros tipos de máquinas
+const truckWorkTypes = [
+  { value: "transporte", label: "Transporte" },
+  { value: "carga", label: "Carga de insumos" },
+  { value: "distribucion", label: "Distribución" }
+];
+
+const vehicleWorkTypes = [
+  { value: "supervision", label: "Supervisión" },
+  { value: "logistica", label: "Logística" },
+  { value: "transporte_personal", label: "Transporte de personal" }
+];
+
+const accessoryWorkTypes = [
+  { value: "implemento", label: "Implemento de tractor" },
+  { value: "complemento", label: "Complemento de trabajo" }
+];
+
 export default function PasturesIndex() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [workSheetOpen, setWorkSheetOpen] = useState(false);
@@ -195,6 +235,7 @@ export default function PasturesIndex() {
   const [workPhotoPreview, setWorkPhotoPreview] = useState<string>("");
   const [selectedMachineType, setSelectedMachineType] = useState<string | null>(null);
   const [filteredMachines, setFilteredMachines] = useState<any[]>([]);
+  const [availableWorkTypes, setAvailableWorkTypes] = useState(defaultWorkTypes);
   const { toast } = useToast();
 
   // Consultar las pasturas
@@ -289,20 +330,6 @@ export default function PasturesIndex() {
     { value: "accesorio", label: "Accesorio" }
   ];
   
-  // Tipos de trabajo
-  const workTypes = [
-    { value: "siembra", label: "Siembra" },
-    { value: "cosecha", label: "Cosecha" },
-    { value: "fumigacion", label: "Fumigación" },
-    { value: "fertilizacion", label: "Fertilización" },
-    { value: "rastra", label: "Rastra" },
-    { value: "arado", label: "Arado" },
-    { value: "cincel", label: "Cincel" },
-    { value: "corte", label: "Corte" },
-    { value: "rastrillado", label: "Rastrillado" },
-    { value: "enrollado", label: "Enrollado" }
-  ];
-  
   // Condiciones climáticas
   const weatherConditionTypes = [
     { value: "soleado", label: "Soleado" },
@@ -364,10 +391,32 @@ export default function PasturesIndex() {
     // Resetear la máquina seleccionada
     workForm.setValue("machineId", null);
     
+    // Resetear el tipo de trabajo seleccionado
+    workForm.setValue("workType", "");
+    
     // Filtrar máquinas por el tipo seleccionado
     if (machines && Array.isArray(machines) && machines.length > 0) {
-      const filtered = machines.filter((machine: any) => machine.type === type);
+      const filtered = machines.filter((machine: {type: string}) => machine.type === type);
       setFilteredMachines(filtered);
+    }
+    
+    // Actualizar los tipos de trabajo disponibles según el tipo de máquina
+    switch (type) {
+      case "topadora":
+        setAvailableWorkTypes(bulldozerWorkTypes);
+        break;
+      case "camion":
+        setAvailableWorkTypes(truckWorkTypes);
+        break;
+      case "vehiculo":
+        setAvailableWorkTypes(vehicleWorkTypes);
+        break;
+      case "accesorio":
+        setAvailableWorkTypes(accessoryWorkTypes);
+        break;
+      case "tractor":
+      default:
+        setAvailableWorkTypes(defaultWorkTypes);
     }
   };
 
@@ -446,6 +495,10 @@ export default function PasturesIndex() {
     setSelectedMachineType(null);
     setFilteredMachines(machines && Array.isArray(machines) ? machines : []);
     workForm.setValue("machineId", null);
+    
+    // Resetear también el tipo de trabajo y asegurar que se muestren los tipos por defecto
+    setAvailableWorkTypes(defaultWorkTypes);
+    workForm.setValue("workType", "");
     
     setWorkSheetOpen(true);
   }
@@ -1203,7 +1256,7 @@ export default function PasturesIndex() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {workTypes.map(type => (
+                        {availableWorkTypes.map((type: {value: string, label: string}) => (
                           <SelectItem key={type.value} value={type.value}>
                             {type.label}
                           </SelectItem>
