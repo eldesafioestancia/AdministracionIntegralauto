@@ -225,7 +225,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
               <Link 
                 href="/settings"
                 className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                  isActive("/settings")
+                  isActive("/settings") && !isActive("/settings/notifications")
                     ? "bg-primary-light bg-opacity-10 text-primary"
                     : "text-neutral-500 hover:bg-neutral-100"
                 }`}
@@ -233,6 +233,19 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
               >
                 <i className="ri-settings-line mr-3 text-lg"></i>
                 Configuración
+              </Link>
+              
+              <Link 
+                href="/settings/notifications"
+                className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  isActive("/settings/notifications")
+                    ? "bg-primary-light bg-opacity-10 text-primary"
+                    : "text-neutral-500 hover:bg-neutral-100"
+                }`}
+                onClick={closeSidebar}
+              >
+                <i className="ri-notification-3-line mr-3 text-lg"></i>
+                Notificaciones
               </Link>
             </div>
           </div>
