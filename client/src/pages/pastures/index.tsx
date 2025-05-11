@@ -1370,41 +1370,6 @@ export default function PasturesIndex() {
                 />
               </div>
               
-              {/* Máquina */}
-              <FormField
-                control={workForm.control}
-                name="machineId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Máquina Utilizada</FormLabel>
-                    <Select 
-                      onValueChange={(value) => field.onChange(value === "0" ? null : parseInt(value))} 
-                      value={field.value?.toString() || "0"}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccione una máquina">
-                            {field.value ? `Máquina ID: ${field.value}` : "Seleccione una máquina"}
-                          </SelectValue>
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="0">Ninguna</SelectItem>
-                        {machines && Array.isArray(machines) ? machines.map((machine: any) => (
-                          <SelectItem key={machine.id} value={machine.id.toString()}>
-                            {machine.brand} {machine.model}
-                          </SelectItem>
-                        )) : null}
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>
-                      Maquinaria utilizada para este trabajo
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
               {/* Área trabajada y horas */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
