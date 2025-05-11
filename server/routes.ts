@@ -2,6 +2,7 @@ import { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
+import { getPublicKey, subscribe, unsubscribe, updateNotificationPreferences, sendTestNotification, sendCriticalAlert } from "./notifications";
 import {
   insertUserSchema,
   insertMachineSchema,
@@ -1048,6 +1049,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+  // Rutas para notificaciones push
+  app.get("/api/notifications/vapid-public-key", getPublicKey);
+  app.post("/api/notifications/subscribe", subscribe);
+  app.post("/api/notifications/unsubscribe", unsubscribe);
+  app.post("/api/notifications/preferences", updateNotificationPreferences);
+  app.post("/api/notifications/test", sendTestNotification);
+  app.post("/api/notifications/alert", sendCriticalAlert);
 
   const httpServer = createServer(app);
   return httpServer;
