@@ -179,7 +179,7 @@ export default function MachinesIndex() {
   };
 
   // Filter machines
-  const filteredMachines = machines ? machines.filter((machine: any) => {
+  const filteredMachines = Array.isArray(machines) ? machines.filter((machine: any) => {
     const matchesSearch = 
       machine.brand.toLowerCase().includes(search.toLowerCase()) ||
       machine.model.toLowerCase().includes(search.toLowerCase());

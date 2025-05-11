@@ -1019,6 +1019,17 @@ export default function PasturesIndex() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            asChild
+                            className="h-8 w-8"
+                            title="Registrar movimiento financiero"
+                          >
+                            <Link href={`/finances?openForm=true&type=expense&category=pasturas&description=Gasto - Parcela ${pasture.name}`}>
+                              <i className="ri-money-dollar-circle-line text-green-500"></i>
+                            </Link>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             className="h-8 w-8"
                             title="Eliminar"
                             onClick={() => handleDelete(pasture.id)}
