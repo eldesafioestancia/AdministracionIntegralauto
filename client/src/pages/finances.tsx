@@ -86,6 +86,7 @@ export default function FinancesPage() {
         subcategory: params.get('subcategory'),
         description: params.get('description'),
         machineId: params.get('machineId'),
+        machineType: params.get('machineType'),
       };
     }
     return {
@@ -95,6 +96,7 @@ export default function FinancesPage() {
       subcategory: null,
       description: null,
       machineId: null,
+      machineType: null,
     };
   };
 
@@ -397,11 +399,31 @@ export default function FinancesPage() {
       // Establecer categoría si existe
       if (params.category) {
         form.setValue("category", params.category);
-      }
-      
-      // Establecer subcategoría si existe y la categoría está establecida
-      if (params.subcategory && params.category) {
-        form.setValue("subcategory", params.subcategory);
+        
+        // Si la categoría es maquinarias, manejar los campos especiales
+        if (params.category === "maquinarias") {
+          // Autocompletar el tipo de máquina si viene en los parámetros
+          if (params.machineType) {
+            form.setValue("machineType", params.machineType);
+            setSelectedMachineType(params.machineType);
+            
+            // Filtrar las máquinas por el tipo seleccionado
+            if (machines && Array.isArray(machines) && machines.length > 0) {
+              const filtered = machines.filter((machine: any) => machine.type === params.machineType);
+              setFilteredMachines(filtered);
+              
+              // Si también viene un ID de máquina, establecerlo
+              if (params.machineId) {
+                form.setValue("machineId", params.machineId);
+              }
+            }
+          }
+        } else {
+          // Para otras categorías, establecer subcategoría si existe
+          if (params.subcategory) {
+            form.setValue("subcategory", params.subcategory);
+          }
+        }
       }
       
       // Establecer descripción si existe
@@ -409,8 +431,8 @@ export default function FinancesPage() {
         form.setValue("description", params.description);
       }
       
-      // Establecer categoría para gastos operativos si es específico de maquinaria
-      if (params.machineId && params.type === "expense") {
+      // Establecer pestaña activa según el tipo de operación
+      if (params.type === "expense") {
         setActiveTab("expenses");
       } else if (params.type === "income") {
         setActiveTab("income");
@@ -419,7 +441,7 @@ export default function FinancesPage() {
       // Abrir el formulario
       setIsAddSheetOpen(true);
     }
-  }, [location]); // Se ejecuta cuando cambia la URL
+  }, [location, machines]); // Se ejecuta cuando cambia la URL o se cargan las máquinas
 
   // Funciones para formatear moneda y fechas
   const formatCurrency = (amount: number | string) => {
@@ -564,7 +586,7 @@ export default function FinancesPage() {
                     )}
                   />
 
-                  {form.watch("category") && (
+                  {form.watch("category") && form.watch("category") !== "maquinarias" && (
                     <FormField
                       control={form.control}
                       name="subcategory"
