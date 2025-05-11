@@ -101,16 +101,33 @@ export default function MachinesIndex() {
 
   // Función para editar una máquina
   function handleEdit(id: number) {
+    if (!machines || !Array.isArray(machines)) {
+      toast({
+        title: "Error",
+        description: "No se pudieron cargar las máquinas",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     // Buscar la máquina por ID
-    const machine = machines?.find(m => m.id === id);
-    if (!machine) return;
+    const machine = machines.find((m) => m.id === id);
+    if (!machine) {
+      toast({
+        title: "Error",
+        description: "No se encontró la máquina",
+        variant: "destructive",
+      });
+      return;
+    }
     
     // Establecer los valores en el formulario
     form.reset({
       ...machine,
       // Convertir fechas si existen
-      purchaseDate: machine.purchaseDate ? new Date(machine.purchaseDate) : undefined,
-      warrantyEnd: machine.warrantyEnd ? new Date(machine.warrantyEnd) : undefined
+      purchaseDate: machine.purchaseDate ? new Date(machine.purchaseDate) : new Date(),
+      warrantyEnd: machine.warrantyEnd ? new Date(machine.warrantyEnd) : undefined,
+      warrantyStart: machine.warrantyStart ? new Date(machine.warrantyStart) : undefined,
     });
     
     // Abrir el sheet para editar
@@ -696,7 +713,7 @@ export default function MachinesIndex() {
                   
                   <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Registrar mantenimiento">
                     <Link href={`/machines/${machine.id}/maintenance`}>
-                      <i className="ri-tools-line text-lg"></i>
+                      <i className="ri-settings-line text-orange-500 text-lg"></i>
                     </Link>
                   </Button>
                   

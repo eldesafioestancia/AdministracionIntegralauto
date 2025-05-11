@@ -479,6 +479,39 @@ export default function PasturesIndex() {
     }
   }
 
+  // Función para editar una parcela
+  function handleEditPasture(id: number) {
+    if (!pastures || !Array.isArray(pastures)) {
+      toast({
+        title: "Error",
+        description: "No se pudieron cargar las parcelas",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Buscar la parcela por ID
+    const pasture = pastures.find((p) => p.id === id);
+    if (!pasture) {
+      toast({
+        title: "Error",
+        description: "No se encontró la parcela",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Establecer los valores en el formulario
+    form.reset({
+      ...pasture,
+      // Convertir fechas si existen
+      acquisitionDate: pasture.acquisitionDate ? new Date(pasture.acquisitionDate) : undefined,
+    });
+    
+    // Abrir el sheet para editar
+    setSheetOpen(true);
+  }
+
   async function handleDelete(id: number) {
     if (!confirm("¿Está seguro de eliminar esta parcela?")) return;
     
@@ -1117,6 +1150,7 @@ export default function PasturesIndex() {
                             size="icon"
                             className="h-8 w-8"
                             title="Editar"
+                            onClick={() => handleEditPasture(pasture.id)}
                           >
                             <i className="ri-pencil-line text-amber-500"></i>
                           </Button>
