@@ -1007,7 +1007,7 @@ export default function AnimalsIndex() {
                     className="h-9 w-9" 
                     title="Finanzas"
                   >
-                    <Link href={`/animals/${animal.id}/finances`}>
+                    <Link href={`/finances?openForm=true&type=expense&category=animales&description=Gasto - Animal #${animal.cartagena}`}>
                       <i className="ri-money-dollar-circle-line text-lg"></i>
                     </Link>
                   </Button>
