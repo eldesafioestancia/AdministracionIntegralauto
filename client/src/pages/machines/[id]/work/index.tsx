@@ -464,7 +464,7 @@ export default function MachineWorkIndex() {
                   <TableHead>Tipo</TableHead>
                   <TableHead>Fecha</TableHead>
                   <TableHead>Parcela</TableHead>
-                  <TableHead>Área</TableHead>
+                  <TableHead>{machine.type === 'tractor' || machine.type === 'topadora' ? 'Área' : 'Distancia'}</TableHead>
                   <TableHead>Costo</TableHead>
                   <TableHead>Acciones</TableHead>
                 </TableRow>
@@ -669,25 +669,51 @@ export default function MachineWorkIndex() {
               </div>
               
               <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={workForm.control}
-                  name="areaWorked"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Superficie trabajada (Ha)</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          placeholder="0" 
-                          step="0.01" 
-                          {...field}
-                          value={field.value || ""}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* Mostrar el campo de área trabajada solo para tractores y topadoras */}
+                {(machine.type === 'tractor' || machine.type === 'topadora') && (
+                  <FormField
+                    control={workForm.control}
+                    name="areaWorked"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Superficie trabajada (Ha)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            placeholder="0" 
+                            step="0.01" 
+                            {...field}
+                            value={field.value || ""}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+                
+                {/* Mostrar el campo de distancia solo para camiones y vehículos */}
+                {(machine.type === 'camion' || machine.type === 'vehiculo') && (
+                  <FormField
+                    control={workForm.control}
+                    name="distance"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Distancia recorrida (Km)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            placeholder="0" 
+                            step="0.1" 
+                            {...field}
+                            value={field.value || ""}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
                 
                 <FormField
                   control={workForm.control}
@@ -1157,9 +1183,18 @@ export default function MachineWorkIndex() {
                 <div className="space-y-2">
                   <h3 className="font-semibold text-sm text-muted-foreground">Métricas y Costos</h3>
                   <div className="bg-muted rounded-lg p-4 space-y-2">
-                    <div>
-                      <span className="font-semibold">Área trabajada:</span> {selectedWork.areaWorked ? `${selectedWork.areaWorked} Ha` : 'No especificada'}
-                    </div>
+                    {/* Área trabajada solo para tractores y topadoras */}
+                    {(machine.type === 'tractor' || machine.type === 'topadora') && (
+                      <div>
+                        <span className="font-semibold">Área trabajada:</span> {selectedWork.areaWorked ? `${selectedWork.areaWorked} Ha` : 'No especificada'}
+                      </div>
+                    )}
+                    {/* Distancia recorrida solo para camiones y vehículos */}
+                    {(machine.type === 'camion' || machine.type === 'vehiculo') && (
+                      <div>
+                        <span className="font-semibold">Distancia recorrida:</span> {selectedWork.distance ? `${selectedWork.distance} Km` : 'No especificada'}
+                      </div>
+                    )}
                     <div>
                       <span className="font-semibold">Tiempo:</span> {selectedWork.workTime ? `${selectedWork.workTime} Hs` : 'No especificado'}
                     </div>
