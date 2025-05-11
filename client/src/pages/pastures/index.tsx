@@ -119,6 +119,7 @@ const pastureWorkFormSchema = z.object({
   endDate: z.date().optional().nullable(),
   machineId: z.number().optional().nullable(),
   areaWorked: z.string().optional().nullable(),
+  distance: z.string().optional().nullable(),
   workingHours: z.string().optional().nullable(),
   fuelUsed: z.string().optional().nullable(),
   operativeCost: z.string().optional().nullable(),
@@ -206,9 +207,11 @@ const bulldozerWorkTypes = [
 
 // Tipos de trabajo para otros tipos de máquinas
 const truckWorkTypes = [
-  { value: "transporte", label: "Transporte" },
-  { value: "carga", label: "Carga de insumos" },
-  { value: "distribucion", label: "Distribución" }
+  { value: "traslado_animales", label: "Traslado de animales" },
+  { value: "traslado_rollos", label: "Traslado de rollos" },
+  { value: "traslado_cargas", label: "Traslado de cargas" },
+  { value: "traslado_aridos", label: "Traslado de áridos" },
+  { value: "traslado_fardos", label: "Traslado de fardos" }
 ];
 
 const vehicleWorkTypes = [
@@ -236,6 +239,7 @@ export default function PasturesIndex() {
   const [selectedMachineType, setSelectedMachineType] = useState<string | null>(null);
   const [filteredMachines, setFilteredMachines] = useState<any[]>([]);
   const [availableWorkTypes, setAvailableWorkTypes] = useState(defaultWorkTypes);
+  const [showDistanceField, setShowDistanceField] = useState(false);
   const { toast } = useToast();
 
   // Consultar las pasturas
@@ -394,6 +398,10 @@ export default function PasturesIndex() {
     // Resetear el tipo de trabajo seleccionado
     workForm.setValue("workType", "");
     
+    // Resetear campos específicos
+    workForm.setValue("areaWorked", "");
+    workForm.setValue("distance", "");
+    
     // Filtrar máquinas por el tipo seleccionado
     if (machines && Array.isArray(machines) && machines.length > 0) {
       const filtered = machines.filter((machine: {type: string}) => machine.type === type);
@@ -404,19 +412,24 @@ export default function PasturesIndex() {
     switch (type) {
       case "topadora":
         setAvailableWorkTypes(bulldozerWorkTypes);
+        setShowDistanceField(false);
         break;
       case "camion":
         setAvailableWorkTypes(truckWorkTypes);
+        setShowDistanceField(true);
         break;
       case "vehiculo":
         setAvailableWorkTypes(vehicleWorkTypes);
+        setShowDistanceField(true);
         break;
       case "accesorio":
         setAvailableWorkTypes(accessoryWorkTypes);
+        setShowDistanceField(false);
         break;
       case "tractor":
       default:
         setAvailableWorkTypes(defaultWorkTypes);
+        setShowDistanceField(false);
     }
   };
 
@@ -499,6 +512,9 @@ export default function PasturesIndex() {
     // Resetear también el tipo de trabajo y asegurar que se muestren los tipos por defecto
     setAvailableWorkTypes(defaultWorkTypes);
     workForm.setValue("workType", "");
+    
+    // Resetear la visibilidad de campos específicos
+    setShowDistanceField(false);
     
     setWorkSheetOpen(true);
   }
@@ -1372,25 +1388,47 @@ export default function PasturesIndex() {
               
               {/* Área trabajada y horas */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <FormField
-                  control={workForm.control}
-                  name="areaWorked"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Superficie Trabajada (Ha)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="125.5"
-                          step="0.01"
-                          {...field}
-                          value={field.value || ""}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {!showDistanceField ? (
+                  <FormField
+                    control={workForm.control}
+                    name="areaWorked"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Superficie Trabajada (Ha)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="125.5"
+                            step="0.01"
+                            {...field}
+                            value={field.value || ""}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ) : (
+                  <FormField
+                    control={workForm.control}
+                    name="distance"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Distancia Recorrida (Km)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="75.5"
+                            step="0.1"
+                            {...field}
+                            value={field.value || ""}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
                 
                 <FormField
                   control={workForm.control}
