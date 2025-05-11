@@ -196,8 +196,20 @@ export default function MachineDetail() {
                   params.append('machineId', id);
                   params.append('description', `${machine.brand} ${machine.model}`);
                   
+                  // Log para depuración
+                  const url = `/finances?${params.toString()}`;
+                  console.log("[DEBUG] Navegando a finanzas con URL:", url);
+                  console.log("[DEBUG] Parámetros enviados:", {
+                    openForm: 'true',
+                    type: 'expense',
+                    category: 'maquinarias',
+                    machineType: machine.type,
+                    machineId: id,
+                    description: `${machine.brand} ${machine.model}`
+                  });
+                  
                   // Navegar a la página de finanzas con los parámetros
-                  navigate(`/finances?${params.toString()}`);
+                  navigate(url);
                 }}
               >
                 <i className="ri-money-dollar-circle-line mr-1"></i>
@@ -522,8 +534,20 @@ export default function MachineDetail() {
                   params.append('machineId', id);
                   params.append('description', `${machine.brand} ${machine.model}`);
                   
+                  // Log para depuración
+                  const url = `/finances?${params.toString()}`;
+                  console.log("[DEBUG] Botón Ver más - Navegando a finanzas con URL:", url);
+                  console.log("[DEBUG] Botón Ver más - Parámetros enviados:", {
+                    openForm: 'true',
+                    type: 'expense',
+                    category: 'maquinarias',
+                    machineType: machine.type,
+                    machineId: id,
+                    description: `${machine.brand} ${machine.model}`
+                  });
+                  
                   // Navegar a la página de finanzas con los parámetros
-                  navigate(`/finances?${params.toString()}`);
+                  navigate(url);
                 }}
               >
                 <i className="ri-external-link-line mr-1"></i> Ver más
