@@ -418,13 +418,13 @@ export default function PasturesIndex() {
         setAvailableWorkTypes(truckWorkTypes);
         setShowDistanceField(true);
         // Para camiones no se selecciona parcela
-        workForm.setValue("pastureId", null);
+        workForm.setValue("pastureId", 0); // Usar 0 como valor predeterminado en lugar de null
         break;
       case "vehiculo":
         setAvailableWorkTypes(vehicleWorkTypes);
         setShowDistanceField(true);
         // Para vehículos no se selecciona parcela
-        workForm.setValue("pastureId", null);
+        workForm.setValue("pastureId", 0); // Usar 0 como valor predeterminado en lugar de null
         break;
       case "accesorio":
         setAvailableWorkTypes(accessoryWorkTypes);
