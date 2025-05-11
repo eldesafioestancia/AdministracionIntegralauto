@@ -204,14 +204,15 @@ export default function PasturesIndex() {
   
   // Consultar las máquinas para el formulario de trabajos
   const { data: machines } = useQuery({
-    queryKey: ["/api/machines"],
-    onSuccess: (data) => {
-      // Inicializar las máquinas filtradas con todas las máquinas
-      if (data && Array.isArray(data)) {
-        setFilteredMachines(data);
-      }
-    }
+    queryKey: ["/api/machines"]
   });
+  
+  // Efecto para inicializar las máquinas filtradas
+  useEffect(() => {
+    if (machines && Array.isArray(machines)) {
+      setFilteredMachines(machines);
+    }
+  }, [machines]);
   
   // Consultar los trabajos agrícolas de parcelas
   const { data: pastureWorks } = useQuery({
@@ -440,6 +441,12 @@ export default function PasturesIndex() {
   function handleOpenWorkSheet(pastureId: number) {
     setSelectedPastureId(pastureId);
     workForm.setValue("pastureId", pastureId);
+    
+    // Resetear los campos de maquinaria
+    setSelectedMachineType(null);
+    setFilteredMachines(machines && Array.isArray(machines) ? machines : []);
+    workForm.setValue("machineId", null);
+    
     setWorkSheetOpen(true);
   }
   
@@ -1161,18 +1168,18 @@ export default function PasturesIndex() {
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="0">Ninguna</SelectItem>
-                        {selectedMachineType && filteredMachines && filteredMachines.length > 0 
+                        {filteredMachines && filteredMachines.length > 0 
                           ? filteredMachines.map((machine: any) => (
                             <SelectItem key={machine.id} value={machine.id.toString()}>
                               {machine.brand} {machine.model}
                             </SelectItem>
                           )) 
-                          : null
+                          : <SelectItem value="0" disabled>No hay máquinas disponibles</SelectItem>
                         }
                       </SelectContent>
                     </Select>
                     <FormDescription>
-                      Maquinaria específica a utilizar
+                      Maquinaria específica a utilizar para el trabajo
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
