@@ -365,6 +365,25 @@ export default function MachineWorkIndex() {
             </Link>
           </Button>
           <Button onClick={() => {
+            // Actualizar tipos de trabajo disponibles según tipo de máquina
+            setSelectedMachineType(machine.type);
+            
+            // Establecer tipos de trabajo según el tipo de máquina
+            switch (machine.type) {
+              case "topadora":
+                setAvailableWorkTypes(bulldozerWorkTypes);
+                break;
+              case "camion":
+                setAvailableWorkTypes(truckWorkTypes);
+                break;
+              case "vehiculo":
+                setAvailableWorkTypes(vehicleWorkTypes);
+                break;
+              case "tractor":
+              default:
+                setAvailableWorkTypes(defaultWorkTypes);
+            }
+            
             workForm.reset({
               machineId: machineId,
               pastureId: null,
@@ -590,6 +609,29 @@ export default function MachineWorkIndex() {
           
           <Form {...workForm}>
             <form onSubmit={workForm.handleSubmit(handleWorkSubmit)} className="space-y-4 py-4">
+              {/* Tipo de maquinaria - solo UI no es campo de formulario */}
+              <div className="space-y-2">
+                <Label>Tipo de Maquinaria</Label>
+                <Select 
+                  onValueChange={(value) => handleMachineTypeChange(value)}
+                  value={selectedMachineType || machine.type || ""}
+                  disabled
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccione el tipo de maquinaria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="tractor">Tractor</SelectItem>
+                    <SelectItem value="topadora">Topadora</SelectItem>
+                    <SelectItem value="camion">Camión</SelectItem>
+                    <SelectItem value="vehiculo">Vehículo</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-sm text-muted-foreground">
+                  Tipo de maquinaria predefinido según la unidad seleccionada
+                </p>
+              </div>
+              
               <FormField
                 control={workForm.control}
                 name="machineId"
@@ -648,17 +690,11 @@ export default function MachineWorkIndex() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="Siembra">Siembra</SelectItem>
-                        <SelectItem value="Cosecha">Cosecha</SelectItem>
-                        <SelectItem value="Fumigación">Fumigación</SelectItem>
-                        <SelectItem value="Fertilización">Fertilización</SelectItem>
-                        <SelectItem value="Rastra">Rastra</SelectItem>
-                        <SelectItem value="Disco">Disco</SelectItem>
-                        <SelectItem value="Enrollado">Enrollado</SelectItem>
-                        <SelectItem value="Nivelación">Nivelación</SelectItem>
-                        <SelectItem value="Limpieza">Limpieza</SelectItem>
-                        <SelectItem value="Transporte">Transporte</SelectItem>
-                        <SelectItem value="Otro">Otro</SelectItem>
+                        {availableWorkTypes.map((workType) => (
+                          <SelectItem key={workType} value={workType}>
+                            {workType}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
