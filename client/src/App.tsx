@@ -28,6 +28,7 @@ import Warehouse from "@/pages/warehouse/index";
 import Weather from "@/pages/weather";
 import Reports from "@/pages/reports/index";
 import Settings from "@/pages/settings/index";
+import NotificationsSettings from "@/pages/settings/notifications";
 import AppLayout from "@/components/layouts/AppLayout";
 
 function App() {
@@ -219,10 +220,16 @@ function App() {
           </AppLayout>
         </Route>
         
-        {/* Ruta para configuración */}
+        {/* Rutas para configuración */}
         <Route path="/settings">
           <AppLayout>
             <Settings />
+          </AppLayout>
+        </Route>
+        
+        <Route path="/settings/notifications">
+          <AppLayout>
+            <NotificationsSettings />
           </AppLayout>
         </Route>
         
