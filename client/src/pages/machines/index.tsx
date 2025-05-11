@@ -68,7 +68,9 @@ export default function MachinesIndex() {
   const [filter, setFilter] = useState("all");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const { toast } = useToast();
   
   const { data: machines, isLoading, error } = useQuery({
@@ -121,6 +123,9 @@ export default function MachinesIndex() {
       return;
     }
     
+    // Guardar el ID de la máquina que estamos editando
+    setEditingId(id);
+    
     // Establecer los valores en el formulario
     form.reset({
       ...machine,
@@ -129,6 +134,13 @@ export default function MachinesIndex() {
       warrantyEnd: machine.warrantyEnd ? new Date(machine.warrantyEnd) : undefined,
       warrantyStart: machine.warrantyStart ? new Date(machine.warrantyStart) : undefined,
     });
+    
+    // Establecer la vista previa de la foto si existe
+    if (machine.photo) {
+      setPhotoPreview(machine.photo);
+    } else {
+      setPhotoPreview("");
+    }
     
     // Abrir el sheet para editar
     setSheetOpen(true);
@@ -144,22 +156,39 @@ export default function MachinesIndex() {
         photoUrl = await uploadFile(photoFile, "machines");
       }
       
-      // Enviar los datos con la URL de la foto
-      await apiRequest("POST", "/api/machines", {
-        ...values,
-        photo: photoUrl
-      });
+      // Determinar si es creación o actualización
+      if (editingId) {
+        // Actualización - PUT request
+        await apiRequest("PUT", `/api/machines/${editingId}`, {
+          ...values,
+          photo: photoUrl
+        });
+        
+        toast({
+          title: "Unidad actualizada",
+          description: "La unidad productiva ha sido actualizada exitosamente",
+        });
+      } else {
+        // Creación - POST request
+        await apiRequest("POST", "/api/machines", {
+          ...values,
+          photo: photoUrl
+        });
+        
+        toast({
+          title: "Unidad creada",
+          description: "La unidad productiva ha sido creada exitosamente",
+        });
+      }
       
       // Invalidate machines query to refresh the list
       queryClient.invalidateQueries({ queryKey: ["/api/machines"] });
       
-      toast({
-        title: "Unidad creada",
-        description: "La unidad productiva ha sido creada exitosamente",
-      });
-      
+      // Limpiar el formulario y estados
       setSheetOpen(false);
       setPhotoFile(null);
+      setPhotoPreview("");
+      setEditingId(null);
       form.reset();
       
     } catch (error) {
