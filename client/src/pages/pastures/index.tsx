@@ -269,6 +269,15 @@ export default function PasturesIndex() {
     { value: "humifero", label: "Humífero" },
   ];
   
+  // Tipos de maquinaria
+  const machineTypes = [
+    { value: "tractor", label: "Tractor" },
+    { value: "topadora", label: "Topadora" },
+    { value: "camion", label: "Camión" },
+    { value: "vehiculo", label: "Vehículo" },
+    { value: "accesorio", label: "Accesorio" }
+  ];
+  
   // Tipos de trabajo
   const workTypes = [
     { value: "siembra", label: "Siembra" },
