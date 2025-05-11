@@ -496,6 +496,8 @@ export default function PasturesIndex() {
           : "No se pudo crear la parcela",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
