@@ -143,6 +143,29 @@ export default function MachineWorkIndex() {
   const machineWorks = pastureWorks && Array.isArray(pastureWorks) 
     ? pastureWorks.filter((work: any) => work.machineId === machineId)
     : [];
+    
+  // Estado para la selección del tipo de máquina
+  const [selectedMachineType, setSelectedMachineType] = useState<string | null>(machine?.type || null);
+
+  // Tipos de trabajo para diferentes tipos de máquinas
+  const defaultWorkTypes = [
+    "Siembra", "Cosecha", "Fumigación", "Fertilización", "Rastra", "Disco", "Enrollado", "Nivelación", "Limpieza", "Otro"
+  ];
+  
+  const bulldozerWorkTypes = [
+    "Topado", "Rolado", "Escardificado", "Movimiento de tierra"
+  ];
+  
+  const truckWorkTypes = [
+    "Traslado de animales", "Traslado de rollos", "Traslado de cargas", "Traslado de áridos", "Traslado de fardos"
+  ];
+  
+  const vehicleWorkTypes = [
+    "Supervisión", "Logística", "Transporte de personal"
+  ];
+  
+  // Estado para los tipos de trabajo disponibles
+  const [availableWorkTypes, setAvailableWorkTypes] = useState(defaultWorkTypes);
 
   // Inicializar formulario
   const workForm = useForm<MachineWorkFormValues>({
@@ -268,6 +291,30 @@ export default function MachineWorkIndex() {
       });
     }
   }
+
+  // Función para manejar el cambio de tipo de maquinaria
+  const handleMachineTypeChange = (type: string) => {
+    setSelectedMachineType(type);
+    
+    // Actualizamos el tipo de trabajo disponible según el tipo de máquina
+    switch (type) {
+      case "topadora":
+        setAvailableWorkTypes(bulldozerWorkTypes);
+        break;
+      case "camion":
+        setAvailableWorkTypes(truckWorkTypes);
+        break;
+      case "vehiculo":
+        setAvailableWorkTypes(vehicleWorkTypes);
+        break;
+      case "tractor":
+      default:
+        setAvailableWorkTypes(defaultWorkTypes);
+    }
+    
+    // Resetear el tipo de trabajo
+    workForm.setValue("workType", "");
+  };
 
   // Función para abrir detalles de un trabajo
   function handleOpenDetails(work: any) {
