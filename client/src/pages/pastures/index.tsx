@@ -1776,6 +1776,20 @@ export default function PasturesIndex() {
                                 <TableCell>{format(new Date(work.startDate), 'dd/MM/yyyy', { locale: es })}</TableCell>
                                 <TableCell>{machine ? `${machine.brand} ${machine.model}` : 'No asignada'}</TableCell>
                                 <TableCell className="max-w-[200px] truncate">{work.description}</TableCell>
+                                <TableCell>
+                                  {work.photo ? (
+                                    <div className="relative w-10 h-10">
+                                      <img 
+                                        src={`/uploads/${work.photo}`} 
+                                        alt="Foto del trabajo"
+                                        className="rounded-md object-cover w-full h-full cursor-pointer"
+                                        onClick={() => window.open(`/uploads/${work.photo}`, '_blank')}
+                                      />
+                                    </div>
+                                  ) : (
+                                    <span className="text-muted-foreground text-xs">Sin foto</span>
+                                  )}
+                                </TableCell>
                               </TableRow>
                             );
                           })}

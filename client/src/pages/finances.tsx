@@ -377,7 +377,7 @@ export default function FinancesPage() {
     setSelectedMachineType(type);
     
     // Filtrar máquinas por el tipo seleccionado
-    if (machines && machines.length > 0) {
+    if (machines && Array.isArray(machines) && machines.length > 0) {
       const filtered = machines.filter((machine: any) => machine.type === type);
       setFilteredMachines(filtered);
     }
@@ -443,144 +443,322 @@ export default function FinancesPage() {
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold">Gestión de Finanzas</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Finanzas</h1>
         <p className="text-muted-foreground">
-          Administra los ingresos, gastos y realiza un seguimiento de las finanzas de la explotación agropecuaria
+          Gestiona y analiza los registros financieros de tu operación agropecuaria.
         </p>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="flex justify-between items-center mb-4">
-          <TabsList>
-            <TabsTrigger value="overview">Resumen</TabsTrigger>
-            <TabsTrigger value="income">Ingresos</TabsTrigger>
-            <TabsTrigger value="expenses">Gastos</TabsTrigger>
-            <TabsTrigger value="all">Todos los movimientos</TabsTrigger>
-          </TabsList>
-
-          <Sheet open={isAddSheetOpen} onOpenChange={setIsAddSheetOpen}>
-            <SheetTrigger asChild>
-              <Button>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="mr-2"
-                >
-                  <path d="M12 5v14"></path>
-                  <path d="M5 12h14"></path>
-                </svg>
-                Nuevo registro
-              </Button>
-            </SheetTrigger>
-            <SheetContent className="overflow-y-auto">
-              <SheetHeader>
-                <SheetTitle>Nuevo registro financiero</SheetTitle>
-                <SheetDescription>
-                  Ingresa los detalles del nuevo movimiento financiero.
-                </SheetDescription>
-              </SheetHeader>
-
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <Button
-                      type="button"
-                      variant={form.watch("type") === "income" ? "default" : "outline"}
-                      className="w-full"
-                      onClick={() => handleTypeChange("income")}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="mr-2"
-                      >
-                        <path d="m18 15-6-6-6 6"></path>
-                      </svg>
-                      Ingreso
-                    </Button>
-
-                    <Button
-                      type="button"
-                      variant={form.watch("type") === "expense" ? "default" : "outline"}
-                      className="w-full"
-                      onClick={() => handleTypeChange("expense")}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="mr-2"
-                      >
-                        <path d="m6 9 6 6 6-6"></path>
-                      </svg>
-                      Gasto
-                    </Button>
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name="category"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Categoría</FormLabel>
-                        <Select onValueChange={handleCategoryChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecciona una categoría" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {(form.watch("type") === "income" ? incomeCategories : expenseCategories).map(
-                              (category) => (
-                                <SelectItem key={category.value} value={category.value}>
-                                  {category.label}
-                                </SelectItem>
-                              )
-                            )}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
+      <div className="flex flex-col md:flex-row gap-4 items-start">
+        <div className="w-full md:w-3/4 space-y-4">
+          <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid grid-cols-4 md:w-[600px]">
+              <TabsTrigger value="overview">Resumen</TabsTrigger>
+              <TabsTrigger value="income">Ingresos</TabsTrigger>
+              <TabsTrigger value="expenses">Gastos</TabsTrigger>
+              <TabsTrigger value="transactions">Transacciones</TabsTrigger>
+            </TabsList>
+            <TabsContent value="overview">
+              <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium">Balance General</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {formatCurrency(balance)}
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium">Ingresos Totales</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-green-600">
+                      {formatCurrency(totalIncome)}
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium">Gastos Totales</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-red-600">
+                      {formatCurrency(totalExpense)}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              <div className="grid gap-4 grid-cols-1 md:grid-cols-2 mt-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Ingresos por Categoría</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {Object.entries(categorizedIncome).length > 0 ? (
+                      <div className="space-y-2">
+                        {Object.entries(categorizedIncome).map(([category, amount]) => (
+                          <div key={category} className="flex justify-between items-center">
+                            <div className="font-medium">{category}</div>
+                            <div className="text-green-600">{formatCurrency(amount)}</div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center text-muted-foreground">No hay datos de ingresos disponibles</div>
                     )}
-                  />
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Gastos por Categoría</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {Object.entries(categorizedExpenses).length > 0 ? (
+                      <div className="space-y-2">
+                        {Object.entries(categorizedExpenses).map(([category, amount]) => (
+                          <div key={category} className="flex justify-between items-center">
+                            <div className="font-medium">{category}</div>
+                            <div className="text-red-600">{formatCurrency(amount)}</div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center text-muted-foreground">No hay datos de gastos disponibles</div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="income">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Ingresos</CardTitle>
+                  <CardDescription>Todos los ingresos registrados en el sistema</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Fecha</TableHead>
+                          <TableHead>Categoría</TableHead>
+                          <TableHead>Descripción</TableHead>
+                          <TableHead>Método de Pago</TableHead>
+                          <TableHead className="text-right">Monto</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {financeData.filter(item => item.type === "income").map((item) => (
+                          <TableRow key={item.id}>
+                            <TableCell>{formatDate(item.date)}</TableCell>
+                            <TableCell>{item.category}</TableCell>
+                            <TableCell>{item.description}</TableCell>
+                            <TableCell>{item.paymentMethod}</TableCell>
+                            <TableCell className="text-right font-medium text-green-600">
+                              {formatCurrency(item.amount)}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="expenses">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Gastos</CardTitle>
+                  <CardDescription>Todos los gastos registrados en el sistema</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Fecha</TableHead>
+                          <TableHead>Categoría</TableHead>
+                          <TableHead>Descripción</TableHead>
+                          <TableHead>Método de Pago</TableHead>
+                          <TableHead className="text-right">Monto</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {financeData.filter(item => item.type === "expense").map((item) => (
+                          <TableRow key={item.id}>
+                            <TableCell>{formatDate(item.date)}</TableCell>
+                            <TableCell>{item.category}</TableCell>
+                            <TableCell>{item.description}</TableCell>
+                            <TableCell>{item.paymentMethod}</TableCell>
+                            <TableCell className="text-right font-medium text-red-600">
+                              {formatCurrency(item.amount)}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="transactions">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Todas las Transacciones</CardTitle>
+                  <CardDescription>Registro completo de transacciones financieras</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Fecha</TableHead>
+                          <TableHead>Tipo</TableHead>
+                          <TableHead>Categoría</TableHead>
+                          <TableHead>Descripción</TableHead>
+                          <TableHead>Método de Pago</TableHead>
+                          <TableHead className="text-right">Monto</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {financeData.map((item) => (
+                          <TableRow key={item.id}>
+                            <TableCell>{formatDate(item.date)}</TableCell>
+                            <TableCell>{item.type === "income" ? "Ingreso" : "Gasto"}</TableCell>
+                            <TableCell>{item.category}</TableCell>
+                            <TableCell>{item.description}</TableCell>
+                            <TableCell>{item.paymentMethod}</TableCell>
+                            <TableCell className={`text-right font-medium ${item.type === "income" ? "text-green-600" : "text-red-600"}`}>
+                              {formatCurrency(item.amount)}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
 
-                  {form.watch("category") && (
+        <div className="w-full md:w-1/4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Acciones Rápidas</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Button
+                onClick={() => {
+                  form.reset({
+                    type: "income",
+                    category: "",
+                    subcategory: "",
+                    date: new Date().toISOString().split('T')[0],
+                    description: "",
+                    amount: "",
+                    paymentMethod: "Efectivo",
+                    status: "completed",
+                  });
+                  setIsAddSheetOpen(true);
+                }}
+                className="w-full"
+              >
+                Nuevo Registro
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+      
+      {/* Sheet para agregar nuevo registro financiero */}
+      <Sheet open={isAddSheetOpen} onOpenChange={setIsAddSheetOpen}>
+        <SheetContent className="sm:max-w-md overflow-y-auto">
+          <SheetHeader className="mb-4">
+            <SheetTitle>Agregar Registro Financiero</SheetTitle>
+            <SheetDescription>
+              Ingresa los detalles del movimiento financiero
+            </SheetDescription>
+          </SheetHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              {/* Selector de tipo (ingreso/gasto) */}
+              <div className="grid grid-cols-2 gap-4">
+                <Button
+                  type="button"
+                  className={`${form.watch("type") === "income" ? "bg-green-600 hover:bg-green-700" : "bg-secondary text-primary"}`}
+                  onClick={() => handleTypeChange("income")}
+                >
+                  Ingreso
+                </Button>
+                <Button
+                  type="button"
+                  className={`${form.watch("type") === "expense" ? "bg-red-600 hover:bg-red-700" : "bg-secondary text-primary"}`}
+                  onClick={() => handleTypeChange("expense")}
+                >
+                  Gasto
+                </Button>
+              </div>
+              
+              {/* Campos del formulario */}
+              <div className="space-y-4">
+                {/* Categoría */}
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Categoría</FormLabel>
+                      <Select onValueChange={(value) => handleCategoryChange(value)} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecciona una categoría" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {(form.watch("type") === "income" ? incomeCategories : expenseCategories).map(
+                            (category) => (
+                              <SelectItem key={category.value} value={category.value}>
+                                {category.label}
+                              </SelectItem>
+                            )
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                {/* El campo de subcategoría ha sido completamente eliminado */}
+                
+                {/* Campo para el tipo de maquinaria - solo aparece cuando la categoría es "maquinarias" */}
+                {form.watch("category") === "maquinarias" && (
+                  <>
                     <FormField
                       control={form.control}
-                      name="subcategory"
+                      name="machineType"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Subcategoría</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
+                          <FormLabel>Tipo de Maquinaria</FormLabel>
+                          <Select onValueChange={(value) => handleMachineTypeChange(value)} value={field.value}>
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="Selecciona una subcategoría" />
+                                <SelectValue placeholder="Selecciona el tipo de maquinaria" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {(subcategories[form.watch("category")] || []).map((subcategory) => (
-                                <SelectItem key={subcategory.value} value={subcategory.value}>
-                                  {subcategory.label}
+                              {machineTypes.map((type) => (
+                                <SelectItem key={type.value} value={type.value}>
+                                  {type.label}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -589,27 +767,25 @@ export default function FinancesPage() {
                         </FormItem>
                       )}
                     />
-                  )}
-                  
-                  {/* Campo para el tipo de maquinaria - solo aparece cuando la categoría es "maquinarias" */}
-                  {form.watch("category") === "maquinarias" && (
-                    <>
+                    
+                    {/* Campo para seleccionar la máquina específica - aparece solo cuando se seleccionó un tipo */}
+                    {selectedMachineType && (
                       <FormField
                         control={form.control}
-                        name="machineType"
+                        name="machineId"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Tipo de maquinaria</FormLabel>
-                            <Select onValueChange={handleMachineTypeChange} value={field.value || ""}>
+                            <FormLabel>Máquina</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
                               <FormControl>
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Selecciona un tipo de maquinaria" />
+                                  <SelectValue placeholder="Selecciona la máquina" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                {machineTypes.map((type) => (
-                                  <SelectItem key={type.value} value={type.value}>
-                                    {type.label}
+                                {filteredMachines.map((machine) => (
+                                  <SelectItem key={machine.id} value={machine.id.toString()}>
+                                    {`${machine.brand} ${machine.model} (${machine.year})`}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -618,373 +794,89 @@ export default function FinancesPage() {
                           </FormItem>
                         )}
                       />
-                      
-                      {/* Campo para seleccionar una máquina específica, solo aparece cuando hay un tipo de máquina seleccionado */}
-                      {selectedMachineType && filteredMachines.length > 0 && (
-                        <FormField
-                          control={form.control}
-                          name="machineId"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Máquina</FormLabel>
-                              <Select onValueChange={field.onChange} value={field.value || ""}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Selecciona una máquina" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {filteredMachines.map((machine) => (
-                                    <SelectItem key={machine.id} value={machine.id.toString()}>
-                                      {machine.brand} {machine.model}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      )}
-                    </>
+                    )}
+                  </>
+                )}
+                
+                {/* Fecha */}
+                <FormField
+                  control={form.control}
+                  name="date"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Fecha</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
-
-                  <FormField
-                    control={form.control}
-                    name="date"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel>Fecha</FormLabel>
+                />
+                
+                {/* Descripción */}
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Descripción</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Describe el movimiento" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                {/* Monto */}
+                <FormField
+                  control={form.control}
+                  name="amount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Monto (ARS)</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="0" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                {/* Método de pago */}
+                <FormField
+                  control={form.control}
+                  name="paymentMethod"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Método de pago</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
-                          <Input 
-                            type="date" 
-                            {...field}
-                          />
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecciona el método de pago" />
+                          </SelectTrigger>
                         </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Descripción</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ingresa una descripción" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="amount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Monto</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="text"
-                            placeholder="Ingresa el monto"
-                            {...field}
-                            onChange={(e) => {
-                              // Solo permitir números
-                              const value = e.target.value.replace(/[^0-9]/g, "");
-                              field.onChange(value);
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="paymentMethod"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Método de pago</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecciona un método de pago" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {paymentMethods.map((method) => (
-                              <SelectItem key={method.value} value={method.value}>
-                                {method.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <Button type="submit" className="w-full">Guardar registro</Button>
-                </form>
-              </Form>
-            </SheetContent>
-          </Sheet>
-        </div>
-
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-3">
-            <Card className={`${balance >= 0 ? 'border-green-100' : 'border-red-100'}`}>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Balance</CardTitle>
-                <CardDescription>Diferencia entre ingresos y egresos</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className={`text-2xl font-bold ${balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {formatCurrency(balance)}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-green-100">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Ingresos</CardTitle>
-                <CardDescription>Total de ingresos registrados</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-green-600">
-                  {formatCurrency(totalIncome)}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-red-100">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Gastos</CardTitle>
-                <CardDescription>Total de gastos registrados</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-red-600">
-                  {formatCurrency(totalExpense)}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Ingresos por categoría</CardTitle>
-                <CardDescription>Distribución de ingresos según categoría</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {Object.entries(categorizedIncome).map(([category, amount]) => (
-                    <div key={category} className="flex justify-between items-center">
-                      <div className="flex items-center">
-                        <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
-                        <span>{category}</span>
-                      </div>
-                      <span className="font-medium">{formatCurrency(amount)}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Gastos por categoría</CardTitle>
-                <CardDescription>Distribución de gastos según categoría</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {Object.entries(categorizedExpenses).map(([category, amount]) => (
-                    <div key={category} className="flex justify-between items-center">
-                      <div className="flex items-center">
-                        <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
-                        <span>{category}</span>
-                      </div>
-                      <span className="font-medium">{formatCurrency(amount)}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Últimos movimientos</CardTitle>
-              <CardDescription>Movimientos financieros recientes</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Fecha</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Categoría</TableHead>
-                    <TableHead>Descripción</TableHead>
-                    <TableHead className="text-right">Monto</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {financeData.slice(0, 5).map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>{formatDate(item.date)}</TableCell>
-                      <TableCell>
-                        <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${
-                          item.type === 'income' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {item.type === 'income' ? 'Ingreso' : 'Gasto'}
-                        </span>
-                      </TableCell>
-                      <TableCell>{item.category}</TableCell>
-                      <TableCell>{item.description}</TableCell>
-                      <TableCell className={`text-right font-medium ${
-                        item.type === 'income' ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {formatCurrency(item.amount)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="income" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Ingresos</CardTitle>
-              <CardDescription>Listado de ingresos registrados</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Fecha</TableHead>
-                    <TableHead>Categoría</TableHead>
-                    <TableHead>Subcategoría</TableHead>
-                    <TableHead>Descripción</TableHead>
-                    <TableHead>Método de pago</TableHead>
-                    <TableHead className="text-right">Monto</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {financeData
-                    .filter(item => item.type === 'income')
-                    .map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>{formatDate(item.date)}</TableCell>
-                      <TableCell>{item.category}</TableCell>
-                      <TableCell>{item.subcategory}</TableCell>
-                      <TableCell>{item.description}</TableCell>
-                      <TableCell>{item.paymentMethod}</TableCell>
-                      <TableCell className="text-right font-medium text-green-600">
-                        {formatCurrency(item.amount)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="expenses" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Gastos</CardTitle>
-              <CardDescription>Listado de gastos registrados</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Fecha</TableHead>
-                    <TableHead>Categoría</TableHead>
-                    <TableHead>Subcategoría</TableHead>
-                    <TableHead>Descripción</TableHead>
-                    <TableHead>Método de pago</TableHead>
-                    <TableHead className="text-right">Monto</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {financeData
-                    .filter(item => item.type === 'expense')
-                    .map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>{formatDate(item.date)}</TableCell>
-                      <TableCell>{item.category}</TableCell>
-                      <TableCell>{item.subcategory}</TableCell>
-                      <TableCell>{item.description}</TableCell>
-                      <TableCell>{item.paymentMethod}</TableCell>
-                      <TableCell className="text-right font-medium text-red-600">
-                        {formatCurrency(item.amount)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="all" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Todos los movimientos</CardTitle>
-              <CardDescription>Listado completo de ingresos y gastos</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Fecha</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Categoría</TableHead>
-                    <TableHead>Descripción</TableHead>
-                    <TableHead>Método de pago</TableHead>
-                    <TableHead className="text-right">Monto</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {financeData.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>{formatDate(item.date)}</TableCell>
-                      <TableCell>
-                        <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${
-                          item.type === 'income' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {item.type === 'income' ? 'Ingreso' : 'Gasto'}
-                        </span>
-                      </TableCell>
-                      <TableCell>{item.category}</TableCell>
-                      <TableCell>{item.description}</TableCell>
-                      <TableCell>{item.paymentMethod}</TableCell>
-                      <TableCell className={`text-right font-medium ${
-                        item.type === 'income' ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {formatCurrency(item.amount)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+                        <SelectContent>
+                          {paymentMethods.map((method) => (
+                            <SelectItem key={method.value} value={method.value}>
+                              {method.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <Button type="submit" className="w-full">
+                Guardar Registro
+              </Button>
+            </form>
+          </Form>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
