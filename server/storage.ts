@@ -123,6 +123,14 @@ export interface IStorage {
   }>;
   getUpcomingMaintenances(): Promise<Maintenance[]>;
   getRecentTransactions(): Promise<(MachineFinance | AnimalFinance | PastureFinance)[]>;
+  
+  // Notificaciones Push
+  addPushSubscription(userId: string, subscription: any): Promise<boolean>;
+  removePushSubscription(userId: string, endpoint: string): Promise<boolean>;
+  getUserPushSubscriptions(userId: string): Promise<any[]>;
+  getAllPushSubscriptions(): Promise<Record<string, any[]>>;
+  updateNotificationPreferences(userId: string, preferences: any): Promise<boolean>;
+  getNotificationPreferences(userId: string): Promise<any>;
 }
 
 export class MemStorage implements IStorage {
