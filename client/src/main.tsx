@@ -23,12 +23,26 @@ if ("serviceWorker" in navigator) {
 }
 */
 
-createRoot(document.getElementById("root")!).render(
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <SyncProvider>
-        <App />
-      </SyncProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+// Elemento raíz para montar la aplicación
+const rootElement = document.getElementById("root");
+
+// Verificación de seguridad
+if (!rootElement) {
+  console.error("No se pudo encontrar el elemento raíz 'root' en el DOM");
+} else {
+  console.log("Elemento root encontrado, intentando renderizar la aplicación");
+  try {
+    createRoot(rootElement).render(
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <SyncProvider>
+            <App />
+          </SyncProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    );
+    console.log("Renderizado completado");
+  } catch (error) {
+    console.error("Error al renderizar la aplicación:", error);
+  }
+}

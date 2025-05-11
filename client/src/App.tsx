@@ -31,6 +31,7 @@ import Reports from "@/pages/reports/index";
 import Settings from "@/pages/settings/index";
 import NotificationsSettings from "@/pages/settings/notifications";
 import AppLayout from "@/components/layouts/AppLayout";
+import Test from "@/pages/test";
 
 function App() {
   return (
@@ -38,6 +39,11 @@ function App() {
       <Toaster />
       <NotificationInitializer />
       <Switch>
+        {/* Ruta de prueba */}
+        <Route path="/test">
+          <Test />
+        </Route>
+      
         {/* Ruta principal va directo al Dashboard */}
         <Route path="/">
           <AppLayout>
