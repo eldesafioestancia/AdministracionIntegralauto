@@ -345,6 +345,20 @@ export default function PasturesIndex() {
       setWorkPhotoPreview("");
     }
   };
+  
+  // Función para manejar el cambio de tipo de maquinaria
+  const handleMachineTypeChange = (type: string) => {
+    setSelectedMachineType(type);
+    
+    // Resetear la máquina seleccionada
+    workForm.setValue("machineId", null);
+    
+    // Filtrar máquinas por el tipo seleccionado
+    if (machines && Array.isArray(machines) && machines.length > 0) {
+      const filtered = machines.filter((machine: any) => machine.type === type);
+      setFilteredMachines(filtered);
+    }
+  };
 
   async function onSubmit(values: PastureFormValues) {
     try {
@@ -1092,6 +1106,78 @@ export default function PasturesIndex() {
           
           <Form {...workForm}>
             <form onSubmit={workForm.handleSubmit(handleWorkSubmit)} className="space-y-4 py-4 overflow-y-auto">
+              {/* Tipo de maquinaria */}
+              <FormField
+                control={workForm.control}
+                name="machineType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tipo de Maquinaria</FormLabel>
+                    <Select 
+                      onValueChange={(value) => handleMachineTypeChange(value)}
+                      value={selectedMachineType || ""}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccione tipo de maquinaria" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {machineTypes.map(type => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Seleccione el tipo de maquinaria a utilizar
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              {/* Máquina específica - filtrada por tipo seleccionado */}
+              <FormField
+                control={workForm.control}
+                name="machineId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Máquina Específica</FormLabel>
+                    <Select 
+                      onValueChange={(value) => field.onChange(value === "0" ? null : parseInt(value))} 
+                      value={field.value?.toString() || "0"}
+                      disabled={!selectedMachineType}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={selectedMachineType 
+                            ? "Seleccione una máquina" 
+                            : "Primero seleccione un tipo de maquinaria"}
+                          />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="0">Ninguna</SelectItem>
+                        {selectedMachineType && filteredMachines && filteredMachines.length > 0 
+                          ? filteredMachines.map((machine: any) => (
+                            <SelectItem key={machine.id} value={machine.id.toString()}>
+                              {machine.brand} {machine.model}
+                            </SelectItem>
+                          )) 
+                          : null
+                        }
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Maquinaria específica a utilizar
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
               {/* Tipo de trabajo */}
               <FormField
                 control={workForm.control}
