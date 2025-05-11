@@ -431,12 +431,24 @@ export default function MachineWorkIndex() {
                   {machineWorks.reduce((acc: number, work: any) => acc + (parseFloat(work.fuelUsed) || 0), 0)} Lt
                 </span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="font-medium text-neutral-500">Área trabajada:</span>
-                <span className="text-neutral-600">
-                  {machineWorks.reduce((acc: number, work: any) => acc + (parseFloat(work.areaWorked) || 0), 0)} Ha
-                </span>
-              </div>
+              {/* Mostrar área trabajada para tractores y topadoras */}
+              {(machine.type === 'tractor' || machine.type === 'topadora') && (
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-neutral-500">Área trabajada:</span>
+                  <span className="text-neutral-600">
+                    {machineWorks.reduce((acc: number, work: any) => acc + (parseFloat(work.areaWorked) || 0), 0)} Ha
+                  </span>
+                </div>
+              )}
+              {/* Mostrar distancia recorrida para camiones y vehículos */}
+              {(machine.type === 'camion' || machine.type === 'vehiculo') && (
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-neutral-500">Distancia total:</span>
+                  <span className="text-neutral-600">
+                    {machineWorks.reduce((acc: number, work: any) => acc + (parseFloat(work.distance) || 0), 0)} Km
+                  </span>
+                </div>
+              )}
               <div className="flex items-center justify-between">
                 <span className="font-medium text-neutral-500">Costo operativo:</span>
                 <span className="text-neutral-600">
@@ -480,7 +492,11 @@ export default function MachineWorkIndex() {
                       <TableCell className="font-medium">{work.workType}</TableCell>
                       <TableCell>{format(new Date(work.startDate), 'dd/MM/yyyy', { locale: es })}</TableCell>
                       <TableCell>{getPastureName(work.pastureId)}</TableCell>
-                      <TableCell>{work.areaWorked ? `${work.areaWorked} Ha` : '-'}</TableCell>
+                      <TableCell>
+                        {machine.type === 'tractor' || machine.type === 'topadora' 
+                          ? (work.areaWorked ? `${work.areaWorked} Ha` : '-')
+                          : (work.distance ? `${work.distance} Km` : '-')}
+                      </TableCell>
                       <TableCell>
                         {work.totalCost ? `$${parseFloat(work.totalCost).toLocaleString()}` : '-'}
                       </TableCell>
