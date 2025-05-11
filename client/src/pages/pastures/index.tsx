@@ -240,6 +240,8 @@ export default function PasturesIndex() {
   const [filteredMachines, setFilteredMachines] = useState<any[]>([]);
   const [availableWorkTypes, setAvailableWorkTypes] = useState(defaultWorkTypes);
   const [showDistanceField, setShowDistanceField] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   // Consultar las pasturas
@@ -439,6 +441,8 @@ export default function PasturesIndex() {
 
   async function onSubmit(values: PastureFormValues) {
     try {
+      setIsSubmitting(true);
+      
       // Upload photo if available
       if (photoFile) {
         try {
@@ -448,32 +452,48 @@ export default function PasturesIndex() {
           console.error("Error uploading photo:", uploadError);
           toast({
             title: "Error en la carga de imagen",
-            description: "No se pudo cargar la foto, pero se continuará con la creación de la parcela",
+            description: "No se pudo cargar la foto, pero se continuará con el proceso",
             variant: "destructive",
           });
         }
       }
       
-      await apiRequest("POST", "/api/pastures", values);
+      // Determinar si es creación o actualización
+      if (editingId) {
+        // Actualización - PUT request
+        await apiRequest("PUT", `/api/pastures/${editingId}`, values);
+        
+        toast({
+          title: "Parcela actualizada",
+          description: "La parcela ha sido actualizada exitosamente",
+        });
+      } else {
+        // Creación - POST request
+        await apiRequest("POST", "/api/pastures", values);
+        
+        toast({
+          title: "Parcela creada",
+          description: "La parcela ha sido creada exitosamente",
+        });
+      }
 
       // Invalidar consulta de pasturas
       queryClient.invalidateQueries({ queryKey: ["/api/pastures"] });
       
-      toast({
-        title: "Parcela creada",
-        description: "La parcela ha sido creada exitosamente",
-      });
-      
+      // Limpiar el formulario y estados
       setSheetOpen(false);
       setPhotoFile(null);
       setPhotoPreview("");
+      setEditingId(null);
       form.reset();
       
     } catch (error) {
-      console.error("Error creating pasture:", error);
+      console.error("Error with pasture operation:", error);
       toast({
         title: "Error",
-        description: "No se pudo crear la parcela",
+        description: editingId 
+          ? "No se pudo actualizar la parcela" 
+          : "No se pudo crear la parcela",
         variant: "destructive",
       });
     }
@@ -501,12 +521,22 @@ export default function PasturesIndex() {
       return;
     }
     
+    // Guardar el ID de la parcela que estamos editando
+    setEditingId(id);
+    
     // Establecer los valores en el formulario
     form.reset({
       ...pasture,
       // Convertir fechas si existen
       acquisitionDate: pasture.acquisitionDate ? new Date(pasture.acquisitionDate) : undefined,
     });
+    
+    // Establecer la vista previa de la foto si existe
+    if (pasture.photo) {
+      setPhotoPreview(pasture.photo);
+    } else {
+      setPhotoPreview("");
+    }
     
     // Abrir el sheet para editar
     setSheetOpen(true);

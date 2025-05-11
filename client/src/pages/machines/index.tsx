@@ -192,10 +192,12 @@ export default function MachinesIndex() {
       form.reset();
       
     } catch (error) {
-      console.error("Error creating machine:", error);
+      console.error("Error with machine operation:", error);
       toast({
         title: "Error",
-        description: "No se pudo crear la unidad productiva",
+        description: editingId 
+          ? "No se pudo actualizar la unidad productiva" 
+          : "No se pudo crear la unidad productiva",
         variant: "destructive",
       });
     } finally {
