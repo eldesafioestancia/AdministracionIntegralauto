@@ -304,9 +304,13 @@ export default function MachineWorkIndex() {
         break;
       case "camion":
         setAvailableWorkTypes(truckWorkTypes);
+        // Para camiones no se selecciona parcela
+        workForm.setValue("pastureId", null);
         break;
       case "vehiculo":
         setAvailableWorkTypes(vehicleWorkTypes);
+        // Para vehículos no se selecciona parcela
+        workForm.setValue("pastureId", null);
         break;
       case "tractor":
       default:
@@ -376,9 +380,13 @@ export default function MachineWorkIndex() {
                 break;
               case "camion":
                 setAvailableWorkTypes(truckWorkTypes);
+                // Para camiones no se selecciona parcela
+                workForm.setValue("pastureId", null);
                 break;
               case "vehiculo":
                 setAvailableWorkTypes(vehicleWorkTypes);
+                // Para vehículos no se selecciona parcela
+                workForm.setValue("pastureId", null);
                 break;
               case "tractor":
               default:
@@ -647,36 +655,39 @@ export default function MachineWorkIndex() {
                 )}
               />
               
-              <FormField
-                control={workForm.control}
-                name="pastureId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Parcela</FormLabel>
-                    <Select 
-                      onValueChange={(value) => field.onChange(value === "0" ? null : parseInt(value))} 
-                      value={field.value?.toString() || "0"}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccione una parcela">
-                            {field.value ? getPastureName(field.value) : "Seleccione una parcela"}
-                          </SelectValue>
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="0">Ninguna</SelectItem>
-                        {pastures && Array.isArray(pastures) ? pastures.map((pasture: any) => (
-                          <SelectItem key={pasture.id} value={pasture.id.toString()}>
-                            {pasture.name}
-                          </SelectItem>
-                        )) : null}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Campo de parcela solo para tractores y topadoras */}
+              {(machine.type === 'tractor' || machine.type === 'topadora') && (
+                <FormField
+                  control={workForm.control}
+                  name="pastureId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Parcela</FormLabel>
+                      <Select 
+                        onValueChange={(value) => field.onChange(value === "0" ? null : parseInt(value))} 
+                        value={field.value?.toString() || "0"}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccione una parcela">
+                              {field.value ? getPastureName(field.value) : "Seleccione una parcela"}
+                            </SelectValue>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="0">Ninguna</SelectItem>
+                          {pastures && Array.isArray(pastures) ? pastures.map((pasture: any) => (
+                            <SelectItem key={pasture.id} value={pasture.id.toString()}>
+                              {pasture.name}
+                            </SelectItem>
+                          )) : null}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
               
               <FormField
                 control={workForm.control}
