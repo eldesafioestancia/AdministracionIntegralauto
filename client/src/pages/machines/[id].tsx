@@ -183,42 +183,13 @@ export default function MachineDetail() {
               <p className="text-neutral-400 mt-1">Año: {machine.year}</p>
             </div>
             <div className="flex space-x-2">
-              <Button 
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  // Construir URL con parámetros para autocompletar el formulario de finanzas
-                  const params = new URLSearchParams();
-                  params.append('openForm', 'true');
-                  params.append('type', 'expense'); // Por defecto es un gasto
-                  params.append('category', 'maquinarias');
-                  params.append('machineType', machine.type);
-                  params.append('machineId', id);
-                  params.append('description', `${machine.brand} ${machine.model}`);
-                  
-                  // Log para depuración
-                  const url = `/finances?${params.toString()}`;
-                  console.log("[DEBUG] Navegando a finanzas con URL:", url);
-                  console.log("[DEBUG] Parámetros enviados:", {
-                    openForm: 'true',
-                    type: 'expense',
-                    category: 'maquinarias',
-                    machineType: machine.type,
-                    machineId: id,
-                    description: `${machine.brand} ${machine.model}`
-                  });
-                  
-                  // Navegar a la página de finanzas con los parámetros
-                  navigate(url);
-                }}
-              >
-                <i className="ri-money-dollar-circle-line mr-1"></i>
-                Finanzas
-              </Button>
               <Button variant="outline" size="sm" asChild>
                 <Link href={`/machines/${id}/maintenance`}>
                   <i className="ri-tools-line mr-1"></i> Mantenimiento
                 </Link>
+              </Button>
+              <Button variant="outline" size="sm">
+                <i className="ri-edit-line mr-1"></i> Editar
               </Button>
             </div>
           </div>
@@ -257,152 +228,20 @@ export default function MachineDetail() {
         </div>
       </div>
 
-      {/* Tabs for different sections */}
-      <Tabs defaultValue="info" className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="info">Información</TabsTrigger>
-          <TabsTrigger value="maintenance">Mantenimiento</TabsTrigger>
-          <TabsTrigger value="finances">Finanzas</TabsTrigger>
+      {/* Tabs for history */}
+      <Tabs defaultValue="maintenance" className="w-full">
+        <TabsList className="grid grid-cols-2 mb-4">
+          <TabsTrigger value="maintenance">Historial de Mantenimiento</TabsTrigger>
+          <TabsTrigger value="finances">Ingresos y Gastos</TabsTrigger>
         </TabsList>
 
-        {/* Info Tab */}
-        <TabsContent value="info" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Datos Técnicos</CardTitle>
-              <CardDescription>Información técnica de la unidad</CardDescription>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium text-neutral-400">Identificación</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <div className="text-sm text-neutral-500 font-medium">Marca</div>
-                      <div className="text-neutral-600">{machine.brand}</div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-neutral-500 font-medium">Modelo</div>
-                      <div className="text-neutral-600">{machine.model}</div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-neutral-500 font-medium">Tipo</div>
-                      <div className="text-neutral-600">{getMachineTypeLabel(machine.type)}</div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-neutral-500 font-medium">Año</div>
-                      <div className="text-neutral-600">{machine.year}</div>
-                    </div>
-                    {machine.serialNumber && (
-                      <div>
-                        <div className="text-sm text-neutral-500 font-medium">Número de serie</div>
-                        <div className="text-neutral-600">{machine.serialNumber}</div>
-                      </div>
-                    )}
-                    {machine.licensePlate && (
-                      <div>
-                        <div className="text-sm text-neutral-500 font-medium">Patente</div>
-                        <div className="text-neutral-600">{machine.licensePlate}</div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium text-neutral-400">Especificaciones</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <div className="text-sm text-neutral-500 font-medium">Horas/Km</div>
-                      <div className="text-neutral-600">{machine.hours}</div>
-                    </div>
-                    {machine.power && (
-                      <div>
-                        <div className="text-sm text-neutral-500 font-medium">Potencia</div>
-                        <div className="text-neutral-600">{machine.power} HP</div>
-                      </div>
-                    )}
-                    {machine.fuelType && (
-                      <div>
-                        <div className="text-sm text-neutral-500 font-medium">Combustible</div>
-                        <div className="text-neutral-600">{machine.fuelType}</div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium text-neutral-400">Adquisición</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <div className="text-sm text-neutral-500 font-medium">Fecha de compra</div>
-                      <div className="text-neutral-600">
-                        {format(new Date(machine.purchaseDate), "dd/MM/yyyy")}
-                      </div>
-                    </div>
-                    {machine.supplier && (
-                      <div>
-                        <div className="text-sm text-neutral-500 font-medium">Proveedor</div>
-                        <div className="text-neutral-600">{machine.supplier}</div>
-                      </div>
-                    )}
-                    {machine.invoiceNumber && (
-                      <div>
-                        <div className="text-sm text-neutral-500 font-medium">Factura</div>
-                        <div className="text-neutral-600">{machine.invoiceNumber}</div>
-                      </div>
-                    )}
-                    {machine.purchasePrice && (
-                      <div>
-                        <div className="text-sm text-neutral-500 font-medium">Precio</div>
-                        <div className="text-neutral-600">${machine.purchasePrice}</div>
-                      </div>
-                    )}
-                    {machine.paymentMethod && (
-                      <div>
-                        <div className="text-sm text-neutral-500 font-medium">Método de pago</div>
-                        <div className="text-neutral-600">{machine.paymentMethod}</div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {(machine.warrantyStart || machine.warrantyEnd) && (
-                  <div className="space-y-2">
-                    <h3 className="text-sm font-medium text-neutral-400">Garantía</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      {machine.warrantyStart && (
-                        <div>
-                          <div className="text-sm text-neutral-500 font-medium">Inicio</div>
-                          <div className="text-neutral-600">
-                            {format(new Date(machine.warrantyStart), "dd/MM/yyyy")}
-                          </div>
-                        </div>
-                      )}
-                      {machine.warrantyEnd && (
-                        <div>
-                          <div className="text-sm text-neutral-500 font-medium">Fin</div>
-                          <div className="text-neutral-600">
-                            {format(new Date(machine.warrantyEnd), "dd/MM/yyyy")}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Maintenance Tab */}
+        {/* Maintenance History Tab */}
         <TabsContent value="maintenance" className="space-y-4">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-header font-semibold text-neutral-500">Historial de Mantenimiento</h2>
-            <Button variant="outline" size="sm" asChild>
+            <Button asChild>
               <Link href={`/machines/${id}/maintenance`}>
-                <i className="ri-add-line mr-1"></i> Nuevo mantenimiento
+                <i className="ri-add-line mr-1"></i> Nuevo registro
               </Link>
             </Button>
           </div>
@@ -417,9 +256,9 @@ export default function MachineDetail() {
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-10">
                 <i className="ri-tools-line text-4xl text-neutral-300 mb-2"></i>
-                <h3 className="text-lg font-medium text-neutral-500 mb-1">Sin mantenimientos registrados</h3>
+                <h3 className="text-lg font-medium text-neutral-500 mb-1">No hay registros de mantenimiento</h3>
                 <p className="text-neutral-400 mb-4">Registre el primer mantenimiento para esta unidad</p>
-                <Button variant="outline" size="sm" asChild>
+                <Button asChild>
                   <Link href={`/machines/${id}/maintenance`}>
                     <i className="ri-add-line mr-1"></i> Nuevo mantenimiento
                   </Link>
@@ -429,38 +268,87 @@ export default function MachineDetail() {
           ) : (
             <div className="space-y-4">
               {maintenances.map((maintenance) => (
-                <Card key={maintenance.id} className="overflow-hidden">
-                  <CardContent className="p-0">
-                    <div className="flex flex-col sm:flex-row">
-                      <div className="bg-neutral-50 p-4 sm:w-48 sm:flex-shrink-0 flex sm:flex-col justify-between items-start sm:items-center">
-                        <div className="text-center sm:mb-4">
-                          <div className="text-xl font-bold text-neutral-600">
-                            {format(new Date(maintenance.date), "dd")}
-                          </div>
-                          <div className="text-sm text-neutral-500">
-                            {format(new Date(maintenance.date), "MMM yyyy")}
-                          </div>
+                <Card key={maintenance.id}>
+                  <CardHeader className="pb-2">
+                    <div className="flex justify-between">
+                      <CardTitle>{getMaintenanceTypeLabel(maintenance.type)}</CardTitle>
+                      <Badge variant="outline">
+                        {format(new Date(maintenance.date), "dd/MM/yyyy")}
+                      </Badge>
+                    </div>
+                    <CardDescription>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          {maintenance.time && `Hora: ${maintenance.time}`}
                         </div>
-                        <Badge className="mt-2">
-                          {getMaintenanceTypeLabel(maintenance.type)}
-                        </Badge>
-                      </div>
-                      
-                      <div className="p-4 flex-grow">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="text-lg font-medium text-neutral-700 mb-1">
-                              {maintenance.title || getMaintenanceTypeLabel(maintenance.type)}
-                            </h3>
-                            <p className="text-sm text-neutral-500">
-                              Horas: {maintenance.hours} | Realizado por: {maintenance.technician || "No especificado"}
-                            </p>
+                        {maintenance.isModified && 
+                          <div className="text-amber-500 flex items-center">
+                            <i className="ri-edit-line mr-1"></i>
+                            <span>Modificado</span>
                           </div>
-                          <Button variant="outline" size="sm" className="ml-2" asChild>
-                            <Link href={`/machines/${id}/maintenance/${maintenance.id}`}>
-                              <i className="ri-edit-line mr-1"></i> Editar
-                            </Link>
-                          </Button>
+                        }
+                      </div>
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {maintenance.type === "maintenance_repair" ? (
+                      <div className="space-y-3">
+                        {maintenance.workshopName && (
+                          <div className="mb-4">
+                            <div className="font-medium text-neutral-600 mb-1">Taller:</div>
+                            <div className="text-sm text-neutral-500">{maintenance.workshopName}</div>
+                            {maintenance.workshopPhone && (
+                              <div className="text-sm text-neutral-500">Tel: {maintenance.workshopPhone}</div>
+                            )}
+                            {maintenance.workshopAddress && (
+                              <div className="text-sm text-neutral-500">{maintenance.workshopAddress}</div>
+                            )}
+                          </div>
+                        )}
+                        
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                          {maintenance.electricalSystem && (
+                            <div className="flex items-center">
+                              <i className="ri-checkbox-circle-line text-success mr-1"></i>
+                              <span className="text-sm">Eléctrico</span>
+                            </div>
+                          )}
+                          {maintenance.mechanicalSystem && (
+                            <div className="flex items-center">
+                              <i className="ri-checkbox-circle-line text-success mr-1"></i>
+                              <span className="text-sm">Mecánico</span>
+                            </div>
+                          )}
+                          {maintenance.frontAxle && (
+                            <div className="flex items-center">
+                              <i className="ri-checkbox-circle-line text-success mr-1"></i>
+                              <span className="text-sm">Tren delantero</span>
+                            </div>
+                          )}
+                          {maintenance.gearbox && (
+                            <div className="flex items-center">
+                              <i className="ri-checkbox-circle-line text-success mr-1"></i>
+                              <span className="text-sm">Caja</span>
+                            </div>
+                          )}
+                          {maintenance.differential && (
+                            <div className="flex items-center">
+                              <i className="ri-checkbox-circle-line text-success mr-1"></i>
+                              <span className="text-sm">Diferencial</span>
+                            </div>
+                          )}
+                          {maintenance.hydraulicSystem && (
+                            <div className="flex items-center">
+                              <i className="ri-checkbox-circle-line text-success mr-1"></i>
+                              <span className="text-sm">Hidráulico</span>
+                            </div>
+                          )}
+                          {maintenance.brakes && (
+                            <div className="flex items-center">
+                              <i className="ri-checkbox-circle-line text-success mr-1"></i>
+                              <span className="text-sm">Frenos</span>
+                            </div>
+                          )}
                         </div>
                         
                         {maintenance.diagnosis && (
@@ -501,14 +389,82 @@ export default function MachineDetail() {
                             )}
                             
                             {maintenance.totalCost && (
-                              <div className="flex items-start gap-2 mt-2 pt-2 border-t">
-                                <div className="text-sm font-medium text-neutral-600 min-w-[80px]">Total:</div>
-                                <div className="font-medium text-neutral-800">$ {maintenance.totalCost}</div>
+                              <div className="flex justify-end mt-2 pt-2 border-t">
+                                <div className="text-sm font-medium">Total: $ {maintenance.totalCost}</div>
                               </div>
                             )}
                           </div>
                         )}
                       </div>
+                    ) : (
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
+                        {maintenance.motorOil && (
+                          <div className="flex items-center">
+                            <i className="ri-checkbox-circle-line text-success mr-1"></i>
+                            <span className="text-sm">Aceite motor: {maintenance.motorOilQuantity}L</span>
+                          </div>
+                        )}
+                        {maintenance.hydraulicOil && (
+                          <div className="flex items-center">
+                            <i className="ri-checkbox-circle-line text-success mr-1"></i>
+                            <span className="text-sm">Aceite hidráulico: {maintenance.hydraulicOilQuantity}L</span>
+                          </div>
+                        )}
+                        {maintenance.coolant && (
+                          <div className="flex items-center">
+                            <i className="ri-checkbox-circle-line text-success mr-1"></i>
+                            <span className="text-sm">Refrigerante: {maintenance.coolantQuantity}L</span>
+                          </div>
+                        )}
+                        {maintenance.oilFilter && (
+                          <div className="flex items-center">
+                            <i className="ri-checkbox-circle-line text-success mr-1"></i>
+                            <span className="text-sm">Filtro de aceite</span>
+                          </div>
+                        )}
+                        {maintenance.hydraulicFilter && (
+                          <div className="flex items-center">
+                            <i className="ri-checkbox-circle-line text-success mr-1"></i>
+                            <span className="text-sm">Filtro hidráulico</span>
+                          </div>
+                        )}
+                        {maintenance.fuelFilter && (
+                          <div className="flex items-center">
+                            <i className="ri-checkbox-circle-line text-success mr-1"></i>
+                            <span className="text-sm">Filtro de combustible</span>
+                          </div>
+                        )}
+                        {maintenance.airFilter && (
+                          <div className="flex items-center">
+                            <i className="ri-checkbox-circle-line text-success mr-1"></i>
+                            <span className="text-sm">Filtro de aire</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    <div className="mt-4 pt-3 border-t border-neutral-100 flex justify-between">
+                      <div className="text-sm text-neutral-400">
+                        <div>
+                          {maintenance.driver && (
+                            <span>Conductor: <span className="text-neutral-500">{maintenance.driver}</span></span>
+                          )}
+                        </div>
+                        <div className="flex flex-col mt-2">
+                          <span>Creado: <span className="text-neutral-500">
+                            {format(new Date(maintenance.createdAt), "dd/MM/yyyy HH:mm")}
+                          </span></span>
+                          {maintenance.isModified && maintenance.modifiedAt && (
+                            <span>Modificado: <span className="text-neutral-500">
+                              {format(new Date(maintenance.modifiedAt), "dd/MM/yyyy HH:mm")}
+                            </span></span>
+                          )}
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm" asChild>
+                        <Link href={`/machines/${id}/maintenance/${maintenance.id}`}>
+                          <i className="ri-edit-line mr-1"></i> Editar
+                        </Link>
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -521,51 +477,20 @@ export default function MachineDetail() {
         <TabsContent value="finances" className="space-y-4">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-header font-semibold text-neutral-500">Ingresos y Gastos</h2>
-            <div className="flex space-x-2">
-              <Button 
-                variant="outline"
-                onClick={() => {
-                  // Construir URL con parámetros para autocompletar el formulario de finanzas
-                  const params = new URLSearchParams();
-                  params.append('openForm', 'true');
-                  params.append('type', 'expense'); // Por defecto es un gasto
-                  params.append('category', 'maquinarias');
-                  params.append('machineType', machine.type);
-                  params.append('machineId', id);
-                  params.append('description', `${machine.brand} ${machine.model}`);
-                  
-                  // Log para depuración
-                  const url = `/finances?${params.toString()}`;
-                  console.log("[DEBUG] Botón Ver más - Navegando a finanzas con URL:", url);
-                  console.log("[DEBUG] Botón Ver más - Parámetros enviados:", {
-                    openForm: 'true',
-                    type: 'expense',
-                    category: 'maquinarias',
-                    machineType: machine.type,
-                    machineId: id,
-                    description: `${machine.brand} ${machine.model}`
-                  });
-                  
-                  // Navegar a la página de finanzas con los parámetros
-                  navigate(url);
-                }}
-              >
-                <i className="ri-external-link-line mr-1"></i> Ver más
-              </Button>
-              <Dialog open={financeDialogOpen} onOpenChange={setFinanceDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <i className="ri-add-line mr-1"></i> Nuevo registro
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
+            <Dialog open={financeDialogOpen} onOpenChange={setFinanceDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <i className="ri-add-line mr-1"></i> Nuevo registro
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Registrar ingreso/gasto</DialogTitle>
                   <DialogDescription>
                     Complete los datos del nuevo registro financiero
                   </DialogDescription>
                 </DialogHeader>
-                
+
                 <Form {...financeForm}>
                   <form onSubmit={financeForm.handleSubmit(onSubmitFinance)} className="space-y-4">
                     <FormField
@@ -655,9 +580,8 @@ export default function MachineDetail() {
                     </DialogFooter>
                   </form>
                 </Form>
-                </DialogContent>
-              </Dialog>
-            </div>
+              </DialogContent>
+            </Dialog>
           </div>
 
           {financesLoading ? (

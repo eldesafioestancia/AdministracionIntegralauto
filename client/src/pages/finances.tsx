@@ -79,21 +79,14 @@ export default function FinancesPage() {
   const parseQueryParams = () => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
-      const result = {
+      return {
         openForm: params.get('openForm') === 'true',
         type: params.get('type') as "income" | "expense" | null,
         category: params.get('category'),
         subcategory: params.get('subcategory'),
         description: params.get('description'),
-        machineType: params.get('machineType'),
         machineId: params.get('machineId'),
       };
-      
-      // Log para depuración
-      console.log("[DEBUG] Parámetros URL recibidos:", result);
-      console.log("[DEBUG] URL completa:", window.location.href);
-      
-      return result;
     }
     return {
       openForm: false,
@@ -101,7 +94,6 @@ export default function FinancesPage() {
       category: null,
       subcategory: null,
       description: null,
-      machineType: null,
       machineId: null,
     };
   };
@@ -394,76 +386,40 @@ export default function FinancesPage() {
   // Efecto para detectar parámetros y autocompletar el formulario
   useEffect(() => {
     const params = parseQueryParams();
-    console.log("[DEBUG] useEffect ejecutándose, location:", location);
-    console.log("[DEBUG] Máquinas disponibles:", machines);
     
     // Si se solicita abrir el formulario desde la URL
     if (params.openForm) {
-      console.log("[DEBUG] openForm es true, configurando formulario");
-      
       // Establecer tipo (ingreso/gasto)
       if (params.type) {
-        console.log("[DEBUG] Estableciendo tipo:", params.type);
         form.setValue("type", params.type);
       }
       
       // Establecer categoría si existe
       if (params.category) {
-        console.log("[DEBUG] Estableciendo categoría:", params.category);
         form.setValue("category", params.category);
-        
-        // Si la categoría es maquinarias y existe el tipo de máquina
-        if (params.category === "maquinarias" && params.machineType) {
-          console.log("[DEBUG] Es maquinaria con tipo:", params.machineType);
-          // Establecer tipo de máquina
-          form.setValue("machineType", params.machineType);
-          setSelectedMachineType(params.machineType);
-          
-          // Filtrar máquinas por tipo
-          if (machines && Array.isArray(machines) && machines.length > 0) {
-            console.log("[DEBUG] Filtrando máquinas por tipo:", params.machineType);
-            const filtered = machines.filter((machine: any) => machine.type === params.machineType);
-            console.log("[DEBUG] Máquinas filtradas:", filtered);
-            setFilteredMachines(filtered);
-            
-            // Si existe un ID de máquina específico, seleccionarlo
-            if (params.machineId) {
-              console.log("[DEBUG] Estableciendo machineId:", params.machineId);
-              form.setValue("machineId", params.machineId);
-            }
-          } else {
-            console.log("[DEBUG] No hay máquinas disponibles aún para filtrar");
-          }
-        }
       }
       
       // Establecer subcategoría si existe y la categoría está establecida
-      if (params.subcategory && params.category && params.category !== "maquinarias") {
+      if (params.subcategory && params.category) {
         form.setValue("subcategory", params.subcategory);
       }
       
       // Establecer descripción si existe
       if (params.description) {
-        console.log("[DEBUG] Estableciendo descripción:", params.description);
         form.setValue("description", params.description);
       }
       
-      // Establecer pestaña activa según el tipo
-      if (params.type === "expense") {
-        console.log("[DEBUG] Estableciendo pestaña de gastos");
+      // Establecer categoría para gastos operativos si es específico de maquinaria
+      if (params.machineId && params.type === "expense") {
         setActiveTab("expenses");
       } else if (params.type === "income") {
-        console.log("[DEBUG] Estableciendo pestaña de ingresos");
         setActiveTab("income");
       }
       
       // Abrir el formulario
-      console.log("[DEBUG] Abriendo formulario");
       setIsAddSheetOpen(true);
-    } else {
-      console.log("[DEBUG] openForm no es true, no se configura el formulario");
     }
-  }, [form, location, machines]); // Se ejecuta cuando cambia la URL o están disponibles las máquinas
+  }, [location]); // Se ejecuta cuando cambia la URL
 
   // Funciones para formatear moneda y fechas
   const formatCurrency = (amount: number | string) => {
