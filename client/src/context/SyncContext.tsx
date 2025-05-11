@@ -10,7 +10,7 @@ interface SyncContextProps {
   syncCollection: (collection: CollectionName) => Promise<void>;
 }
 
-const SyncContext = createContext<SyncContextProps | undefined>(undefined);
+export const SyncContext = createContext<SyncContextProps | undefined>(undefined);
 
 interface SyncProviderProps {
   children: ReactNode;

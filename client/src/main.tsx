@@ -7,8 +7,6 @@ import { AuthProvider } from "./context/AuthContext";
 import { SyncProvider } from "./context/SyncContext";
 
 // Register service worker for PWA
-// Temporarily disabling service worker until we fix class extension issues
-/*
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker
@@ -21,7 +19,6 @@ if ("serviceWorker" in navigator) {
       });
   });
 }
-*/
 
 createRoot(document.getElementById("root")!).render(
   <QueryClientProvider client={queryClient}>

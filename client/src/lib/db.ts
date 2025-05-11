@@ -2,28 +2,17 @@ import PouchDB from 'pouchdb';
 import PouchDBFind from 'pouchdb-find';
 import { doc, getDoc } from './firebase';
 
-// Registrar el plugin de búsqueda de PouchDB
-PouchDB.plugin(PouchDBFind);
-
 // Tipos de base de datos
 export type CollectionName = 'machines' | 'animals' | 'pastures' | 'pastureWorks' | 'maintenance' | 'investments' | 'capital' | 'employees';
 
-// Definir tipo para Database
-declare namespace PouchDB {
-  interface Database {
-    allDocs: (options?: any) => Promise<any>;
-    get: (id: string) => Promise<any>;
-    put: (doc: any) => Promise<any>;
-    remove: (doc: any) => Promise<any>;
-    sync: (remoteDb: Database, options?: any) => Promise<any>;
-    createIndex: (options: any) => Promise<any>;
-    find: (query: any) => Promise<any>;
-  }
+// Registrar el plugin de búsqueda de PouchDB
+if (PouchDB) {
+  PouchDB.plugin(PouchDBFind);
 }
 
 // Clase para manejar la base de datos local y su sincronización
 class DatabaseService {
-  private databases: Map<CollectionName, PouchDB.Database>;
+  private databases: Map<CollectionName, any>;
   private remoteUrls: Map<CollectionName, string>;
   private isOnline: boolean;
   private listeners: Set<(online: boolean) => void>;
@@ -82,8 +71,8 @@ class DatabaseService {
   }
 
   // Obtener la base de datos local para una colección
-  public getDatabase(collection: CollectionName): PouchDB.Database {
-    return this.databases.get(collection) as PouchDB.Database;
+  public getDatabase(collection: CollectionName): any {
+    return this.databases.get(collection);
   }
 
   // Sincronizar una colección específica
@@ -102,7 +91,7 @@ class DatabaseService {
     }
 
     try {
-      const remoteDb = new PouchDB(remoteUrl);
+      const remoteDb = new (PouchDB as any)(remoteUrl);
       await localDb.sync(remoteDb, {
         live: true,
         retry: true

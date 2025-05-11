@@ -1,209 +1,130 @@
-// Service Worker para manejar notificaciones push
+const CACHE_NAME = 'agro-manager-v1';
+const ASSETS_TO_CACHE = [
+  '/',
+  '/index.html',
+  '/offline.html'
+];
 
-const CACHE_NAME = 'agro-app-cache-v1';
-const OFFLINE_URL = '/offline.html';
-const ICON_URL = '/icons/notification-icon.png';
-
-// Eventos del ciclo de vida del service worker
+// Instalar el service worker
 self.addEventListener('install', (event) => {
-  console.log('[Service Worker] Instalando');
+  console.log('[Service Worker] Instalando...');
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('[Service Worker] Creando caché');
-      return cache.addAll([
-        OFFLINE_URL,
-        ICON_URL,
-        '/icons/badge-icon.png'
-      ]);
-    })
+    caches.open(CACHE_NAME)
+      .then((cache) => {
+        console.log('[Service Worker] Almacenando en caché los activos estáticos...');
+        return cache.addAll(ASSETS_TO_CACHE);
+      })
+      .then(() => {
+        console.log('[Service Worker] Instalación completada');
+        return self.skipWaiting();
+      })
   );
 });
 
+// Activar el service worker
 self.addEventListener('activate', (event) => {
-  console.log('[Service Worker] Activando');
-  // Limpiar cachés viejas
+  console.log('[Service Worker] Activando...');
+  
+  // Eliminar cachés antiguas
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
-            console.log('[Service Worker] Eliminando caché vieja', cacheName);
+            console.log('[Service Worker] Eliminando caché antigua:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
-  return self.clients.claim();
 });
 
-// Manejo de las notificaciones push
-self.addEventListener('push', (event) => {
-  console.log('[Service Worker] Push recibido');
+// Estrategia de caché primero, luego red, con fallback a offline
+self.addEventListener('fetch', (event) => {
+  // Solo interceptamos solicitudes GET
+  if (event.request.method !== 'GET') return;
   
-  let notificationData = {};
+  // Ignoramos solicitudes a la API ya que son manejadas por PouchDB
+  if (event.request.url.includes('/api/')) return;
   
-  try {
-    notificationData = event.data.json();
-  } catch (e) {
-    notificationData = {
-      title: 'Nueva notificación',
-      body: event.data ? event.data.text() : 'No hay contenido',
-      tag: 'default'
-    };
+  event.respondWith(
+    caches.match(event.request)
+      .then((cachedResponse) => {
+        // Si el recurso está en caché, lo devolvemos
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+        
+        // Si no está en caché, intentamos obtenerlo de la red
+        return fetch(event.request)
+          .then((response) => {
+            // Si la respuesta no es válida, devolvemos una respuesta de error
+            if (!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+            
+            // Hacemos una copia de la respuesta, ya que es un stream que solo se puede consumir una vez
+            const responseToCache = response.clone();
+            
+            // Guardamos la respuesta en caché para uso futuro
+            caches.open(CACHE_NAME)
+              .then((cache) => {
+                cache.put(event.request, responseToCache);
+              });
+            
+            return response;
+          })
+          .catch(() => {
+            // Si hay un error en la red, verificamos si es una solicitud de página
+            if (event.request.headers.get('accept').includes('text/html')) {
+              // Devolvemos la página offline como fallback
+              return caches.match('/offline.html');
+            }
+          });
+      })
+  );
+});
+
+// Gestionar solicitudes de sincronización en segundo plano
+self.addEventListener('sync', (event) => {
+  console.log('[Service Worker] Evento de sincronización recibido:', event.tag);
+  
+  if (event.tag === 'sync-data') {
+    event.waitUntil(
+      // La sincronización real se maneja en el cliente a través de PouchDB
+      console.log('[Service Worker] Sincronización de datos solicitada')
+    );
   }
+});
+
+// Gestionar notificaciones push
+self.addEventListener('push', (event) => {
+  console.log('[Service Worker] Notificación push recibida:', event);
   
+  const data = event.data.json();
   const options = {
-    body: notificationData.body || 'No hay contenido',
-    icon: notificationData.icon || ICON_URL,
-    badge: notificationData.badge || '/icons/badge-icon.png',
-    data: notificationData.data || {},
-    tag: notificationData.tag || 'default',
+    body: data.body,
+    icon: '/icons/notification-icon.png',
+    badge: '/icons/badge-icon.png',
     vibrate: [100, 50, 100],
-    timestamp: Date.now(),
-    renotify: notificationData.renotify || false,
-    actions: notificationData.actions || []
+    data: {
+      url: data.url || '/'
+    }
   };
   
   event.waitUntil(
-    self.registration.showNotification(notificationData.title || 'Nueva notificación', options)
+    self.registration.showNotification(data.title, options)
   );
 });
 
-// Manejo de clics en notificaciones
+// Gestionar clics en notificaciones
 self.addEventListener('notificationclick', (event) => {
-  console.log('[Service Worker] Clic en notificación', event.notification.tag);
+  console.log('[Service Worker] Clic en notificación:', event);
   
   event.notification.close();
   
-  // Determinar la URL a abrir según el tipo de notificación
-  let urlToOpen = '/';
-  
-  if (event.notification.data && event.notification.data.url) {
-    urlToOpen = event.notification.data.url;
-  } else {
-    // URLs predeterminadas según el tag de la notificación
-    switch(event.notification.tag) {
-      case 'animal':
-        urlToOpen = '/animals';
-        break;
-      case 'machine':
-        urlToOpen = '/machines';
-        break;
-      case 'maintenance':
-        urlToOpen = '/machines/maintenance';
-        break;
-      case 'pasture':
-        urlToOpen = '/pastures';
-        break;
-      case 'weather':
-        urlToOpen = '/weather';
-        break;
-      case 'finance':
-        urlToOpen = '/finances';
-        break;
-      default:
-        urlToOpen = '/';
-    }
-  }
-  
-  // Manejo de acciones específicas
-  if (event.action) {
-    switch(event.action) {
-      case 'view-details':
-        // Abrir página de detalles
-        if (event.notification.data && event.notification.data.detailsUrl) {
-          urlToOpen = event.notification.data.detailsUrl;
-        }
-        break;
-      case 'dismiss':
-        // Solo cerrar la notificación
-        return;
-    }
-  }
-  
   event.waitUntil(
-    clients.matchAll({
-      type: 'window'
-    }).then((clientList) => {
-      // Verificar si ya existe una ventana abierta y enfocarla
-      for (const client of clientList) {
-        if (client.url === urlToOpen && 'focus' in client) {
-          return client.focus();
-        }
-      }
-      // Si no hay ventana abierta, abrir una nueva
-      if (clients.openWindow) {
-        return clients.openWindow(urlToOpen);
-      }
-    })
+    clients.openWindow(event.notification.data.url)
   );
-});
-
-// Sincronización de notificaciones en segundo plano
-async function syncNotifications() {
-  try {
-    // Intentar recuperar notificaciones pendientes
-    const response = await fetch('/api/notifications/pending');
-    if (response.ok) {
-      const pendingNotifications = await response.json();
-      
-      // Mostrar notificaciones pendientes
-      pendingNotifications.forEach(notification => {
-        self.registration.showNotification(notification.title, {
-          body: notification.body,
-          icon: notification.icon || ICON_URL,
-          badge: notification.badge || '/icons/badge-icon.png',
-          tag: notification.tag || 'default',
-          data: notification.data || {},
-          vibrate: [100, 50, 100],
-          timestamp: Date.now()
-        });
-      });
-      
-      // Confirmar que se procesaron
-      if (pendingNotifications.length > 0) {
-        await fetch('/api/notifications/confirm-delivery', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            ids: pendingNotifications.map(n => n.id)
-          })
-        });
-      }
-    }
-  } catch (error) {
-    console.error('[Service Worker] Error sincronizando notificaciones:', error);
-  }
-}
-
-// Manejar sincronización periódica
-self.addEventListener('sync', (event) => {
-  if (event.tag === 'sync-notifications') {
-    event.waitUntil(syncNotifications());
-  }
-});
-
-// Manejar eventos de sincronización periódica
-self.addEventListener('periodicsync', (event) => {
-  if (event.tag === 'periodic-notifications-sync') {
-    event.waitUntil(syncNotifications());
-  }
-});
-
-// Manejar peticiones de red fallidas
-self.addEventListener('fetch', (event) => {
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request)
-        .catch(() => {
-          return caches.open(CACHE_NAME)
-            .then((cache) => {
-              return cache.match(OFFLINE_URL);
-            });
-        })
-    );
-  }
 });

@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import NotificationInitializer from "@/components/notifications/NotificationInitializer";
+import { SyncInitializer } from "@/components/SyncInitializer";
 import Dashboard from "@/pages/dashboard";
 import MachinesIndex from "@/pages/machines/index";
 import MachineDetail from "@/pages/machines/[id]";
@@ -30,6 +31,7 @@ import Weather from "@/pages/weather";
 import Reports from "@/pages/reports/index";
 import Settings from "@/pages/settings/index";
 import NotificationsSettings from "@/pages/settings/notifications";
+import SyncSettings from "@/pages/settings/sync";
 import AppLayout from "@/components/layouts/AppLayout";
 
 function App() {
@@ -37,6 +39,7 @@ function App() {
     <TooltipProvider>
       <Toaster />
       <NotificationInitializer />
+      <SyncInitializer />
       <Switch>
         {/* Ruta principal va directo al Dashboard */}
         <Route path="/">
@@ -232,6 +235,12 @@ function App() {
         <Route path="/settings/notifications">
           <AppLayout>
             <NotificationsSettings />
+          </AppLayout>
+        </Route>
+
+        <Route path="/settings/sync">
+          <AppLayout>
+            <SyncSettings />
           </AppLayout>
         </Route>
         

@@ -248,6 +248,19 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                 <i className="ri-notification-3-line mr-3 text-lg"></i>
                 Notificaciones
               </Link>
+              
+              <Link 
+                href="/settings/sync"
+                className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  isActive("/settings/sync")
+                    ? "bg-primary-light bg-opacity-10 text-primary"
+                    : "text-neutral-500 hover:bg-neutral-100"
+                }`}
+                onClick={closeSidebar}
+              >
+                <i className="ri-refresh-line mr-3 text-lg"></i>
+                Sincronización
+              </Link>
             </div>
           </div>
           
