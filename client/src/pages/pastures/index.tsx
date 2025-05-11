@@ -13,6 +13,7 @@ import { ImageUpload } from "@/components/ui/image-upload";
 import { uploadFile } from "@/lib/fileUpload";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import {
   Table,
@@ -101,6 +102,7 @@ const pastureWorkFormSchema = z.object({
   pastureId: z.number({
     required_error: "Debe seleccionar una parcela",
   }),
+  machineType: z.string().optional().nullable(),
   workType: z.string({
     required_error: "El tipo de trabajo es requerido",
   }).min(1, {
@@ -191,6 +193,8 @@ export default function PasturesIndex() {
   const [photoPreview, setPhotoPreview] = useState<string>("");
   const [workPhotoFile, setWorkPhotoFile] = useState<File | null>(null);
   const [workPhotoPreview, setWorkPhotoPreview] = useState<string>("");
+  const [selectedMachineType, setSelectedMachineType] = useState<string | null>(null);
+  const [filteredMachines, setFilteredMachines] = useState<any[]>([]);
   const { toast } = useToast();
 
   // Consultar las pasturas
@@ -201,6 +205,12 @@ export default function PasturesIndex() {
   // Consultar las máquinas para el formulario de trabajos
   const { data: machines } = useQuery({
     queryKey: ["/api/machines"],
+    onSuccess: (data) => {
+      // Inicializar las máquinas filtradas con todas las máquinas
+      if (data && Array.isArray(data)) {
+        setFilteredMachines(data);
+      }
+    }
   });
   
   // Consultar los trabajos agrícolas de parcelas
@@ -1106,37 +1116,28 @@ export default function PasturesIndex() {
           
           <Form {...workForm}>
             <form onSubmit={workForm.handleSubmit(handleWorkSubmit)} className="space-y-4 py-4 overflow-y-auto">
-              {/* Tipo de maquinaria */}
-              <FormField
-                control={workForm.control}
-                name="machineType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tipo de Maquinaria</FormLabel>
-                    <Select 
-                      onValueChange={(value) => handleMachineTypeChange(value)}
-                      value={selectedMachineType || ""}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccione tipo de maquinaria" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {machineTypes.map(type => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>
-                      Seleccione el tipo de maquinaria a utilizar
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Tipo de maquinaria - no es un campo de formulario real, solo UI */}
+              <div className="space-y-2">
+                <Label>Tipo de Maquinaria</Label>
+                <Select 
+                  onValueChange={(value) => handleMachineTypeChange(value)}
+                  value={selectedMachineType || ""}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccione tipo de maquinaria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {machineTypes.map(type => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-sm text-muted-foreground">
+                  Seleccione el tipo de maquinaria a utilizar
+                </p>
+              </div>
               
               {/* Máquina específica - filtrada por tipo seleccionado */}
               <FormField
