@@ -1,6 +1,6 @@
 import webpush from 'web-push';
 import { Request, Response } from 'express';
-import { getMemStorage } from './storage';
+import { storage } from './storage';
 
 // Generar claves VAPID (deberían almacenarse de forma segura y no regenerarse en cada inicio)
 // En un entorno de producción, estas claves deben generarse una vez y almacenarse de forma segura
@@ -14,7 +14,7 @@ webpush.setVapidDetails(
 );
 
 // Almacenará las suscripciones de los usuarios
-const storage = getMemStorage();
+// El storage ya está importado desde './storage'
 
 /**
  * Obtiene la clave pública VAPID para que el cliente pueda suscribirse

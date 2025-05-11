@@ -149,6 +149,10 @@ export class MemStorage implements IStorage {
   private repairs: Map<number, Repair>;
   private salaries: Map<number, Salary>;
   private capitals: Map<number, Capital>;
+  
+  // Almacenamiento para notificaciones push
+  private pushSubscriptions: Record<string, any[]> = {};
+  private notificationPreferences: Record<string, any> = {};
 
   private currentIds: {
     user: number;
@@ -879,6 +883,85 @@ export class MemStorage implements IStorage {
     return allFinances
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 5);
+  }
+  
+  // Implementación de métodos para notificaciones push
+  async addPushSubscription(userId: string, subscription: any): Promise<boolean> {
+    try {
+      // Inicializar el array de suscripciones si no existe
+      if (!this.pushSubscriptions[userId]) {
+        this.pushSubscriptions[userId] = [];
+      }
+      
+      // Verificar si la suscripción ya existe para evitar duplicados
+      const exists = this.pushSubscriptions[userId].some(
+        sub => sub.endpoint === subscription.endpoint
+      );
+      
+      if (!exists) {
+        this.pushSubscriptions[userId].push(subscription);
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error al guardar suscripción push:', error);
+      return false;
+    }
+  }
+  
+  async removePushSubscription(userId: string, endpoint: string): Promise<boolean> {
+    try {
+      if (!this.pushSubscriptions[userId]) {
+        return false;
+      }
+      
+      // Filtrar la suscripción con el endpoint especificado
+      this.pushSubscriptions[userId] = this.pushSubscriptions[userId].filter(
+        sub => sub.endpoint !== endpoint
+      );
+      
+      return true;
+    } catch (error) {
+      console.error('Error al eliminar suscripción push:', error);
+      return false;
+    }
+  }
+  
+  async getUserPushSubscriptions(userId: string): Promise<any[]> {
+    return this.pushSubscriptions[userId] || [];
+  }
+  
+  async getAllPushSubscriptions(): Promise<Record<string, any[]>> {
+    return this.pushSubscriptions;
+  }
+  
+  async updateNotificationPreferences(userId: string, preferences: any): Promise<boolean> {
+    try {
+      this.notificationPreferences[userId] = {
+        ...(this.notificationPreferences[userId] || {}),
+        ...preferences
+      };
+      
+      return true;
+    } catch (error) {
+      console.error('Error al actualizar preferencias de notificación:', error);
+      return false;
+    }
+  }
+  
+  async getNotificationPreferences(userId: string): Promise<any> {
+    // Valores predeterminados si no hay preferencias establecidas
+    const defaultPreferences = {
+      animalsAlerts: true,
+      machinesAlerts: true,
+      financialAlerts: true,
+      pasturesAlerts: true,
+      weatherAlerts: true,
+      maintenanceReminders: true,
+      enablePushNotifications: true
+    };
+    
+    return this.notificationPreferences[userId] || defaultPreferences;
   }
 }
 
