@@ -99,6 +99,24 @@ export default function MachinesIndex() {
     },
   });
 
+  // Función para editar una máquina
+  function handleEdit(id: number) {
+    // Buscar la máquina por ID
+    const machine = machines?.find(m => m.id === id);
+    if (!machine) return;
+    
+    // Establecer los valores en el formulario
+    form.reset({
+      ...machine,
+      // Convertir fechas si existen
+      purchaseDate: machine.purchaseDate ? new Date(machine.purchaseDate) : undefined,
+      warrantyEnd: machine.warrantyEnd ? new Date(machine.warrantyEnd) : undefined
+    });
+    
+    // Abrir el sheet para editar
+    setSheetOpen(true);
+  }
+
   async function onSubmit(values: MachineFormValues) {
     try {
       setIsSubmitting(true);
@@ -666,10 +684,14 @@ export default function MachinesIndex() {
                 </Link>
                 
                 <div className="flex items-center space-x-1 pr-3">
-                  <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Editar">
-                    <Link href={`/machines/${machine.id}/edit`}>
-                      <i className="ri-edit-line text-lg"></i>
-                    </Link>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-9 w-9" 
+                    title="Editar"
+                    onClick={() => handleEdit(machine.id)}
+                  >
+                    <i className="ri-edit-line text-amber-500 text-lg"></i>
                   </Button>
                   
                   <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Registrar mantenimiento">
