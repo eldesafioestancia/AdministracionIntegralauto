@@ -37,7 +37,7 @@ class DatabaseService {
 
     // Inicializar bases de datos locales y URLs remotas
     collections.forEach(collection => {
-      this.databases.set(collection, new PouchDB(collection));
+      this.databases.set(collection, new (PouchDB as any)(collection));
       this.remoteUrls.set(collection, `https://${import.meta.env.FIREBASE_PROJECT_ID}.firebaseio.com/${collection}`);
     });
 
