@@ -1127,7 +1127,7 @@ export default function PasturesIndex() {
                             title="Trabajos Realizados"
                             onClick={() => handleOpenWorkSheet(pasture.id)}
                           >
-                            <i className="ri-tools-fill text-blue-500"></i>
+                            <i className="ri-tools-line text-blue-500"></i>
                           </Button>
                           <Button
                             variant="ghost"
