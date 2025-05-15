@@ -14,7 +14,8 @@ import {
   taxes, Tax, InsertTax,
   repairs, Repair, InsertRepair,
   salaries, Salary, InsertSalary,
-  capital, Capital, InsertCapital
+  capital, Capital, InsertCapital,
+  animalWeights, AnimalWeight, InsertAnimalWeight
 } from "@shared/schema";
 
 export interface IStorage {
@@ -112,6 +113,11 @@ export interface IStorage {
   getCapital(): Promise<Capital[]>;
   createCapital(capital: InsertCapital): Promise<Capital>;
   deleteCapital(id: number): Promise<boolean>;
+  
+  // Animal Weights
+  getAnimalWeights(animalId?: number): Promise<AnimalWeight[]>;
+  createAnimalWeight(weight: InsertAnimalWeight): Promise<AnimalWeight>;
+  deleteAnimalWeight(id: number): Promise<boolean>;
   
   // Dashboard
   getDashboardStats(): Promise<{

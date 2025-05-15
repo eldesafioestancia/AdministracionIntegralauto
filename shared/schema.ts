@@ -264,6 +264,29 @@ export const animalVeterinary = pgTable("animal_veterinary", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Animal Weight History
+export const animalWeights = pgTable("animal_weights", {
+  id: serial("id").primaryKey(),
+  animalId: integer("animal_id").notNull(),
+  date: timestamp("date").notNull(),
+  weight: decimal("weight").notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Base animal weight schema
+const baseAnimalWeightSchema = createInsertSchema(animalWeights).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Extended schema with date transformations
+export const insertAnimalWeightSchema = baseAnimalWeightSchema.extend({
+  date: z.string().or(z.date()).transform(val => 
+    typeof val === 'string' ? new Date(val) : val
+  ),
+});
+
 // Base animal veterinary schema
 const baseAnimalVeterinarySchema = createInsertSchema(animalVeterinary).omit({
   id: true,
@@ -542,3 +565,7 @@ export type InsertSalary = z.infer<typeof insertSalarySchema>;
 
 export type Capital = typeof capital.$inferSelect;
 export type InsertCapital = z.infer<typeof insertCapitalSchema>;
+
+// Animal Weights types
+export type AnimalWeight = typeof animalWeights.$inferSelect;
+export type InsertAnimalWeight = z.infer<typeof insertAnimalWeightSchema>;
