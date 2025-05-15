@@ -226,8 +226,15 @@ const accessoryWorkTypes = [
 ];
 
 export default function PasturesIndex() {
+  // Comprobar si hay parámetros en la URL para abrir formulario de trabajo
+  const queryParams = new URLSearchParams(window.location.search);
+  const shouldOpenWorkForm = queryParams.get('workForm') === 'true';
+  const preSelectedMachineId = queryParams.get('preSelectMachine') 
+    ? parseInt(queryParams.get('preSelectMachine') || '0') 
+    : null;
+  
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [workSheetOpen, setWorkSheetOpen] = useState(false);
+  const [workSheetOpen, setWorkSheetOpen] = useState(shouldOpenWorkForm);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedPastureId, setSelectedPastureId] = useState<number | null>(null);
   const [selectedPasture, setSelectedPasture] = useState<any>(null);
@@ -259,8 +266,38 @@ export default function PasturesIndex() {
   useEffect(() => {
     if (machines && Array.isArray(machines)) {
       setFilteredMachines(machines);
+      
+      // Si hay una máquina preseleccionada, configurar automáticamente
+      if (preSelectedMachineId) {
+        const selectedMachine = machines.find(m => m.id === preSelectedMachineId);
+        if (selectedMachine) {
+          // Establecer el tipo de maquinaria
+          setSelectedMachineType(selectedMachine.type);
+          
+          // Establecer los tipos de trabajo disponibles según el tipo de máquina
+          switch (selectedMachine.type) {
+            case "topadora":
+              setAvailableWorkTypes(bulldozerWorkTypes);
+              break;
+            case "camion":
+              setAvailableWorkTypes(truckWorkTypes);
+              break;
+            case "vehiculo":
+              setAvailableWorkTypes(vehicleWorkTypes);
+              break;
+            case "tractor":
+            default:
+              setAvailableWorkTypes(defaultWorkTypes);
+          }
+          
+          // Después de filtrar por tipo, establecer el ID de la máquina
+          setTimeout(() => {
+            workForm.setValue("machineId", preSelectedMachineId);
+          }, 0);
+        }
+      }
     }
-  }, [machines]);
+  }, [machines, preSelectedMachineId]);
   
   // Consultar los trabajos agrícolas de parcelas
   const { data: pastureWorks } = useQuery({
