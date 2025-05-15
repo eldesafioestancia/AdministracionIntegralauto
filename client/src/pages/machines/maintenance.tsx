@@ -190,18 +190,18 @@ export default function MachineMaintenance() {
   const addOilChecked = form.watch("addOil");
   const addFuelChecked = form.watch("addFuel");
   const maintenanceType = form.watch("type");
-  const sparePartsCost = form.watch("sparePartsCost");
-  const laborCost = form.watch("laborCost");
+  const sparePartsCost = form.watch("sparePartsCost") || "";
+  const laborCost = form.watch("laborCost") || "";
 
   // Calcular el costo total cuando cambian los valores de costo de repuestos o mano de obra
-  React.useEffect(() => {
+  useEffect(() => {
     if (maintenanceType === "maintenance_repair") {
       const spareCost = parseFloat(sparePartsCost) || 0;
       const labCost = parseFloat(laborCost) || 0;
       const total = spareCost + labCost;
       
       if (!isNaN(total) && (spareCost > 0 || labCost > 0)) {
-        form.setValue("totalCost", total.toString());
+        form.setValue("totalCost", total.toFixed(2));
       }
     }
   }, [sparePartsCost, laborCost, maintenanceType, form]);
@@ -656,8 +656,16 @@ export default function MachineMaintenance() {
                           <FormItem>
                             <FormLabel>Costo total ($)</FormLabel>
                             <FormControl>
-                              <Input placeholder="0.00" {...field} />
+                              <Input 
+                                placeholder="0.00" 
+                                className="bg-gray-50" 
+                                disabled={true}
+                                {...field}
+                              />
                             </FormControl>
+                            <FormDescription>
+                              Calculado automáticamente como la suma del costo de repuestos y mano de obra
+                            </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
