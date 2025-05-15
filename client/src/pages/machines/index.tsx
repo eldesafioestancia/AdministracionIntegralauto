@@ -11,6 +11,15 @@ import { useToast } from "@/hooks/use-toast";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { uploadFile } from "@/lib/fileUpload";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -322,17 +331,16 @@ export default function MachinesIndex() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
         <div>
-          <h1 className="text-2xl font-header font-bold text-neutral-500">Maquinarias</h1>
+          <h1 className="text-2xl font-header font-bold text-neutral-500">Gestión de Maquinarias</h1>
           <p className="text-neutral-400 text-sm">Gestiona tus camiones, tractores, topadoras y accesorios</p>
         </div>
         
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 mt-2 sm:mt-0">
           {/* Botón para eliminar seleccionados - solo se muestra si hay elementos seleccionados */}
           {selectedMachines.length > 0 && (
             <Button 
               variant="destructive"
               onClick={handleDeleteSelected}
-              className="mt-2 sm:mt-0"
             >
               <i className="ri-delete-bin-line mr-1"></i> 
               Eliminar ({selectedMachines.length})
@@ -341,15 +349,15 @@ export default function MachinesIndex() {
           
           <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
-              <Button className="mt-2 sm:mt-0">
-                <i className="ri-add-line mr-1"></i> Nueva unidad
+              <Button>
+                <i className="ri-add-line mr-1"></i> Nueva Máquina
               </Button>
             </SheetTrigger>
-            <SheetContent className="sm:max-w-md md:max-w-lg overflow-y-auto">
+            <SheetContent className="sm:max-w-md overflow-y-auto h-full max-h-screen pb-24">
               <SheetHeader>
-                <SheetTitle>Agregar nueva unidad productiva</SheetTitle>
+                <SheetTitle>Nueva Máquina</SheetTitle>
                 <SheetDescription>
-                  Complete los datos de la nueva máquina
+                  Complete la información de la máquina. Todos los campos marcados con * son obligatorios.
                 </SheetDescription>
               </SheetHeader>
               
