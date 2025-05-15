@@ -609,122 +609,113 @@ export default function AnimalsIndex() {
           <p className="text-neutral-400">No se encontraron animales</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredAnimals.map((animal) => (
-            <Card key={animal.id} className="overflow-hidden">
-              <div className="flex flex-col h-full">
-                <Link href={`/animals/${animal.id}`} className="flex-1">
-                  <div className="relative h-40">
-                    {animal.photo ? (
-                      <img
-                        src={animal.photo}
-                        alt={`Animal ${animal.cartagena}`}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <i className={`${getCategoryIcon(animal.category)} text-5xl text-neutral-300`}></i>
-                      </div>
-                    )}
-                    
-                    <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 p-2">
-                      <div className="flex items-center">
-                        <i className={`${getCategoryIcon(animal.category)} text-white mr-2`}></i>
-                        <div className="font-bold text-white">Caravana {animal.cartagena}</div>
-                      </div>
-                      <div className="text-sm text-neutral-500 flex flex-wrap items-center gap-3">
-                        <Badge 
-                          variant="secondary"
-                          style={{ backgroundColor: animal.cartagenaColor === "blanco" ? "#ffffff" : 
-                            animal.cartagenaColor === "amarillo" ? "#FFD700" :
-                            animal.cartagenaColor === "rojo" ? "#FF0000" :
-                            animal.cartagenaColor === "verde" ? "#008000" :
-                            animal.cartagenaColor === "azul" ? "#0000FF" :
-                            animal.cartagenaColor === "violeta" ? "#8A2BE2" :
-                            animal.cartagenaColor === "naranja" ? "#FFA500" :
-                            animal.cartagenaColor === "rosa" ? "#FFC0CB" :
-                            animal.cartagenaColor === "negro" ? "#000000" : "#ffffff",
-                            color: ["blanco", "amarillo", "rosa", "naranja"].includes(animal.cartagenaColor || "") ? "#333" : "#fff"
-                          }}
-                        >
-                          {animal.cartagenaColor}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-                
-                <div className="flex justify-between items-center">
-                  <div className="flex-1 p-3">
-                    <div className="flex flex-wrap gap-1">
-                      <Badge variant="outline" className="text-xs">
-                        {getCategoryLabel(animal.category)}
-                      </Badge>
-                      <Badge variant="outline" className="text-xs">
-                        {getRaceLabel(animal.race)}
-                      </Badge>
-                      {animal.reproductiveStatus && (
-                        <Badge variant="outline" className="text-xs">
-                          {getReproductiveStatusLabel(animal.reproductiveStatus)}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                
-                  <div className="flex items-center space-x-1 pr-3">
-                    {/* Checkbox para selección múltiple */}
+        <div className="border rounded-md">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b bg-muted/50">
+                <th className="py-3 px-4 text-left w-10">
+                  {/* Header checkbox placeholder - podría implementarse seleccionar todos */}
+                </th>
+                <th className="py-3 px-4 text-left">Caravana</th>
+                <th className="py-3 px-4 text-left">Categoría</th>
+                <th className="py-3 px-4 text-left">Raza</th>
+                <th className="py-3 px-4 text-left hidden md:table-cell">Estado</th>
+                <th className="py-3 px-4 text-left hidden md:table-cell">Ubicación</th>
+                <th className="py-3 px-4 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredAnimals.map((animal) => (
+                <tr key={animal.id} className="border-b hover:bg-muted/50">
+                  <td className="py-2 px-4">
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="h-9 w-9" 
+                      className="h-8 w-8" 
                       title={selectedAnimals.includes(animal.id) ? "Deseleccionar" : "Seleccionar"}
                       onClick={() => handleSelectAnimal(animal.id)}
                     >
                       <i className={`${selectedAnimals.includes(animal.id) ? "ri-checkbox-fill text-primary" : "ri-checkbox-blank-line text-gray-400"} text-lg`}></i>
                     </Button>
-                    
-                    {/* Veterinaria (1º) */}
-                    <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Evento veterinario">
-                      <Link href={`/animals/${animal.id}/veterinary`}>
-                        <i className="ri-stethoscope-line text-lg"></i>
-                      </Link>
-                    </Button>
-                    
-                    {/* Ventas (2º) */}
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      asChild 
-                      className="h-9 w-9" 
-                      title="Finanzas"
-                    >
-                      <Link href={`/finances?openForm=true&type=expense&category=animales&description=Gasto - Animal #${animal.cartagena}`}>
-                        <i className="ri-money-dollar-circle-line text-lg"></i>
-                      </Link>
-                    </Button>
-                    
-                    {/* Movimientos (3º) */}
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-9 w-9" 
-                      title="Trasladar animal"
-                      onClick={() => openTransferSheet(animal)}
-                    >
-                      <i className="ri-arrow-left-right-line text-lg"></i>
-                    </Button>
-                    
-                    {/* Editar (4º) */}
-                    <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Editar">
-                      <Link href={`/animals/${animal.id}/edit`}>
-                        <i className="ri-edit-line text-lg"></i>
-                      </Link>
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          ))}
+                  </td>
+                  <td className="py-2 px-4">
+                    <Link href={`/animals/${animal.id}`} className="flex items-center hover:underline">
+                      <div className="flex items-center">
+                        <i className={`${getCategoryIcon(animal.category)} mr-2 text-lg`}></i>
+                        <div className="font-medium">{animal.cartagena}</div>
+                        <Badge 
+                          className="ml-2"
+                          style={{ 
+                            backgroundColor: animal.cartagenaColor === "blanco" ? "#ffffff" : 
+                              animal.cartagenaColor === "amarillo" ? "#FFD700" :
+                              animal.cartagenaColor === "rojo" ? "#FF0000" :
+                              animal.cartagenaColor === "verde" ? "#008000" :
+                              animal.cartagenaColor === "azul" ? "#0000FF" :
+                              animal.cartagenaColor === "violeta" ? "#8A2BE2" :
+                              animal.cartagenaColor === "naranja" ? "#FFA500" :
+                              animal.cartagenaColor === "rosa" ? "#FFC0CB" :
+                              animal.cartagenaColor === "negro" ? "#000000" : "#ffffff",
+                            color: ["blanco", "amarillo", "rosa", "naranja"].includes(animal.cartagenaColor || "") ? "#333" : "#fff"
+                          }}
+                        >
+                          &nbsp;
+                        </Badge>
+                      </div>
+                    </Link>
+                  </td>
+                  <td className="py-2 px-4">{getCategoryLabel(animal.category)}</td>
+                  <td className="py-2 px-4">{getRaceLabel(animal.race)}</td>
+                  <td className="py-2 px-4 hidden md:table-cell">
+                    {animal.reproductiveStatus ? getReproductiveStatusLabel(animal.reproductiveStatus) : "-"}
+                  </td>
+                  <td className="py-2 px-4 hidden md:table-cell">
+                    {animal.location ? animal.location.replace(/_/g, ' ') : "-"}
+                  </td>
+                  <td className="py-2 px-4 text-right">
+                    <div className="flex items-center justify-end space-x-1">
+                      {/* Veterinaria (1º) */}
+                      <Button variant="ghost" size="icon" asChild className="h-8 w-8" title="Evento veterinario">
+                        <Link href={`/animals/${animal.id}/veterinary`}>
+                          <i className="ri-stethoscope-line text-lg"></i>
+                        </Link>
+                      </Button>
+                      
+                      {/* Ventas (2º) */}
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        asChild 
+                        className="h-8 w-8" 
+                        title="Finanzas"
+                      >
+                        <Link href={`/finances?openForm=true&type=expense&category=animales&description=Gasto - Animal #${animal.cartagena}`}>
+                          <i className="ri-money-dollar-circle-line text-lg"></i>
+                        </Link>
+                      </Button>
+                      
+                      {/* Movimientos (3º) */}
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8" 
+                        title="Trasladar animal"
+                        onClick={() => openTransferSheet(animal)}
+                      >
+                        <i className="ri-arrow-left-right-line text-lg"></i>
+                      </Button>
+                      
+                      {/* Editar (4º) */}
+                      <Button variant="ghost" size="icon" asChild className="h-8 w-8" title="Editar">
+                        <Link href={`/animals/${animal.id}/edit`}>
+                          <i className="ri-edit-line text-lg"></i>
+                        </Link>
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
       
