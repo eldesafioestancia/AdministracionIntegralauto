@@ -677,12 +677,12 @@ export default function MachinesIndex() {
         <div className="space-y-3">
           {filteredMachines.map((machine: any) => (
             <Card key={machine.id} className="p-0 overflow-hidden">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center">
                 <div className="w-16 h-16 flex-shrink-0 bg-neutral-100 flex items-center justify-center">
                   <i className={`${getMachineTypeIcon(machine.type)} text-2xl text-neutral-500`}></i>
                 </div>
                 
-                <Link href={`/machines/${machine.id}`} className="flex-grow px-4 py-3 min-w-0">
+                <Link href={`/machines/${machine.id}`} className="flex-1 px-4 py-3">
                   <div className="flex flex-col">
                     <div className="flex items-center">
                       <h3 className="font-medium text-neutral-800">{machine.brand} {machine.model}</h3>
@@ -710,7 +710,7 @@ export default function MachinesIndex() {
                   </div>
                 </Link>
                 
-                <div className="flex items-center space-x-1 pr-3 ml-auto shrink-0">
+                <div className="flex items-center space-x-1 pr-3">
                   {/* Checkbox para seleccionar la máquina */}
                   <Button 
                     variant="ghost" 
