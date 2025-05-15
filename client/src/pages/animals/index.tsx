@@ -604,33 +604,41 @@ export default function AnimalsIndex() {
         </div>
       </div>
       
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-2">
-        <div className="relative flex-1">
-          <i className="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400"></i>
-          <Input
-            placeholder="Buscar por caravana, raza..."
-            className="pl-10"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+      {/* Tabs */}
+      <Tabs defaultValue="list" className="w-full">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="list">Lista</TabsTrigger>
+          <TabsTrigger value="stats">Estadísticas</TabsTrigger>
+        </TabsList>
         
-        <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="Categoría" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas las categorías</SelectItem>
-            <SelectItem value="vaca">Vacas</SelectItem>
-            <SelectItem value="vaquillona">Vaquillonas</SelectItem>
-            <SelectItem value="toro">Toros</SelectItem>
-            <SelectItem value="novillo">Novillos</SelectItem>
-            <SelectItem value="ternero">Terneros</SelectItem>
-            <SelectItem value="ternera">Terneras</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+        <TabsContent value="list" className="space-y-4 mt-4">
+          {/* Filters */}
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className="relative flex-1">
+              <i className="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400"></i>
+              <Input
+                placeholder="Buscar por caravana, raza..."
+                className="pl-10"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            
+            <Select value={filter} onValueChange={setFilter}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Categoría" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas las categorías</SelectItem>
+                <SelectItem value="vaca">Vacas</SelectItem>
+                <SelectItem value="vaquillona">Vaquillonas</SelectItem>
+                <SelectItem value="toro">Toros</SelectItem>
+                <SelectItem value="novillo">Novillos</SelectItem>
+                <SelectItem value="ternero">Terneros</SelectItem>
+                <SelectItem value="ternera">Terneras</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
       
       {/* Animal list */}
       {filteredAnimals.length === 0 ? (
