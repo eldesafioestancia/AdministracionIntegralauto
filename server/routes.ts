@@ -629,6 +629,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Animal Weight History routes
+  app.get("/api/animal-weights", async (req: Request, res: Response) => {
+    try {
+      const animalId = req.query.animalId ? parseInt(req.query.animalId as string) : undefined;
+      const weights = await storage.getAnimalWeights(animalId);
+      res.json(weights);
+    } catch (error) {
+      console.error("Error fetching animal weights:", error);
+      res.status(500).json({ message: "Error fetching animal weights" });
+    }
+  });
+  
+  app.post("/api/animal-weights", async (req: Request, res: Response) => {
+    try {
+      const weightData = insertAnimalWeightSchema.parse(req.body);
+      const newWeight = await storage.createAnimalWeight(weightData);
+      res.status(201).json(newWeight);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid weight data", errors: error.errors });
+      }
+      
+      console.error("Error creating animal weight record:", error);
+      res.status(500).json({ message: "Error creating animal weight record" });
+    }
+  });
+  
+  app.delete("/api/animal-weights/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteAnimalWeight(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Weight record not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting weight record:", error);
+      res.status(500).json({ message: "Error deleting weight record" });
+    }
+  });
+  
   // Rutas para eventos reproductivos
   app.get("/api/animals/:id/reproduction", async (req: Request, res: Response) => {
     try {

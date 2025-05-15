@@ -69,9 +69,18 @@ export default function AnimalVeterinary() {
       
       // Actualizar el peso del animal si se ha proporcionado
       if (values.weight && values.weight !== animal.currentWeight) {
+        // Actualizar el peso actual del animal
         await apiRequest("PUT", `/api/animals/${animalId}`, {
           currentWeight: values.weight,
           lastWeightDate: values.date
+        });
+        
+        // Guardar en el historial de pesos
+        await apiRequest("POST", `/api/animal-weights`, {
+          animalId: Number(animalId),
+          date: values.date,
+          weight: values.weight,
+          notes: `Registrado durante evento: ${values.type} - ${values.description}`
         });
       }
       
@@ -91,6 +100,7 @@ export default function AnimalVeterinary() {
       queryClient.invalidateQueries({ queryKey: [`/api/animals/${animalId}`] });
       queryClient.invalidateQueries({ queryKey: [`/api/animal-veterinary`] });
       queryClient.invalidateQueries({ queryKey: [`/api/animal-finances`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/animal-weights`] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard"] });
       
       toast({
