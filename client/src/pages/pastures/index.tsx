@@ -697,6 +697,16 @@ export default function PasturesIndex() {
     const statusItem = statuses.find(s => s.value === status);
     return statusItem ? statusItem.label : status;
   };
+  
+  // Función para manejar la selección de pasturas (checkbox)
+  const handleSelectPasture = (id: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (selectedPastures.includes(id)) {
+      setSelectedPastures(selectedPastures.filter(pastureId => pastureId !== id));
+    } else {
+      setSelectedPastures([...selectedPastures, id]);
+    }
+  };
 
   const getSoilTypeLabel = (soilType: string) => {
     const soilItem = soilTypes.find(s => s.value === soilType);
@@ -723,7 +733,23 @@ export default function PasturesIndex() {
           </p>
         </div>
         
-        <div className="mt-2 sm:mt-0">
+        <div className="flex space-x-2 mt-2 sm:mt-0">
+          {/* Botón para eliminar seleccionados - solo se muestra si hay elementos seleccionados */}
+          {selectedPastures.length > 0 && (
+            <Button 
+              variant="destructive"
+              onClick={() => {
+                if (confirm(`¿Está seguro de eliminar ${selectedPastures.length} parcelas seleccionadas?`)) {
+                  console.log("Eliminando parcelas:", selectedPastures);
+                  // Aquí iría la lógica para eliminar múltiples parcelas
+                }
+              }}
+            >
+              <i className="ri-delete-bin-line mr-1"></i> 
+              Eliminar ({selectedPastures.length})
+            </Button>
+          )}
+          
           <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
               <Button>
@@ -1131,19 +1157,7 @@ export default function PasturesIndex() {
                         setDetailsDialogOpen(true);
                       }}
                     >
-                      <TableCell>
-                        {pasture.photo ? (
-                          <img 
-                            src={pasture.photo} 
-                            alt={pasture.name} 
-                            className="w-10 h-10 rounded-md object-cover"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 rounded-md bg-muted flex items-center justify-center">
-                            <i className="ri-landscape-line text-muted-foreground"></i>
-                          </div>
-                        )}
-                      </TableCell>
+
                       <TableCell className="font-medium">{pasture.name}</TableCell>
                       <TableCell>{parseFloat(pasture.area).toFixed(2)}</TableCell>
                       <TableCell className="hidden md:table-cell">{pasture.location || '-'}</TableCell>
@@ -1177,52 +1191,63 @@ export default function PasturesIndex() {
                         </Badge>
                       </TableCell>
                       <TableCell onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center space-x-1">
+                        <div className="flex items-center justify-end space-x-2">
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8"
+                            className="h-10 w-10"
                             title="Editar"
                             onClick={() => handleEditPasture(pasture.id)}
                           >
-                            <i className="ri-pencil-line text-amber-500"></i>
+                            <i className="ri-pencil-line text-xl text-amber-500"></i>
                           </Button>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8"
+                            className="h-10 w-10"
                             title="Trabajos Realizados"
                             onClick={() => handleOpenWorkSheet(pasture.id)}
                           >
-                            <i className="ri-tools-line text-blue-500"></i>
+                            <i className="ri-tools-line text-xl text-blue-500"></i>
                           </Button>
                           <Button
                             variant="ghost"
                             size="icon"
                             asChild
-                            className="h-8 w-8"
+                            className="h-10 w-10"
                             title="Registrar movimiento financiero"
                           >
                             <Link href={`/finances?openForm=true&type=expense&category=pasturas&description=Gasto - Parcela ${pasture.name}`}>
-                              <i className="ri-money-dollar-circle-line text-green-500"></i>
+                              <i className="ri-money-dollar-circle-line text-xl text-green-500"></i>
                             </Link>
                           </Button>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8"
+                            className="h-10 w-10"
                             title="Eliminar"
                             onClick={() => handleDelete(pasture.id)}
                           >
-                            <i className="ri-delete-bin-line text-red-500"></i>
+                            <i className="ri-delete-bin-line text-xl text-red-500"></i>
                           </Button>
                         </div>
+                      </TableCell>
+                      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-10 w-10" 
+                          title={selectedPastures.includes(pasture.id) ? "Deseleccionar" : "Seleccionar"}
+                          onClick={(e) => handleSelectPasture(pasture.id, e)}
+                        >
+                          <i className={`${selectedPastures.includes(pasture.id) ? "ri-checkbox-fill text-primary" : "ri-checkbox-blank-line text-gray-400"} text-xl`}></i>
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center h-24 text-neutral-400">
+                    <TableCell colSpan={8} className="text-center h-24 text-neutral-400">
                       No hay parcelas registradas
                     </TableCell>
                   </TableRow>
