@@ -86,6 +86,7 @@ export default function AnimalsIndex() {
   const [transferLocation, setTransferLocation] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>("");
+  const [selectedAnimals, setSelectedAnimals] = useState<number[]>([]);
   const { toast } = useToast();
   
   interface Animal {
@@ -298,6 +299,47 @@ export default function AnimalsIndex() {
       });
     }
   };
+  
+  // Función para manejar la selección de un animal
+  const handleSelectAnimal = (id: number) => {
+    setSelectedAnimals(prev => {
+      if (prev.includes(id)) {
+        // Si ya está seleccionado, lo quitamos
+        return prev.filter(animalId => animalId !== id);
+      } else {
+        // Si no está seleccionado, lo agregamos
+        return [...prev, id];
+      }
+    });
+  };
+  
+  // Función para eliminar los animales seleccionados
+  const handleDeleteSelected = async () => {
+    if (selectedAnimals.length === 0) return;
+    
+    try {
+      for (const id of selectedAnimals) {
+        await apiRequest("DELETE", `/api/animals/${id}`);
+      }
+      
+      toast({
+        title: "Animales eliminados",
+        description: `Se eliminaron ${selectedAnimals.length} animales exitosamente`,
+      });
+      
+      // Limpiar selección y actualizar lista
+      setSelectedAnimals([]);
+      queryClient.invalidateQueries({ queryKey: ["/api/animals"] });
+      
+    } catch (error) {
+      console.error("Error deleting animals:", error);
+      toast({
+        title: "Error",
+        description: "No se pudieron eliminar algunos animales",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Filter animals
   const filteredAnimals = animals ? animals.filter((animal) => {
@@ -340,7 +382,20 @@ export default function AnimalsIndex() {
           <p className="text-neutral-400 text-sm">Gestiona el rodeo de tu establecimiento</p>
         </div>
         
-        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <div className="flex space-x-2">
+          {/* Botón para eliminar seleccionados - solo se muestra si hay elementos seleccionados */}
+          {selectedAnimals.length > 0 && (
+            <Button 
+              variant="destructive"
+              onClick={handleDeleteSelected}
+              className="mt-2 sm:mt-0"
+            >
+              <i className="ri-delete-bin-line mr-1"></i> 
+              Eliminar ({selectedAnimals.length})
+            </Button>
+          )}
+          
+          <Sheet open={sheetOpen} onOpenChange={setSheetOpen}
           <SheetTrigger asChild>
             <Button className="mt-2 sm:mt-0">
               <i className="ri-add-line mr-1"></i> Nuevo animal
