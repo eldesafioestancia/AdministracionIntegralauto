@@ -11,6 +11,15 @@ import { useToast } from "@/hooks/use-toast";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { uploadFile } from "@/lib/fileUpload";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -322,17 +331,16 @@ export default function MachinesIndex() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
         <div>
-          <h1 className="text-2xl font-header font-bold text-neutral-500">Maquinarias</h1>
+          <h1 className="text-2xl font-header font-bold text-neutral-500">Gestión de Maquinarias</h1>
           <p className="text-neutral-400 text-sm">Gestiona tus camiones, tractores, topadoras y accesorios</p>
         </div>
         
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 mt-2 sm:mt-0">
           {/* Botón para eliminar seleccionados - solo se muestra si hay elementos seleccionados */}
           {selectedMachines.length > 0 && (
             <Button 
               variant="destructive"
               onClick={handleDeleteSelected}
-              className="mt-2 sm:mt-0"
             >
               <i className="ri-delete-bin-line mr-1"></i> 
               Eliminar ({selectedMachines.length})
@@ -341,15 +349,15 @@ export default function MachinesIndex() {
           
           <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
-              <Button className="mt-2 sm:mt-0">
-                <i className="ri-add-line mr-1"></i> Nueva unidad
+              <Button>
+                <i className="ri-add-line mr-1"></i> Nueva Máquina
               </Button>
             </SheetTrigger>
-            <SheetContent className="sm:max-w-md md:max-w-lg overflow-y-auto">
+            <SheetContent className="sm:max-w-md overflow-y-auto h-full max-h-screen pb-24">
               <SheetHeader>
-                <SheetTitle>Agregar nueva unidad productiva</SheetTitle>
+                <SheetTitle>Nueva Máquina</SheetTitle>
                 <SheetDescription>
-                  Complete los datos de la nueva máquina
+                  Complete la información de la máquina. Todos los campos marcados con * son obligatorios.
                 </SheetDescription>
               </SheetHeader>
               
@@ -637,121 +645,185 @@ export default function MachinesIndex() {
         </div>
       </div>
       
-      {/* Búsqueda y filtros */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <Input
-          placeholder="Buscar maquinaria..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="flex-1"
-        />
+      {/* Tabs para diferentes vistas */}
+      <Tabs defaultValue="list" className="w-full">
+        <TabsList>
+          <TabsTrigger value="list">Lista de Maquinarias</TabsTrigger>
+          <TabsTrigger value="stats">Estadísticas</TabsTrigger>
+        </TabsList>
         
-        <Select
-          value={filter}
-          onValueChange={setFilter}
-        >
-          <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="Filtrar por tipo" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos</SelectItem>
-            <SelectItem value="tractor">Tractores</SelectItem>
-            <SelectItem value="topadora">Topadoras</SelectItem>
-            <SelectItem value="camion">Camiones</SelectItem>
-            <SelectItem value="vehiculo">Vehículos</SelectItem>
-            <SelectItem value="accesorio">Accesorios</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      
-      {/* Lista de máquinas */}
-      {filteredMachines.length === 0 ? (
-        <div className="text-center py-10 bg-white rounded-lg shadow">
-          <i className="ri-truck-line text-5xl text-neutral-300"></i>
-          <p className="mt-4 text-neutral-500">No hay unidades productivas que coincidan con tu búsqueda</p>
-          <Button variant="outline" onClick={() => {setSearch(""); setFilter("all")}} className="mt-2">
-            Mostrar todas
-          </Button>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {filteredMachines.map((machine: any) => (
-            <Card key={machine.id} className="p-0 overflow-hidden">
-              <div className="flex items-center">
-                <div className="w-16 h-16 flex-shrink-0 bg-neutral-100 flex items-center justify-center">
-                  <i className={`${getMachineTypeIcon(machine.type)} text-2xl text-neutral-500`}></i>
-                </div>
-                
-                <Link href={`/machines/${machine.id}`} className="flex-1 px-4 py-3">
-                  <div className="flex flex-col">
-                    <div className="flex items-center">
-                      <h3 className="font-medium text-neutral-800">{machine.brand} {machine.model}</h3>
-                      <Badge 
-                        className={`ml-2 px-2 py-0 h-5 ${
-                          machine.type === "tractor" ? "bg-red-100 text-red-800 hover:bg-red-200" :
-                          machine.type === "camion" ? "bg-blue-100 text-blue-800 hover:bg-blue-200" :
-                          machine.type === "topadora" ? "bg-green-100 text-green-800 hover:bg-green-200" :
-                          machine.type === "vehiculo" ? "bg-amber-100 text-amber-800 hover:bg-amber-200" :
-                          machine.type === "accesorio" ? "bg-purple-100 text-purple-800 hover:bg-purple-200" :
-                          ""
-                        }`}
-                      >
-                        {getMachineTypeLabel(machine.type)}
-                      </Badge>
-                    </div>
-                    <div className="text-sm text-neutral-500 flex items-center space-x-3">
-                      <span className="flex items-center">
-                        <i className="ri-calendar-line mr-1"></i> {machine.year}
-                      </span>
-                      <span className="flex items-center">
-                        <i className="ri-time-line mr-1"></i> {machine.hours} hs
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-                
-                <div className="flex items-center space-x-1 pr-3">
-                  {/* Checkbox para seleccionar la máquina */}
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-9 w-9" 
-                    title={selectedMachines.includes(machine.id) ? "Deseleccionar" : "Seleccionar"}
-                    onClick={() => handleSelectMachine(machine.id)}
-                  >
-                    <i className={`${selectedMachines.includes(machine.id) ? "ri-checkbox-fill text-primary" : "ri-checkbox-blank-line text-gray-400"} text-lg`}></i>
-                  </Button>
-                  
-                  {/* Mantenimiento (1º) */}
-                  <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Registrar mantenimiento">
-                    <Link href={`/machines/${machine.id}/maintenance`}>
-                      <i className="ri-settings-line text-orange-500 text-lg"></i>
-                    </Link>
-                  </Button>
-                  
-                  {/* Trabajos (2º) */}
-                  <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Trabajos">
-                    <Link href={`/machines/${machine.id}/work`}>
-                      <i className="ri-tools-line text-blue-500 text-lg"></i>
-                    </Link>
-                  </Button>
-                  
-                  {/* Editar (3º) */}
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-9 w-9" 
-                    title="Editar"
-                    onClick={() => handleEdit(machine.id)}
-                  >
-                    <i className="ri-edit-line text-amber-500 text-lg"></i>
-                  </Button>
-                </div>
+        <TabsContent value="list" className="mt-4">
+          {/* Búsqueda y filtros */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-4">
+            <Input
+              placeholder="Buscar maquinaria..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="flex-1"
+            />
+            
+            <Select
+              value={filter}
+              onValueChange={setFilter}
+            >
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Filtrar por tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="tractor">Tractores</SelectItem>
+                <SelectItem value="topadora">Topadoras</SelectItem>
+                <SelectItem value="camion">Camiones</SelectItem>
+                <SelectItem value="vehiculo">Vehículos</SelectItem>
+                <SelectItem value="accesorio">Accesorios</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {/* Lista de máquinas en formato tabla */}
+          {filteredMachines.length === 0 ? (
+            <div className="text-center py-10 bg-white rounded-lg border">
+              <i className="ri-truck-line text-5xl text-neutral-300"></i>
+              <p className="mt-4 text-neutral-500">No hay unidades productivas que coincidan con tu búsqueda</p>
+              <Button variant="outline" onClick={() => {setSearch(""); setFilter("all")}} className="mt-2">
+                Mostrar todas
+              </Button>
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Imagen</TableHead>
+                    <TableHead>Tipo</TableHead>
+                    <TableHead>Marca/Modelo</TableHead>
+                    <TableHead className="hidden md:table-cell">Año</TableHead>
+                    <TableHead className="hidden md:table-cell">Horas/Km</TableHead>
+                    <TableHead>Ubicación</TableHead>
+                    <TableHead>Estado</TableHead>
+                    <TableHead>Acciones</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredMachines.map((machine: any) => (
+                    <TableRow 
+                      key={machine.id}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => {
+                        // Navegación a detalles de la máquina
+                        window.location.href = `/machines/${machine.id}`;
+                      }}
+                    >
+                      <TableCell>
+                        {machine.photo ? (
+                          <img 
+                            src={machine.photo} 
+                            alt={`${machine.brand} ${machine.model}`} 
+                            className="w-10 h-10 rounded-md object-cover"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-md bg-muted flex items-center justify-center">
+                            <i className={`${getMachineTypeIcon(machine.type)} text-muted-foreground`}></i>
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={machine.type === 'accesorio' ? 'outline' : 'default'}
+                          className={`${
+                            machine.type === 'tractor' ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border-emerald-200' :
+                            machine.type === 'topadora' ? 'bg-amber-100 text-amber-800 hover:bg-amber-200 border-amber-200' :
+                            machine.type === 'camion' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200 border-blue-200' :
+                            machine.type === 'vehiculo' ? 'bg-purple-100 text-purple-800 hover:bg-purple-200 border-purple-200' :
+                            'bg-gray-100 text-gray-800'
+                          }`}
+                        >
+                          {getMachineTypeLabel(machine.type)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-medium">{machine.brand} {machine.model}</TableCell>
+                      <TableCell className="hidden md:table-cell">{machine.year}</TableCell>
+                      <TableCell className="hidden md:table-cell">{machine.hours} hs</TableCell>
+                      <TableCell>{machine.location || '-'}</TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant="outline"
+                          className={
+                            machine.status === 'activo' 
+                              ? 'bg-green-100 text-green-800 hover:bg-green-200 border-green-200' 
+                              : 'bg-red-100 text-red-800 hover:bg-red-200 border-red-200'
+                          }
+                        >
+                          {getMachineStatusLabel(machine.status)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center space-x-1">
+                          {/* Checkbox para seleccionar la máquina */}
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8" 
+                            title={selectedMachines.includes(machine.id) ? "Deseleccionar" : "Seleccionar"}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSelectMachine(machine.id);
+                            }}
+                          >
+                            <i className={`${selectedMachines.includes(machine.id) ? "ri-checkbox-fill text-primary" : "ri-checkbox-blank-line text-gray-400"}`}></i>
+                          </Button>
+                          
+                          {/* Mantenimiento (1º) */}
+                          <Button variant="ghost" size="icon" className="h-8 w-8" title="Registrar mantenimiento">
+                            <Link href={`/machines/${machine.id}/maintenance`}>
+                              <i className="ri-settings-line text-orange-500"></i>
+                            </Link>
+                          </Button>
+                          
+                          {/* Trabajos (2º) */}
+                          <Button variant="ghost" size="icon" className="h-8 w-8" title="Trabajos">
+                            <Link href={`/machines/${machine.id}/work`}>
+                              <i className="ri-tools-line text-blue-500"></i>
+                            </Link>
+                          </Button>
+                          
+                          {/* Editar (3º) */}
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8" 
+                            title="Editar"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEdit(machine.id);
+                            }}
+                          >
+                            <i className="ri-edit-line text-amber-500"></i>
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="stats" className="mt-4">
+          <div className="p-8 text-center border rounded-md">
+            <div className="flex flex-col items-center justify-center">
+              <div className="bg-neutral-100 p-4 rounded-full mb-4">
+                <i className="ri-bar-chart-line text-neutral-400 text-4xl"></i>
               </div>
-            </Card>
-          ))}
-        </div>
-      )}
+              <h3 className="font-medium text-lg mb-1">Estadísticas de maquinarias</h3>
+              <p className="text-neutral-500 max-w-md">
+                En desarrollo: Esta sección mostrará estadísticas detalladas sobre uso, costos y mantenimiento de la maquinaria.
+              </p>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
