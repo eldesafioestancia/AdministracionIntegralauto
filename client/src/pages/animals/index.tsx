@@ -413,17 +413,16 @@ export default function AnimalsIndex() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
         <div>
-          <h1 className="text-2xl font-header font-bold text-neutral-500">Animales</h1>
+          <h1 className="text-2xl font-header font-bold text-neutral-500">Gestión de Animales</h1>
           <p className="text-neutral-400 text-sm">Gestiona el rodeo de tu establecimiento</p>
         </div>
         
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 mt-2 sm:mt-0">
           {/* Botón para eliminar seleccionados - solo se muestra si hay elementos seleccionados */}
           {selectedAnimals.length > 0 && (
             <Button 
               variant="destructive"
               onClick={handleDeleteSelected}
-              className="mt-2 sm:mt-0"
             >
               <i className="ri-delete-bin-line mr-1"></i> 
               Eliminar ({selectedAnimals.length})
@@ -432,15 +431,15 @@ export default function AnimalsIndex() {
           
           <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
-              <Button className="mt-2 sm:mt-0">
-                <i className="ri-add-line mr-1"></i> Nuevo animal
+              <Button>
+                <i className="ri-add-line mr-1"></i> Nuevo Animal
               </Button>
             </SheetTrigger>
-            <SheetContent className="sm:max-w-md md:max-w-lg overflow-y-auto">
+            <SheetContent className="sm:max-w-md overflow-y-auto h-full max-h-screen pb-24">
               <SheetHeader>
-                <SheetTitle>Agregar nuevo animal</SheetTitle>
+                <SheetTitle>Nuevo Animal</SheetTitle>
                 <SheetDescription>
-                  Complete los datos del nuevo animal
+                  Complete la información del animal. Todos los campos marcados con * son obligatorios.
                 </SheetDescription>
               </SheetHeader>
               
