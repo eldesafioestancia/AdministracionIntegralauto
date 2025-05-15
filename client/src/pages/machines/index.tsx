@@ -71,6 +71,7 @@ export default function MachinesIndex() {
   const [photoPreview, setPhotoPreview] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [selectedMachines, setSelectedMachines] = useState<number[]>([]);
   const { toast } = useToast();
   
   const { data: machines, isLoading, error } = useQuery({
@@ -202,6 +203,47 @@ export default function MachinesIndex() {
       });
     } finally {
       setIsSubmitting(false);
+    }
+  }
+  
+  // Función para manejar la selección de una máquina
+  function handleSelectMachine(id: number) {
+    setSelectedMachines(prev => {
+      if (prev.includes(id)) {
+        // Si ya está seleccionado, lo quitamos
+        return prev.filter(machineId => machineId !== id);
+      } else {
+        // Si no está seleccionado, lo agregamos
+        return [...prev, id];
+      }
+    });
+  }
+  
+  // Función para eliminar las máquinas seleccionadas
+  async function handleDeleteSelected() {
+    if (selectedMachines.length === 0) return;
+    
+    try {
+      for (const id of selectedMachines) {
+        await apiRequest("DELETE", `/api/machines/${id}`);
+      }
+      
+      toast({
+        title: "Unidades eliminadas",
+        description: `Se eliminaron ${selectedMachines.length} unidades exitosamente`,
+      });
+      
+      // Limpiar selección y actualizar lista
+      setSelectedMachines([]);
+      queryClient.invalidateQueries({ queryKey: ["/api/machines"] });
+      
+    } catch (error) {
+      console.error("Error deleting machines:", error);
+      toast({
+        title: "Error",
+        description: "No se pudieron eliminar algunas unidades",
+        variant: "destructive",
+      });
     }
   }
 
