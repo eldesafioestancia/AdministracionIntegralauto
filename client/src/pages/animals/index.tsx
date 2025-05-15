@@ -10,6 +10,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { uploadFile } from "@/lib/fileUpload";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Sheet,
   SheetContent,
@@ -401,285 +402,24 @@ export default function AnimalsIndex() {
                 <i className="ri-add-line mr-1"></i> Nuevo animal
               </Button>
             </SheetTrigger>
-          <SheetContent className="sm:max-w-md md:max-w-lg overflow-y-auto">
-            <SheetHeader>
-              <SheetTitle>Agregar nuevo animal</SheetTitle>
-              <SheetDescription>
-                Complete los datos del nuevo animal
-              </SheetDescription>
-            </SheetHeader>
-            
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-                <h3 className="font-semibold text-base text-neutral-500">Identificación</h3>
-                
-                <FormField
-                  control={form.control}
-                  name="cartagena"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nº de Caravana</FormLabel>
-                      <FormControl>
-                        <Input placeholder="123" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="cartagenaColor"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Color de caravana</FormLabel>
-                      <div className="grid grid-cols-5 gap-2">
-                        {["rojo", "amarillo", "azul", "verde", "violeta", "naranja", "rosa", "blanco", "negro"].map((color) => (
-                          <div 
-                            key={color}
-                            className={`
-                              w-full aspect-square rounded-md cursor-pointer border-2 
-                              ${field.value === color ? "border-primary ring-2 ring-primary ring-opacity-50" : "border-neutral-200"}
-                            `}
-                            style={{ 
-                              backgroundColor: 
-                                color === "blanco" ? "#ffffff" : 
-                                color === "amarillo" ? "#FFD700" :
-                                color === "rojo" ? "#FF0000" :
-                                color === "verde" ? "#008000" :
-                                color === "azul" ? "#0000FF" :
-                                color === "violeta" ? "#8A2BE2" :
-                                color === "naranja" ? "#FFA500" :
-                                color === "rosa" ? "#FFC0CB" :
-                                color === "negro" ? "#000000" : "#ffffff",
-                              color: ["blanco", "amarillo", "rosa", "naranja"].includes(color) ? "#333" : "#fff"
-                            }}
-                            onClick={() => field.onChange(color)}
-                          >
-                            <div className="w-full h-full flex items-center justify-center">
-                              {field.value === color && <i className="ri-check-line text-lg" />}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="category"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Categoría</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Seleccione una categoría" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="vaca">Vaca</SelectItem>
-                            <SelectItem value="vaquillona">Vaquillona</SelectItem>
-                            <SelectItem value="toro">Toro</SelectItem>
-                            <SelectItem value="novillo">Novillo</SelectItem>
-                            <SelectItem value="ternero">Ternero</SelectItem>
-                            <SelectItem value="ternera">Ternera</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+            <SheetContent className="sm:max-w-md md:max-w-lg overflow-y-auto">
+              <SheetHeader>
+                <SheetTitle>Agregar nuevo animal</SheetTitle>
+                <SheetDescription>
+                  Complete los datos del nuevo animal
+                </SheetDescription>
+              </SheetHeader>
+              
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+                  <h3 className="font-semibold text-base text-neutral-500">Identificación</h3>
                   
                   <FormField
                     control={form.control}
-                    name="race"
+                    name="cartagena"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Raza</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Seleccione una raza" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="aberdeen">Aberdeen</SelectItem>
-                            <SelectItem value="angus">Angus</SelectItem>
-                            <SelectItem value="averdin_colorado">Averdin Colorado</SelectItem>
-                            <SelectItem value="averdin_negro">Averdin Negro</SelectItem>
-                            <SelectItem value="criollo">Criollo</SelectItem>
-                            <SelectItem value="limousin">Limousin</SelectItem>
-                            <SelectItem value="braford">Braford</SelectItem>
-                            <SelectItem value="hereford">Hereford</SelectItem>
-                            <SelectItem value="brangus">Brangus</SelectItem>
-                            <SelectItem value="brahman">Brahman</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="birthDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Fecha de nacimiento</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="date"
-                            {...field}
-                            value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-                            onChange={(e) => {
-                              const date = e.target.value ? new Date(e.target.value) : null;
-                              field.onChange(date);
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="reproductiveStatus"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Estado reproductivo</FormLabel>
-                        <Select 
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                            // Reset related fields when changing reproductive status
-                            if (value !== "prenada") {
-                              form.setValue("expectedDeliveryDate", null);
-                            }
-                          }} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Seleccione un estado" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {/* Opciones para vaca/vaquillona */}
-                            {(form.watch("category") === "vaca" || form.watch("category") === "vaquillona") && (
-                              <>
-                                <SelectItem value="vacia">Vacía</SelectItem>
-                                <SelectItem value="servicio">A punto de entrar en servicio</SelectItem>
-                                <SelectItem value="prenada">Preñada</SelectItem>
-                                <SelectItem value="parida">Parida</SelectItem>
-                              </>
-                            )}
-                            
-                            {/* Opciones para toro */}
-                            {form.watch("category") === "toro" && (
-                              <>
-                                <SelectItem value="en_servicio">En servicio</SelectItem>
-                                <SelectItem value="no_en_servicio">No en servicio</SelectItem>
-                              </>
-                            )}
-                            
-                            {/* Opciones para otras categorías */}
-                            {!["vaca", "vaquillona", "toro"].includes(form.watch("category")) && (
-                              <SelectItem value="no_aplica">No aplica</SelectItem>
-                            )}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                
-                <FormField
-                  control={form.control}
-                  name="origin"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Origen</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccione el origen" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="nacido_establecimiento">Nacido en el establecimiento</SelectItem>
-                          <SelectItem value="comprado">Comprado</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                {form.watch("origin") === "comprado" && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="supplier"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Proveedor</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Nombre del proveedor" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="purchaseDate"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Fecha de compra</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="date"
-                              {...field}
-                              value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-                              onChange={(e) => {
-                                const date = e.target.value ? new Date(e.target.value) : null;
-                                field.onChange(date);
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                )}
-                
-                <h3 className="font-semibold text-base text-neutral-500 mt-4">Filiación</h3>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="fatherCartagena"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nº Caravana Padre</FormLabel>
+                        <FormLabel>Nº de Caravana</FormLabel>
                         <FormControl>
                           <Input placeholder="123" {...field} />
                         </FormControl>
@@ -690,382 +430,297 @@ export default function AnimalsIndex() {
                   
                   <FormField
                     control={form.control}
-                    name="motherCartagena"
+                    name="cartagenaColor"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Nº Caravana Madre</FormLabel>
-                        <FormControl>
-                          <Input placeholder="456" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="marks"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Señales / Marcas particulares</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Corte de oreja, mancha blanca, etc." {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <h3 className="font-semibold text-base text-neutral-500 mt-4">Datos Productivos y Corporales</h3>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="currentWeight"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Peso actual (kg)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="450" {...field} />
-                        </FormControl>
+                        <FormLabel>Color de caravana</FormLabel>
+                        <div className="grid grid-cols-5 gap-2">
+                          {["rojo", "amarillo", "azul", "verde", "violeta", "naranja", "rosa", "blanco", "negro"].map((color) => (
+                            <div 
+                              key={color}
+                              className={`
+                                w-full aspect-square rounded-md cursor-pointer border-2 
+                                ${field.value === color ? "border-primary ring-2 ring-primary ring-opacity-50" : "border-neutral-200"}
+                              `}
+                              style={{ 
+                                backgroundColor: 
+                                  color === "blanco" ? "#ffffff" : 
+                                  color === "amarillo" ? "#FFD700" :
+                                  color === "rojo" ? "#FF0000" :
+                                  color === "verde" ? "#008000" :
+                                  color === "azul" ? "#0000FF" :
+                                  color === "violeta" ? "#8A2BE2" :
+                                  color === "naranja" ? "#FFA500" :
+                                  color === "rosa" ? "#FFC0CB" :
+                                  color === "negro" ? "#000000" : "#ffffff",
+                                color: ["blanco", "amarillo", "rosa", "naranja"].includes(color) ? "#333" : "#fff"
+                              }}
+                              onClick={() => field.onChange(color)}
+                            >
+                              <div className="w-full h-full flex items-center justify-center">
+                                {field.value === color && <i className="ri-check-line text-lg" />}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                   
-                  <FormField
-                    control={form.control}
-                    name="lastWeightDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Último control de peso</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="date"
-                            {...field}
-                            value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-                            onChange={(e) => {
-                              const date = e.target.value ? new Date(e.target.value) : null;
-                              field.onChange(date);
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                
-                <FormField
-                  control={form.control}
-                  name="bodyCondition"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Condición corporal (1 a 5)</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccione condición" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="1">1 - Muy delgado</SelectItem>
-                          <SelectItem value="1.5">1.5</SelectItem>
-                          <SelectItem value="2">2 - Delgado</SelectItem>
-                          <SelectItem value="2.5">2.5</SelectItem>
-                          <SelectItem value="3">3 - Normal</SelectItem>
-                          <SelectItem value="3.5">3.5</SelectItem>
-                          <SelectItem value="4">4 - Gordo</SelectItem>
-                          <SelectItem value="4.5">4.5</SelectItem>
-                          <SelectItem value="5">5 - Muy gordo</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="lastServiceDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Fecha último servicio</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="date"
-                            {...field}
-                            value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-                            onChange={(e) => {
-                              const date = e.target.value ? new Date(e.target.value) : null;
-                              field.onChange(date);
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="category"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Categoría</FormLabel>
+                          <Select 
+                            onValueChange={field.onChange} 
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Seleccionar" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="vaca">Vaca</SelectItem>
+                              <SelectItem value="vaquillona">Vaquillona</SelectItem>
+                              <SelectItem value="toro">Toro</SelectItem>
+                              <SelectItem value="novillo">Novillo</SelectItem>
+                              <SelectItem value="ternero">Ternero</SelectItem>
+                              <SelectItem value="ternera">Ternera</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="race"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Raza</FormLabel>
+                          <Select 
+                            onValueChange={field.onChange} 
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Seleccionar" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="aberdeen">Aberdeen</SelectItem>
+                              <SelectItem value="angus">Angus</SelectItem>
+                              <SelectItem value="averdin_colorado">Averdin Colorado</SelectItem>
+                              <SelectItem value="averdin_negro">Averdin Negro</SelectItem>
+                              <SelectItem value="criollo">Criollo</SelectItem>
+                              <SelectItem value="limousin">Limousin</SelectItem>
+                              <SelectItem value="braford">Braford</SelectItem>
+                              <SelectItem value="hereford">Hereford</SelectItem>
+                              <SelectItem value="brangus">Brangus</SelectItem>
+                              <SelectItem value="brahman">Brahman</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                   
-                  <FormField
-                    control={form.control}
-                    name="lastServiceType"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tipo de servicio</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Inseminación artificial, monta natural, etc." {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                
-                {/* Campo de fecha probable de parto solo cuando está preñada */}
-                {form.watch("reproductiveStatus") === "prenada" && (
-                  <FormField
-                    control={form.control}
-                    name="expectedDeliveryDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Fecha probable de parto</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="date"
-                            {...field}
-                            value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-                            onChange={(e) => {
-                              const date = e.target.value ? new Date(e.target.value) : null;
-                              field.onChange(date);
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-                
-                {/* Sección de fotografía */}
-                <div className="space-y-2 pt-4">
-                  <h3 className="text-lg font-medium">Fotografía</h3>
-                  <ImageUpload 
-                    onChange={handlePhotoChange} 
-                    value={photoPreview}
-                    className="w-full max-w-sm mx-auto"
-                  />
-                </div>
-                
-                <SheetFooter className="pt-4">
-                  <Button type="submit">Guardar animal</Button>
-                </SheetFooter>
-              </form>
-            </Form>
-          </SheetContent>
-        </Sheet>
+                  <div className="flex flex-col">
+                    <FormField
+                      control={form.control}
+                      name="photo"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Foto</FormLabel>
+                          <FormControl>
+                            <ImageUpload 
+                              onFileChange={handlePhotoChange} 
+                              onClear={() => {
+                                handlePhotoChange(null);
+                                field.onChange("");
+                              }}
+                              maxWidth={800}
+                              maxHeight={600}
+                            />
+                          </FormControl>
+                          {photoPreview && (
+                            <div className="mt-2">
+                              <img 
+                                src={photoPreview} 
+                                alt="Vista previa" 
+                                className="w-full max-h-40 object-cover rounded-md" 
+                              />
+                            </div>
+                          )}
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <SheetFooter>
+                    <Button type="submit">Guardar animal</Button>
+                  </SheetFooter>
+                </form>
+              </Form>
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
-
+      
       {/* Filters */}
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative w-full sm:w-64">
-            <i className="ri-search-line absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"></i>
-            <Input
-              placeholder="Buscar por caravana, raza..."
-              className="pl-9"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          <Select
-            value={filter}
-            onValueChange={setFilter}
-          >
-            <SelectTrigger className="w-full sm:w-40">
-              <SelectValue placeholder="Filtrar por" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos</SelectItem>
-              <SelectItem value="vaca">Vacas</SelectItem>
-              <SelectItem value="vaquillona">Vaquillonas</SelectItem>
-              <SelectItem value="toro">Toros</SelectItem>
-              <SelectItem value="novillo">Novillos</SelectItem>
-              <SelectItem value="ternero">Terneros</SelectItem>
-              <SelectItem value="ternera">Terneras</SelectItem>
-            </SelectContent>
-          </Select>
+      <div className="flex flex-col sm:flex-row gap-2">
+        <div className="relative flex-1">
+          <i className="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400"></i>
+          <Input
+            placeholder="Buscar por caravana, raza..."
+            className="pl-10"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
-        <div className="text-sm text-neutral-500">
-          {filteredAnimals.length} {filteredAnimals.length === 1 ? "animal" : "animales"}
-        </div>
+        
+        <Select value={filter} onValueChange={setFilter}>
+          <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectValue placeholder="Categoría" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas las categorías</SelectItem>
+            <SelectItem value="vaca">Vacas</SelectItem>
+            <SelectItem value="vaquillona">Vaquillonas</SelectItem>
+            <SelectItem value="toro">Toros</SelectItem>
+            <SelectItem value="novillo">Novillos</SelectItem>
+            <SelectItem value="ternero">Terneros</SelectItem>
+            <SelectItem value="ternera">Terneras</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
-
-      {/* Animal List */}
+      
+      {/* Animal list */}
       {filteredAnimals.length === 0 ? (
-        <div className="py-12 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-neutral-100 text-neutral-400 mb-4">
-            <i className="ri-cattle-line text-2xl"></i>
-          </div>
-          <h3 className="text-lg font-medium text-neutral-700 mb-2">
-            No se encontraron animales
-          </h3>
-          <p className="text-neutral-500 max-w-md mx-auto mb-6">
-            {search || filter !== "all" 
-              ? "Intente con otros filtros de búsqueda" 
-              : "Registre un nuevo animal para comenzar"}
-          </p>
-          {search || filter !== "all" ? (
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setSearch("");
-                setFilter("all");
-              }}
-            >
-              Limpiar filtros
-            </Button>
-          ) : (
-            <Button
-              onClick={() => setSheetOpen(true)}
-            >
-              <i className="ri-add-line mr-1"></i> Nuevo animal
-            </Button>
-          )}
+        <div className="py-10 text-center">
+          <p className="text-neutral-400">No se encontraron animales</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredAnimals.map((animal) => (
-            <Card key={animal.id} className="p-0 overflow-hidden">
-              <div className="flex items-center">
-                <div 
-                  className="w-16 h-16 flex-shrink-0 flex items-center justify-center relative"
-                  style={{
-                    backgroundColor: 
-                      animal.cartagenaColor === "blanco" ? "#ffffff" : 
-                      animal.cartagenaColor === "amarillo" ? "#FFD700" :
-                      animal.cartagenaColor === "rojo" ? "#FF0000" :
-                      animal.cartagenaColor === "verde" ? "#008000" :
-                      animal.cartagenaColor === "azul" ? "#0000FF" :
-                      animal.cartagenaColor === "violeta" ? "#8A2BE2" :
-                      animal.cartagenaColor === "naranja" ? "#FFA500" :
-                      animal.cartagenaColor === "rosa" ? "#FFC0CB" :
-                      animal.cartagenaColor === "negro" ? "#000000" : "#f5f5f5",
-                    color: ["blanco", "amarillo", "rosa", "naranja"].includes(animal.cartagenaColor || "") ? "#333" : "#fff"
-                  }}
-                >
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-lg font-bold">{animal.cartagena}</span>
-                  </div>
-                </div>
-                
-                <Link href={`/animals/${animal.id}`} className="flex-1 px-4 py-3">
-                  <div className="flex flex-col">
-                    <div className="flex items-center">
-                      <h3 className="font-medium text-neutral-800">#{animal.cartagena}</h3>
-                      <Badge className="ml-2 px-2 py-0 h-5">{getCategoryLabel(animal.category)}</Badge>
-                    </div>
-                    <div className="text-sm text-neutral-500 flex flex-wrap items-center gap-3">
-                      {/* Peso */}
-                      {animal.currentWeight && (
-                        <span className="flex items-center">
-                          <i className="ri-scales-line mr-1"></i> {animal.currentWeight} kg
-                        </span>
-                      )}
-                      
-                      {/* Ubicación */}
-                      {animal.location && (
-                        <span className="flex items-center">
-                          <i className="ri-map-pin-line mr-1"></i> {animal.location}
-                        </span>
-                      )}
-                      
-                      {/* Estado reproductivo */}
-                      {animal.reproductiveStatus && animal.reproductiveStatus !== "no_aplica" && (
-                        <span className="flex items-center">
-                          {animal.reproductiveStatus === "prenada" ? (
-                            <i className="ri-heart-fill mr-1 text-red-500"></i>
-                          ) : animal.reproductiveStatus === "parida" ? (
-                            <i className="ri-parent-line mr-1"></i>
-                          ) : animal.reproductiveStatus === "en_servicio" ? (
-                            <i className="ri-heart-add-line mr-1 text-green-500"></i>
-                          ) : (
-                            <i className="ri-heart-line mr-1"></i>
-                          )}
-                          {getReproductiveStatusLabel(animal.reproductiveStatus)}
-                        </span>
-                      )}
-                      
-                      {/* Fecha de parto aproximada */}
-                      {animal.reproductiveStatus === "prenada" && animal.expectedDeliveryDate && (
-                        <span className="flex items-center text-red-600">
-                          <i className="ri-calendar-event-line mr-1"></i>
-                          Parto: {format(new Date(animal.expectedDeliveryDate), "dd/MM/yyyy")}
-                        </span>
-                      )}
-                      
-                      {/* Ubicación del animal */}
-                      {animal.location && (
-                        <span className="flex items-center text-blue-600">
-                          <i className="ri-map-pin-line mr-1"></i>
-                          {animal.location}
-                        </span>
-                      )}
+            <Card key={animal.id} className="overflow-hidden">
+              <div className="flex flex-col h-full">
+                <Link href={`/animals/${animal.id}`} className="flex-1">
+                  <div className="relative h-40">
+                    {animal.photo ? (
+                      <img
+                        src={animal.photo}
+                        alt={`Animal ${animal.cartagena}`}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <i className={`${getCategoryIcon(animal.category)} text-5xl text-neutral-300`}></i>
+                      </div>
+                    )}
+                    
+                    <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 p-2">
+                      <div className="flex items-center">
+                        <i className={`${getCategoryIcon(animal.category)} text-white mr-2`}></i>
+                        <div className="font-bold text-white">Caravana {animal.cartagena}</div>
+                      </div>
+                      <div className="text-sm text-neutral-500 flex flex-wrap items-center gap-3">
+                        <Badge 
+                          variant="secondary"
+                          style={{ backgroundColor: animal.cartagenaColor === "blanco" ? "#ffffff" : 
+                            animal.cartagenaColor === "amarillo" ? "#FFD700" :
+                            animal.cartagenaColor === "rojo" ? "#FF0000" :
+                            animal.cartagenaColor === "verde" ? "#008000" :
+                            animal.cartagenaColor === "azul" ? "#0000FF" :
+                            animal.cartagenaColor === "violeta" ? "#8A2BE2" :
+                            animal.cartagenaColor === "naranja" ? "#FFA500" :
+                            animal.cartagenaColor === "rosa" ? "#FFC0CB" :
+                            animal.cartagenaColor === "negro" ? "#000000" : "#ffffff",
+                            color: ["blanco", "amarillo", "rosa", "naranja"].includes(animal.cartagenaColor || "") ? "#333" : "#fff"
+                          }}
+                        >
+                          {animal.cartagenaColor}
+                        </Badge>
+                      </div>
                     </div>
                   </div>
                 </Link>
                 
-                <div className="flex items-center space-x-1 pr-3">
-                  <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Editar">
-                    <Link href={`/animals/${animal.id}/edit`}>
-                      <i className="ri-edit-line text-lg"></i>
-                    </Link>
-                  </Button>
-                  
-                  <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Evento veterinario">
-                    <Link href={`/animals/${animal.id}/veterinary`}>
-                      <i className="ri-stethoscope-line text-lg"></i>
-                    </Link>
-                  </Button>
-                  
-                  <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Evento reproductivo">
-                    <Link href={`/animals/${animal.id}/reproduction`}>
-                      <i className="ri-heart-pulse-line text-lg"></i>
-                    </Link>
-                  </Button>
-                  
-                  <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Registrar peso">
-                    <Link href={`/animals/${animal.id}/weight`}>
-                      <i className="ri-scales-line text-lg"></i>
-                    </Link>
-                  </Button>
-                  
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-9 w-9" 
-                    title="Trasladar animal"
-                    onClick={() => openTransferSheet(animal)}
-                  >
-                    <i className="ri-arrow-left-right-line text-lg"></i>
-                  </Button>
-                  
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    asChild 
-                    className="h-9 w-9" 
-                    title="Finanzas"
-                  >
-                    <Link href={`/finances?openForm=true&type=expense&category=animales&description=Gasto - Animal #${animal.cartagena}`}>
-                      <i className="ri-money-dollar-circle-line text-lg"></i>
-                    </Link>
-                  </Button>
+                <div className="flex justify-between items-center">
+                  <div className="flex-1 p-3">
+                    <div className="flex flex-wrap gap-1">
+                      <Badge variant="outline" className="text-xs">
+                        {getCategoryLabel(animal.category)}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">
+                        {getRaceLabel(animal.race)}
+                      </Badge>
+                      {animal.reproductiveStatus && (
+                        <Badge variant="outline" className="text-xs">
+                          {getReproductiveStatusLabel(animal.reproductiveStatus)}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                
+                  <div className="flex items-center space-x-1 pr-3">
+                    {/* Checkbox para selección múltiple */}
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-9 w-9" 
+                      title={selectedAnimals.includes(animal.id) ? "Deseleccionar" : "Seleccionar"}
+                      onClick={() => handleSelectAnimal(animal.id)}
+                    >
+                      <i className={`${selectedAnimals.includes(animal.id) ? "ri-checkbox-fill text-primary" : "ri-checkbox-blank-line text-gray-400"} text-lg`}></i>
+                    </Button>
+                    
+                    {/* Veterinaria (1º) */}
+                    <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Evento veterinario">
+                      <Link href={`/animals/${animal.id}/veterinary`}>
+                        <i className="ri-stethoscope-line text-lg"></i>
+                      </Link>
+                    </Button>
+                    
+                    {/* Ventas (2º) */}
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      asChild 
+                      className="h-9 w-9" 
+                      title="Finanzas"
+                    >
+                      <Link href={`/finances?openForm=true&type=expense&category=animales&description=Gasto - Animal #${animal.cartagena}`}>
+                        <i className="ri-money-dollar-circle-line text-lg"></i>
+                      </Link>
+                    </Button>
+                    
+                    {/* Movimientos (3º) */}
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-9 w-9" 
+                      title="Trasladar animal"
+                      onClick={() => openTransferSheet(animal)}
+                    >
+                      <i className="ri-arrow-left-right-line text-lg"></i>
+                    </Button>
+                    
+                    {/* Editar (4º) */}
+                    <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Editar">
+                      <Link href={`/animals/${animal.id}/edit`}>
+                        <i className="ri-edit-line text-lg"></i>
+                      </Link>
+                    </Button>
+                  </div>
                 </div>
               </div>
             </Card>
@@ -1075,51 +730,58 @@ export default function AnimalsIndex() {
       
       {/* Transfer Sheet */}
       <Sheet open={transferSheetOpen} onOpenChange={setTransferSheetOpen}>
-        <SheetContent className="sm:max-w-md">
+        <SheetContent>
           <SheetHeader>
-            <SheetTitle>Trasladar animal #{selectedAnimal?.cartagena}</SheetTitle>
+            <SheetTitle>Trasladar animal</SheetTitle>
             <SheetDescription>
-              Indique la nueva ubicación del animal
+              Ingrese la nueva ubicación del animal
             </SheetDescription>
           </SheetHeader>
           
           <div className="py-6 space-y-4">
             <div className="space-y-2">
-              <label htmlFor="location" className="text-sm font-medium">
-                Ubicación
-              </label>
-              <Input
-                id="location"
-                placeholder="Ej: Potrero 1, Corral 3, etc."
-                value={transferLocation}
-                onChange={(e) => setTransferLocation(e.target.value)}
-              />
+              <h3 className="font-medium text-sm">Animal</h3>
+              <p>Caravana <strong>{selectedAnimal?.cartagena}</strong></p>
+              <p>Ubicación actual: <strong>{selectedAnimal?.location || "No especificada"}</strong></p>
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="font-medium text-sm">Nueva ubicación</h3>
+              <Select value={transferLocation} onValueChange={setTransferLocation}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar ubicación" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="campo_general">Campo general</SelectItem>
+                  <SelectItem value="potrero_norte">Potrero norte</SelectItem>
+                  <SelectItem value="potrero_sur">Potrero sur</SelectItem>
+                  <SelectItem value="campo_engorde">Campo de engorde</SelectItem>
+                  <SelectItem value="corral_destete">Corral de destete</SelectItem>
+                </SelectContent>
+              </Select>
               
-              {/* Sugerencias de ubicación según estado reproductivo */}
-              {selectedAnimal?.reproductiveStatus === "prenada" && (
+              {transferLocation && selectedAnimal?.location === transferLocation && (
                 <div className="mt-2 text-sm text-green-600 bg-green-50 p-2 rounded-md">
                   <i className="ri-information-line mr-1"></i>
-                  Sugerencia: Ubicar en potreros para invernada.
+                  El animal ya se encuentra en esta ubicación
                 </div>
               )}
               
-              {(selectedAnimal?.reproductiveStatus === "vacia" || selectedAnimal?.reproductiveStatus === "servicio") && (
+              {transferLocation && selectedAnimal?.category === "ternero" && transferLocation === "corral_destete" && (
                 <div className="mt-2 text-sm text-yellow-600 bg-yellow-50 p-2 rounded-md">
-                  <i className="ri-information-line mr-1"></i>
-                  Sugerencia: Ubicar en área para inseminación artificial.
+                  <i className="ri-alert-line mr-1"></i>
+                  Considere registrar un evento de destete al mover un ternero al corral de destete
                 </div>
               )}
             </div>
             
-            {selectedAnimal && selectedAnimal.location && (
-              <div className="text-sm text-neutral-500">
-                Ubicación actual: <span className="font-medium">{selectedAnimal.location}</span>
-              </div>
-            )}
+            <div className="text-sm text-neutral-500">
+              Este cambio quedará registrado en el historial del animal
+            </div>
           </div>
           
           <SheetFooter>
-            <Button type="button" onClick={handleTransfer} disabled={!transferLocation.trim()}>
+            <Button onClick={handleTransfer} disabled={!transferLocation || transferLocation === selectedAnimal?.location}>
               Trasladar animal
             </Button>
           </SheetFooter>
