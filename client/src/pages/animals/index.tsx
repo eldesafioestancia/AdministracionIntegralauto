@@ -692,7 +692,6 @@ export default function AnimalsIndex() {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center">
-                      <i className={`${getCategoryIcon(animal.category)} mr-2`}></i>
                       <div className="font-medium">{animal.cartagena}</div>
                       <Badge 
                         className="ml-2"
