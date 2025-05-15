@@ -85,6 +85,8 @@ export default function AnimalsIndex() {
   const [transferSheetOpen, setTransferSheetOpen] = useState(false);
   const [selectedAnimal, setSelectedAnimal] = useState<any>(null);
   const [transferLocation, setTransferLocation] = useState("");
+  const [newWeight, setNewWeight] = useState<string>("");
+  const [registerWeight, setRegisterWeight] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>("");
   const [selectedAnimals, setSelectedAnimals] = useState<number[]>([]);
@@ -263,6 +265,8 @@ export default function AnimalsIndex() {
   const openTransferSheet = (animal: any) => {
     setSelectedAnimal(animal);
     setTransferLocation(animal.location || "");
+    setNewWeight("");
+    setRegisterWeight(false);
     setTransferSheetOpen(true);
   };
   
@@ -270,32 +274,62 @@ export default function AnimalsIndex() {
     if (!selectedAnimal) return;
     
     try {
-      await apiRequest("PUT", `/api/animals/${selectedAnimal.id}`, {
+      // Actualizar ubicación del animal
+      const updateData: any = {
         location: transferLocation
-      });
+      };
+      
+      // Si se registró un peso, actualizarlo también
+      if (registerWeight && newWeight) {
+        updateData.currentWeight = newWeight;
+        updateData.lastWeightDate = new Date();
+      }
+      
+      await apiRequest("PUT", `/api/animals/${selectedAnimal.id}`, updateData);
       
       // Invalidate animals query to refresh the list
       queryClient.invalidateQueries({ queryKey: ["/api/animals"] });
       
-      // Add a veterinary event for the transfer
+      // Add a veterinary event for the transfer (y posiblemente el pesaje)
+      let description = `Traslado a: ${transferLocation}`;
+      if (registerWeight && newWeight) {
+        description += ` - Peso registrado: ${newWeight} kg`;
+      }
+      
       await apiRequest("POST", "/api/animal-veterinary", {
         animalId: selectedAnimal.id,
         date: new Date(),
-        type: "transfer",
-        description: `Traslado a: ${transferLocation}`
+        type: registerWeight ? "transfer_weight" : "transfer",
+        description: description
       });
       
+      // Si se registró peso, agregar un evento de peso específico
+      if (registerWeight && newWeight) {
+        await apiRequest("POST", "/api/animal-veterinary", {
+          animalId: selectedAnimal.id,
+          date: new Date(),
+          type: "weight",
+          description: `Peso registrado: ${newWeight} kg`
+        });
+      }
+      
+      // Mensaje toast con la información relevante
+      let successMessage = `El animal ha sido trasladado a ${transferLocation}`;
+      if (registerWeight && newWeight) {
+        successMessage += ` y se registró un peso de ${newWeight} kg`;
+      }
+      
       toast({
-        title: "Animal trasladado",
-        description: `El animal ha sido trasladado a ${transferLocation}`,
+        title: "Operación exitosa",
+        description: successMessage,
       });
       
       setTransferSheetOpen(false);
     } catch (error) {
-      console.error("Error transferring animal:", error);
+      console.error("Error en operación:", error);
       toast({
         title: "Error",
-        description: "No se pudo trasladar el animal",
+        description: "No se pudo completar la operación",
         variant: "destructive",
       });
     }
@@ -723,9 +757,9 @@ export default function AnimalsIndex() {
       <Sheet open={transferSheetOpen} onOpenChange={setTransferSheetOpen}>
         <SheetContent>
           <SheetHeader>
-            <SheetTitle>Trasladar animal</SheetTitle>
+            <SheetTitle>Trasladar y/o pesar animal</SheetTitle>
             <SheetDescription>
-              Ingrese la nueva ubicación del animal
+              Defina la nueva ubicación del animal y/o registre su peso actual
             </SheetDescription>
           </SheetHeader>
           
@@ -766,14 +800,58 @@ export default function AnimalsIndex() {
               )}
             </div>
             
+            {/* Sección de pesaje */}
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="registerWeight" 
+                  checked={registerWeight}
+                  onCheckedChange={(checked) => setRegisterWeight(checked === true)}
+                />
+                <label
+                  htmlFor="registerWeight"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  Registrar peso actual
+                </label>
+              </div>
+              
+              {registerWeight && (
+                <div className="pt-2">
+                  <div className="flex items-center space-x-2">
+                    <Input
+                      type="number"
+                      placeholder="Peso en kg"
+                      value={newWeight}
+                      onChange={(e) => setNewWeight(e.target.value)}
+                      className="w-36"
+                    />
+                    <span className="text-sm text-neutral-500">kg</span>
+                  </div>
+                  {selectedAnimal?.currentWeight && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Último peso registrado: {selectedAnimal.currentWeight} kg
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+            
             <div className="text-sm text-neutral-500">
               Este cambio quedará registrado en el historial del animal
             </div>
           </div>
           
           <SheetFooter>
-            <Button onClick={handleTransfer} disabled={!transferLocation || transferLocation === selectedAnimal?.location}>
-              Trasladar animal
+            <Button 
+              onClick={handleTransfer} 
+              disabled={(transferLocation === selectedAnimal?.location && !registerWeight) || (!transferLocation)}
+            >
+              {registerWeight && transferLocation === selectedAnimal?.location 
+                ? "Registrar peso" 
+                : registerWeight 
+                  ? "Trasladar y registrar peso" 
+                  : "Trasladar animal"}
             </Button>
           </SheetFooter>
         </SheetContent>
