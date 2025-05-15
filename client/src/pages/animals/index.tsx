@@ -686,10 +686,10 @@ export default function AnimalsIndex() {
                         size="icon" 
                         asChild 
                         className="h-8 w-8" 
-                        title="Finanzas"
+                        title="Registrar venta"
                       >
-                        <Link href={`/finances?openForm=true&type=expense&category=animales&description=Gasto - Animal #${animal.cartagena}`}>
-                          <i className="ri-money-dollar-circle-line text-lg"></i>
+                        <Link href={`/finances?openForm=true&type=income&category=animales&description=Venta - Animal #${animal.cartagena}`}>
+                          <i className="ri-shopping-cart-line text-lg"></i>
                         </Link>
                       </Button>
                       
