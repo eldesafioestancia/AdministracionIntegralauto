@@ -692,9 +692,8 @@ export default function AnimalsIndex() {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center">
-                      <div className="font-medium">{animal.cartagena}</div>
                       <Badge 
-                        className="ml-2"
+                        className="mr-2"
                         style={{ 
                           backgroundColor: animal.cartagenaColor === "blanco" ? "#ffffff" : 
                             animal.cartagenaColor === "amarillo" ? "#FFD700" :
@@ -705,11 +704,15 @@ export default function AnimalsIndex() {
                             animal.cartagenaColor === "naranja" ? "#FFA500" :
                             animal.cartagenaColor === "rosa" ? "#FFC0CB" :
                             animal.cartagenaColor === "negro" ? "#000000" : "#ffffff",
-                          color: ["blanco", "amarillo", "rosa", "naranja"].includes(animal.cartagenaColor || "") ? "#333" : "#fff"
+                          color: ["blanco", "amarillo", "rosa", "naranja"].includes(animal.cartagenaColor || "") ? "#333" : "#fff",
+                          width: "12px",
+                          height: "12px",
+                          minWidth: "12px"
                         }}
                       >
                         &nbsp;
                       </Badge>
+                      <div className="font-medium">{animal.cartagena}</div>
                     </div>
                   </TableCell>
                   <TableCell>{getCategoryLabel(animal.category)}</TableCell>
