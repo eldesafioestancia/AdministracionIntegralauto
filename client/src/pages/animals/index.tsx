@@ -1144,5 +1144,6 @@ export default function AnimalsIndex() {
         </SheetContent>
       </Sheet>
     </div>
+  </div>
   );
 }
