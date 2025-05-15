@@ -1025,7 +1025,7 @@ export default function AnimalsIndex() {
                   </div>
                 </Link>
                 
-                <div className="flex items-center space-x-1 pr-3">
+                <div className="flex items-center space-x-1 pr-3 ml-auto shrink-0">
                   {/* Checkbox para seleccionar el animal */}
                   <Button 
                     variant="ghost" 
