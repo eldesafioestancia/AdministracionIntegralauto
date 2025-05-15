@@ -24,6 +24,7 @@ import {
   insertPastureFinanceSchema,
   insertInvestmentSchema,
   insertCapitalSchema,
+  insertAnimalWeightSchema,
 } from "@shared/schema";
 import { 
   getCurrentWeather, 
