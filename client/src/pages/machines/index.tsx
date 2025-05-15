@@ -326,7 +326,20 @@ export default function MachinesIndex() {
           <p className="text-neutral-400 text-sm">Gestiona tus camiones, tractores, topadoras y accesorios</p>
         </div>
         
-        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <div className="flex space-x-2">
+          {/* Botón para eliminar seleccionados - solo se muestra si hay elementos seleccionados */}
+          {selectedMachines.length > 0 && (
+            <Button 
+              variant="destructive"
+              onClick={handleDeleteSelected}
+              className="mt-2 sm:mt-0"
+            >
+              <i className="ri-delete-bin-line mr-1"></i> 
+              Eliminar ({selectedMachines.length})
+            </Button>
+          )}
+          
+          <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
           <SheetTrigger asChild>
             <Button className="mt-2 sm:mt-0">
               <i className="ri-add-line mr-1"></i> Nueva unidad
@@ -774,6 +787,32 @@ export default function MachinesIndex() {
                 </Link>
                 
                 <div className="flex items-center space-x-1 pr-3">
+                  {/* Checkbox para seleccionar la máquina */}
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-9 w-9" 
+                    title={selectedMachines.includes(machine.id) ? "Deseleccionar" : "Seleccionar"}
+                    onClick={() => handleSelectMachine(machine.id)}
+                  >
+                    <i className={`${selectedMachines.includes(machine.id) ? "ri-checkbox-fill text-primary" : "ri-checkbox-blank-line text-gray-400"} text-lg`}></i>
+                  </Button>
+                  
+                  {/* Mantenimiento (1º) */}
+                  <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Registrar mantenimiento">
+                    <Link href={`/machines/${machine.id}/maintenance`}>
+                      <i className="ri-settings-line text-orange-500 text-lg"></i>
+                    </Link>
+                  </Button>
+                  
+                  {/* Trabajos (2º) */}
+                  <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Trabajos">
+                    <Link href={`/machines/${machine.id}/work`}>
+                      <i className="ri-tools-line text-blue-500 text-lg"></i>
+                    </Link>
+                  </Button>
+                  
+                  {/* Editar (3º) */}
                   <Button 
                     variant="ghost" 
                     size="icon" 
@@ -782,24 +821,6 @@ export default function MachinesIndex() {
                     onClick={() => handleEdit(machine.id)}
                   >
                     <i className="ri-edit-line text-amber-500 text-lg"></i>
-                  </Button>
-                  
-                  <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Registrar mantenimiento">
-                    <Link href={`/machines/${machine.id}/maintenance`}>
-                      <i className="ri-settings-line text-orange-500 text-lg"></i>
-                    </Link>
-                  </Button>
-                  
-                  <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Trabajos">
-                    <Link href={`/machines/${machine.id}/work`}>
-                      <i className="ri-tools-line text-blue-500 text-lg"></i>
-                    </Link>
-                  </Button>
-                  
-                  <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Registrar movimiento financiero">
-                    <Link href={`/finances?openForm=true&type=expense&category=maquinarias&description=Gasto - ${machine.brand} ${machine.model}&machineId=${machine.id}`}>
-                      <i className="ri-money-dollar-circle-line text-green-500 text-lg"></i>
-                    </Link>
                   </Button>
                 </div>
               </div>
