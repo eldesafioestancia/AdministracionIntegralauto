@@ -1196,15 +1196,6 @@ export default function PasturesIndex() {
                             variant="ghost"
                             size="icon"
                             className="h-10 w-10"
-                            title="Editar"
-                            onClick={() => handleEditPasture(pasture.id)}
-                          >
-                            <i className="ri-pencil-line text-xl text-amber-500"></i>
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-10 w-10"
                             title="Trabajos Realizados"
                             onClick={() => handleOpenWorkSheet(pasture.id)}
                           >
@@ -1221,27 +1212,29 @@ export default function PasturesIndex() {
                               <i className="ri-money-dollar-circle-line text-xl text-green-500"></i>
                             </Link>
                           </Button>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-end space-x-2">
                           <Button
                             variant="ghost"
                             size="icon"
                             className="h-10 w-10"
-                            title="Eliminar"
-                            onClick={() => handleDelete(pasture.id)}
+                            title="Editar"
+                            onClick={() => handleEditPasture(pasture.id)}
                           >
-                            <i className="ri-delete-bin-line text-xl text-red-500"></i>
+                            <i className="ri-pencil-line text-xl text-amber-500"></i>
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-10 w-10" 
+                            title={selectedPastures.includes(pasture.id) ? "Deseleccionar" : "Seleccionar"}
+                            onClick={(e) => handleSelectPasture(pasture.id, e)}
+                          >
+                            <i className={`${selectedPastures.includes(pasture.id) ? "ri-checkbox-fill text-primary" : "ri-checkbox-blank-line text-gray-400"} text-xl`}></i>
                           </Button>
                         </div>
-                      </TableCell>
-                      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-10 w-10" 
-                          title={selectedPastures.includes(pasture.id) ? "Deseleccionar" : "Seleccionar"}
-                          onClick={(e) => handleSelectPasture(pasture.id, e)}
-                        >
-                          <i className={`${selectedPastures.includes(pasture.id) ? "ri-checkbox-fill text-primary" : "ri-checkbox-blank-line text-gray-400"} text-xl`}></i>
-                        </Button>
                       </TableCell>
                     </TableRow>
                   ))
