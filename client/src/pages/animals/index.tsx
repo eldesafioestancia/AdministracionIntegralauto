@@ -19,11 +19,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { 
   Form, 
   FormControl, 
@@ -91,7 +86,6 @@ export default function AnimalsIndex() {
   const [transferLocation, setTransferLocation] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>("");
-  const [selectedAnimals, setSelectedAnimals] = useState<number[]>([]);
   const { toast } = useToast();
   
   interface Animal {
@@ -305,47 +299,6 @@ export default function AnimalsIndex() {
     }
   };
 
-  // Función para manejar la selección de un animal
-  function handleSelectAnimal(id: number) {
-    setSelectedAnimals(prev => {
-      if (prev.includes(id)) {
-        // Si ya está seleccionado, lo quitamos
-        return prev.filter(animalId => animalId !== id);
-      } else {
-        // Si no está seleccionado, lo agregamos
-        return [...prev, id];
-      }
-    });
-  }
-  
-  // Función para eliminar los animales seleccionados
-  async function handleDeleteSelected() {
-    if (selectedAnimals.length === 0) return;
-    
-    try {
-      for (const id of selectedAnimals) {
-        await apiRequest("DELETE", `/api/animals/${id}`);
-      }
-      
-      toast({
-        title: "Animales eliminados",
-        description: `Se eliminaron ${selectedAnimals.length} animales exitosamente`,
-      });
-      
-      // Limpiar selección y actualizar lista
-      setSelectedAnimals([]);
-      queryClient.invalidateQueries({ queryKey: ["/api/animals"] });
-      
-    } catch (error) {
-      console.error("Error deleting animals:", error);
-      toast({
-        title: "Error",
-        description: "No se pudieron eliminar algunos animales",
-        variant: "destructive",
-      });
-    }
-  };
-
   // Filter animals
   const filteredAnimals = animals ? animals.filter((animal) => {
     const matchesSearch = 
@@ -387,20 +340,7 @@ export default function AnimalsIndex() {
           <p className="text-neutral-400 text-sm">Gestiona el rodeo de tu establecimiento</p>
         </div>
         
-        <div className="flex space-x-2">
-          {/* Botón para eliminar seleccionados - solo se muestra si hay elementos seleccionados */}
-          {selectedAnimals.length > 0 && (
-            <Button 
-              variant="destructive"
-              onClick={handleDeleteSelected}
-              className="mt-2 sm:mt-0"
-            >
-              <i className="ri-delete-bin-line mr-1"></i> 
-              Eliminar ({selectedAnimals.length})
-            </Button>
-          )}
-          
-          <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
           <SheetTrigger asChild>
             <Button className="mt-2 sm:mt-0">
               <i className="ri-add-line mr-1"></i> Nuevo animal
@@ -944,10 +884,10 @@ export default function AnimalsIndex() {
           )}
         </div>
       ) : (
-        <div className="space-y-3 w-full overflow-hidden">
+        <div className="space-y-3">
           {filteredAnimals.map((animal) => (
-            <Card key={animal.id} className="p-0 overflow-hidden max-w-full">
-              <div className="flex items-center w-full">
+            <Card key={animal.id} className="p-0 overflow-hidden">
+              <div className="flex items-center">
                 <div 
                   className="w-16 h-16 flex-shrink-0 flex items-center justify-center relative"
                   style={{
@@ -1026,48 +966,30 @@ export default function AnimalsIndex() {
                 </Link>
                 
                 <div className="flex items-center space-x-1 pr-3">
-                  {/* Checkbox para seleccionar el animal */}
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-9 w-9" 
-                    title={selectedAnimals.includes(animal.id) ? "Deseleccionar" : "Seleccionar"}
-                    onClick={() => handleSelectAnimal(animal.id)}
-                  >
-                    <i className={`${selectedAnimals.includes(animal.id) ? "ri-checkbox-fill text-primary" : "ri-checkbox-blank-line text-gray-400"} text-lg`}></i>
+                  <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Editar">
+                    <Link href={`/animals/${animal.id}/edit`}>
+                      <i className="ri-edit-line text-lg"></i>
+                    </Link>
                   </Button>
                   
-                  {/* Veterinaria (1º) - Crear menú desplegable */}
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-9 w-9" title="Evento veterinario">
-                        <i className="ri-stethoscope-line text-lg"></i>
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-56 p-0" side="right" align="start">
-                      <div className="flex flex-col p-1">
-                        <Button variant="ghost" size="sm" asChild className="justify-start">
-                          <Link href={`/animals/${animal.id}/veterinary`}>
-                            <i className="ri-stethoscope-line mr-2"></i> Evento veterinario
-                          </Link>
-                        </Button>
-                        <Button variant="ghost" size="sm" asChild className="justify-start">
-                          <Link href={`/animals/${animal.id}/weight`}>
-                            <i className="ri-scales-line mr-2"></i> Registrar peso
-                          </Link>
-                        </Button>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
+                  <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Evento veterinario">
+                    <Link href={`/animals/${animal.id}/veterinary`}>
+                      <i className="ri-stethoscope-line text-lg"></i>
+                    </Link>
+                  </Button>
                   
-                  {/* Ventas (2º) */}
                   <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Evento reproductivo">
                     <Link href={`/animals/${animal.id}/reproduction`}>
                       <i className="ri-heart-pulse-line text-lg"></i>
                     </Link>
                   </Button>
                   
-                  {/* Movimientos (3º) - Traslado */}
+                  <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Registrar peso">
+                    <Link href={`/animals/${animal.id}/weight`}>
+                      <i className="ri-scales-line text-lg"></i>
+                    </Link>
+                  </Button>
+                  
                   <Button 
                     variant="ghost" 
                     size="icon" 
@@ -1078,10 +1000,15 @@ export default function AnimalsIndex() {
                     <i className="ri-arrow-left-right-line text-lg"></i>
                   </Button>
                   
-                  {/* Editar (4º) */}
-                  <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Editar">
-                    <Link href={`/animals/${animal.id}/edit`}>
-                      <i className="ri-edit-line text-lg"></i>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    asChild 
+                    className="h-9 w-9" 
+                    title="Finanzas"
+                  >
+                    <Link href={`/finances?openForm=true&type=expense&category=animales&description=Gasto - Animal #${animal.cartagena}`}>
+                      <i className="ri-money-dollar-circle-line text-lg"></i>
                     </Link>
                   </Button>
                 </div>
@@ -1144,6 +1071,5 @@ export default function AnimalsIndex() {
         </SheetContent>
       </Sheet>
     </div>
-  </div>
   );
 }

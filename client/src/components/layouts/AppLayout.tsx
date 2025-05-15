@@ -70,10 +70,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
         <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
 
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-neutral-100 p-4 sm:p-6 pb-20 lg:pb-6">
-          <div className="container mx-auto max-w-7xl">
-            {children}
-          </div>
+        <main className="flex-1 overflow-y-auto bg-neutral-100 p-4 sm:p-6 pb-20 lg:pb-6">
+          {children}
         </main>
       </div>
 
