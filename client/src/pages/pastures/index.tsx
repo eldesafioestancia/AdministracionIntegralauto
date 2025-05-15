@@ -1107,7 +1107,6 @@ export default function PasturesIndex() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Imagen</TableHead>
                   <TableHead>Nombre</TableHead>
                   <TableHead>Superficie (Ha)</TableHead>
                   <TableHead className="hidden md:table-cell">Ubicación</TableHead>
@@ -1115,6 +1114,9 @@ export default function PasturesIndex() {
                   <TableHead>Agua</TableHead>
                   <TableHead>Estado</TableHead>
                   <TableHead>Acciones</TableHead>
+                  <TableHead className="w-10 text-right">
+                    {/* Columna para checkboxes */}
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
