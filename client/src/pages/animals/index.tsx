@@ -90,6 +90,7 @@ type AnimalFormValues = z.infer<typeof animalFormSchema>;
 export default function AnimalsIndex() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
+  const [activeTab, setActiveTab] = useState("list");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [transferSheetOpen, setTransferSheetOpen] = useState(false);
   const [selectedAnimal, setSelectedAnimal] = useState<any>(null);
@@ -604,55 +605,68 @@ export default function AnimalsIndex() {
         </div>
       </div>
       
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-2">
-        <div className="relative flex-1">
-          <i className="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400"></i>
-          <Input
-            placeholder="Buscar por caravana, raza..."
-            className="pl-10"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+      {/* Tabs Navigation */}
+      <Tabs defaultValue="list" onValueChange={setActiveTab}>
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="list">
+            <i className="ri-list-check mr-1"></i> Lista
+          </TabsTrigger>
+          <TabsTrigger value="stats">
+            <i className="ri-pie-chart-line mr-1"></i> Estadísticas
+          </TabsTrigger>
+        </TabsList>
         
-        <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="Categoría" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas las categorías</SelectItem>
-            <SelectItem value="vaca">Vacas</SelectItem>
-            <SelectItem value="vaquillona">Vaquillonas</SelectItem>
-            <SelectItem value="toro">Toros</SelectItem>
-            <SelectItem value="novillo">Novillos</SelectItem>
-            <SelectItem value="ternero">Terneros</SelectItem>
-            <SelectItem value="ternera">Terneras</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      
-      {/* Animal list */}
-      {filteredAnimals.length === 0 ? (
-        <div className="py-10 text-center">
-          <p className="text-neutral-400">No se encontraron animales</p>
-        </div>
-      ) : (
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-10">
-                  {/* Header checkbox placeholder - podría implementarse seleccionar todos */}
-                </TableHead>
-                <TableHead>Caravana</TableHead>
-                <TableHead>Categoría</TableHead>
-                <TableHead>Raza</TableHead>
-                <TableHead className="hidden md:table-cell">Estado</TableHead>
-                <TableHead className="hidden md:table-cell">Ubicación</TableHead>
-                <TableHead className="text-right">Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
+        {/* Tab Content - List */}
+        <TabsContent value="list" className="mt-4">
+          {/* Filters */}
+          <div className="flex flex-col sm:flex-row gap-2 mb-4">
+            <div className="relative flex-1">
+              <i className="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400"></i>
+              <Input
+                placeholder="Buscar por caravana, raza..."
+                className="pl-10"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            
+            <Select value={filter} onValueChange={setFilter}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Categoría" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas las categorías</SelectItem>
+                <SelectItem value="vaca">Vacas</SelectItem>
+                <SelectItem value="vaquillona">Vaquillonas</SelectItem>
+                <SelectItem value="toro">Toros</SelectItem>
+                <SelectItem value="novillo">Novillos</SelectItem>
+                <SelectItem value="ternero">Terneros</SelectItem>
+                <SelectItem value="ternera">Terneras</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {/* Animal list */}
+          {filteredAnimals.length === 0 ? (
+            <div className="py-10 text-center">
+              <p className="text-neutral-400">No se encontraron animales</p>
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-10">
+                      {/* Header checkbox placeholder - podría implementarse seleccionar todos */}
+                    </TableHead>
+                    <TableHead>Caravana</TableHead>
+                    <TableHead>Categoría</TableHead>
+                    <TableHead>Raza</TableHead>
+                    <TableHead className="hidden md:table-cell">Estado</TableHead>
+                    <TableHead className="hidden md:table-cell">Ubicación</TableHead>
+                    <TableHead className="text-right">Acciones</TableHead>
+                  </TableRow>
+                </TableHeader>
             <TableBody>
               {filteredAnimals.map((animal) => (
                 <TableRow 
@@ -769,6 +783,26 @@ export default function AnimalsIndex() {
           </Table>
         </div>
       )}
+        </TabsContent>
+        
+        {/* Tab Content - Stats */}
+        <TabsContent value="stats" className="mt-4">
+          <div className="p-8 text-center border rounded-md">
+            <div className="flex flex-col items-center justify-center">
+              <div className="bg-neutral-100 p-4 rounded-full mb-4">
+                <i className="ri-pie-chart-line text-neutral-400 text-4xl"></i>
+              </div>
+              <h3 className="text-lg font-medium">Estadísticas del Rodeo</h3>
+              <p className="text-neutral-500 mt-2 max-w-md">
+                En esta sección podrá visualizar estadísticas sobre la composición del rodeo, pesos, evolución y más.
+              </p>
+              <Button className="mt-4" disabled>
+                <i className="ri-bar-chart-line mr-1"></i> Mostrar Estadísticas
+              </Button>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
       
       {/* Transfer Sheet */}
       <Sheet open={transferSheetOpen} onOpenChange={setTransferSheetOpen}>
