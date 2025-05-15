@@ -656,15 +656,15 @@ export default function AnimalsIndex() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-10">
-                      {/* Header checkbox placeholder - podría implementarse seleccionar todos */}
-                    </TableHead>
                     <TableHead>Caravana</TableHead>
                     <TableHead>Categoría</TableHead>
                     <TableHead>Raza</TableHead>
                     <TableHead className="hidden md:table-cell">Estado</TableHead>
                     <TableHead className="hidden md:table-cell">Ubicación</TableHead>
                     <TableHead className="text-right">Acciones</TableHead>
+                    <TableHead className="w-10 text-right">
+                      {/* Columna para checkboxes */}
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
             <TableBody>
