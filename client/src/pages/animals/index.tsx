@@ -86,6 +86,7 @@ export default function AnimalsIndex() {
   const [transferLocation, setTransferLocation] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>("");
+  const [selectedAnimals, setSelectedAnimals] = useState<number[]>([]);
   const { toast } = useToast();
   
   interface Animal {
@@ -294,6 +295,47 @@ export default function AnimalsIndex() {
       toast({
         title: "Error",
         description: "No se pudo trasladar el animal",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Función para manejar la selección de un animal
+  function handleSelectAnimal(id: number) {
+    setSelectedAnimals(prev => {
+      if (prev.includes(id)) {
+        // Si ya está seleccionado, lo quitamos
+        return prev.filter(animalId => animalId !== id);
+      } else {
+        // Si no está seleccionado, lo agregamos
+        return [...prev, id];
+      }
+    });
+  }
+  
+  // Función para eliminar los animales seleccionados
+  async function handleDeleteSelected() {
+    if (selectedAnimals.length === 0) return;
+    
+    try {
+      for (const id of selectedAnimals) {
+        await apiRequest("DELETE", `/api/animals/${id}`);
+      }
+      
+      toast({
+        title: "Animales eliminados",
+        description: `Se eliminaron ${selectedAnimals.length} animales exitosamente`,
+      });
+      
+      // Limpiar selección y actualizar lista
+      setSelectedAnimals([]);
+      queryClient.invalidateQueries({ queryKey: ["/api/animals"] });
+      
+    } catch (error) {
+      console.error("Error deleting animals:", error);
+      toast({
+        title: "Error",
+        description: "No se pudieron eliminar algunos animales",
         variant: "destructive",
       });
     }
