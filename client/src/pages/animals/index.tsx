@@ -944,10 +944,10 @@ export default function AnimalsIndex() {
           )}
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3 w-full overflow-hidden">
           {filteredAnimals.map((animal) => (
-            <Card key={animal.id} className="p-0 overflow-hidden">
-              <div className="flex items-center">
+            <Card key={animal.id} className="p-0 overflow-hidden max-w-full">
+              <div className="flex items-center w-full">
                 <div 
                   className="w-16 h-16 flex-shrink-0 flex items-center justify-center relative"
                   style={{
@@ -1044,7 +1044,7 @@ export default function AnimalsIndex() {
                         <i className="ri-stethoscope-line text-lg"></i>
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
+                    <PopoverContent className="w-56 p-0" side="right" align="start">
                       <div className="flex flex-col p-1">
                         <Button variant="ghost" size="sm" asChild className="justify-start">
                           <Link href={`/animals/${animal.id}/veterinary`}>
