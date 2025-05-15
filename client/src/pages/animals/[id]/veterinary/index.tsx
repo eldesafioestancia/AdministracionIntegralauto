@@ -26,6 +26,7 @@ const veterinaryFormSchema = z.object({
   medication: z.string().optional(),
   dose: z.string().optional(),
   cost: z.string().optional(),
+  weight: z.string().optional(),
   notes: z.string().optional(),
 });
 
@@ -53,6 +54,7 @@ export default function AnimalVeterinary() {
       medication: "",
       dose: "",
       cost: "",
+      weight: animal?.currentWeight || "",
       notes: "",
     },
   });
@@ -65,14 +67,35 @@ export default function AnimalVeterinary() {
         ...values,
       });
       
+      // Actualizar el peso del animal si se ha proporcionado
+      if (values.weight && values.weight !== animal.currentWeight) {
+        await apiRequest("PUT", `/api/animals/${animalId}`, {
+          currentWeight: values.weight,
+          lastWeightDate: values.date
+        });
+      }
+      
+      // Registrar el costo de medicamentos como gasto financiero si se ha proporcionado
+      if (values.cost && parseFloat(values.cost) > 0) {
+        await apiRequest("POST", `/api/animal-finances`, {
+          animalId: Number(animalId),
+          date: values.date,
+          type: "expense",
+          concept: `Medicamento: ${values.medication || 'Sin especificar'} - ${values.type}`,
+          amount: values.cost
+        });
+      }
+      
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ["/api/animals"] });
       queryClient.invalidateQueries({ queryKey: [`/api/animals/${animalId}`] });
       queryClient.invalidateQueries({ queryKey: [`/api/animal-veterinary`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/animal-finances`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard"] });
       
       toast({
         title: "Evento veterinario registrado",
-        description: "Los datos del evento han sido registrados exitosamente",
+        description: "Los datos del evento, peso y gastos han sido registrados exitosamente",
       });
       
       // Navegar a la página de detalle
@@ -251,7 +274,7 @@ export default function AnimalVeterinary() {
                 />
               </div>
               
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
                   name="medication"
@@ -279,15 +302,41 @@ export default function AnimalVeterinary() {
                     </FormItem>
                   )}
                 />
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="weight"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Peso del animal (kg)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          placeholder="Peso en kilogramos" 
+                          {...field} 
+                          onChange={(e) => field.onChange(e.target.value)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 
                 <FormField
                   control={form.control}
                   name="cost"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Costo</FormLabel>
+                      <FormLabel>Costo del medicamento</FormLabel>
                       <FormControl>
-                        <Input placeholder="Costo del tratamiento" {...field} />
+                        <Input 
+                          type="number" 
+                          placeholder="Costo en pesos" 
+                          {...field} 
+                          onChange={(e) => field.onChange(e.target.value)}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

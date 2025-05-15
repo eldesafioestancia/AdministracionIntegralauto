@@ -254,6 +254,13 @@ export const animalVeterinary = pgTable("animal_veterinary", {
   date: timestamp("date").notNull(),
   type: text("type").notNull(), // separation, device_placement, device_removal, insemination, check, visit, birth, weaning, sale, vaccination
   description: text("description").notNull(),
+  treatment: text("treatment"),
+  result: text("result"),
+  medication: text("medication"),
+  dose: text("dose"),
+  cost: text("cost"), // Costo de medicamentos
+  weight: text("weight"), // Peso del animal
+  notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
