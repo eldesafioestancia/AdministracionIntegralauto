@@ -155,6 +155,7 @@ export class MemStorage implements IStorage {
   private repairs: Map<number, Repair>;
   private salaries: Map<number, Salary>;
   private capitals: Map<number, Capital>;
+  private animalWeightsHistory: Map<number, AnimalWeight>;
   
   // Almacenamiento para notificaciones push
   private pushSubscriptions: Record<string, any[]> = {};
@@ -198,6 +199,7 @@ export class MemStorage implements IStorage {
     this.repairs = new Map();
     this.salaries = new Map();
     this.capitals = new Map();
+    this.animalWeightsHistory = new Map();
 
     this.currentIds = {
       user: 1,
@@ -216,6 +218,7 @@ export class MemStorage implements IStorage {
       repair: 1,
       salary: 1,
       capital: 1,
+      animalWeight: 1,
     };
 
     // Initialize with a default admin user
@@ -809,6 +812,30 @@ export class MemStorage implements IStorage {
 
   async deleteCapital(id: number): Promise<boolean> {
     return this.capitals.delete(id);
+  }
+  
+  // Métodos para historial de pesos de animales
+  async getAnimalWeights(animalId?: number): Promise<AnimalWeight[]> {
+    const weights = Array.from(this.animalWeightsHistory.values());
+    if (animalId !== undefined) {
+      return weights.filter(weight => weight.animalId === animalId)
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    }
+    return weights.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }
+  
+  async createAnimalWeight(insertWeight: InsertAnimalWeight): Promise<AnimalWeight> {
+    const id = this.currentIds.animalWeight++;
+    const now = new Date();
+    
+    const weight: AnimalWeight = { ...insertWeight, id, createdAt: now };
+    this.animalWeightsHistory.set(id, weight);
+    
+    return weight;
+  }
+  
+  async deleteAnimalWeight(id: number): Promise<boolean> {
+    return this.animalWeightsHistory.delete(id);
   }
 
   // Dashboard
