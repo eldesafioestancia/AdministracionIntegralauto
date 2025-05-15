@@ -662,56 +662,63 @@ export default function AnimalsIndex() {
                     window.location.href = `/animals/${animal.id}`;
                   }}
                 >
-                  <td className="py-2 px-4">
+                  <TableCell>
                     <Button 
                       variant="ghost" 
                       size="icon" 
                       className="h-8 w-8" 
                       title={selectedAnimals.includes(animal.id) ? "Deseleccionar" : "Seleccionar"}
-                      onClick={() => handleSelectAnimal(animal.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSelectAnimal(animal.id);
+                      }}
                     >
-                      <i className={`${selectedAnimals.includes(animal.id) ? "ri-checkbox-fill text-primary" : "ri-checkbox-blank-line text-gray-400"} text-lg`}></i>
+                      <i className={`${selectedAnimals.includes(animal.id) ? "ri-checkbox-fill text-primary" : "ri-checkbox-blank-line text-gray-400"}`}></i>
                     </Button>
-                  </td>
-                  <td className="py-2 px-4">
-                    <Link href={`/animals/${animal.id}`} className="flex items-center hover:underline">
-                      <div className="flex items-center">
-                        <i className={`${getCategoryIcon(animal.category)} mr-2 text-lg`}></i>
-                        <div className="font-medium">{animal.cartagena}</div>
-                        <Badge 
-                          className="ml-2"
-                          style={{ 
-                            backgroundColor: animal.cartagenaColor === "blanco" ? "#ffffff" : 
-                              animal.cartagenaColor === "amarillo" ? "#FFD700" :
-                              animal.cartagenaColor === "rojo" ? "#FF0000" :
-                              animal.cartagenaColor === "verde" ? "#008000" :
-                              animal.cartagenaColor === "azul" ? "#0000FF" :
-                              animal.cartagenaColor === "violeta" ? "#8A2BE2" :
-                              animal.cartagenaColor === "naranja" ? "#FFA500" :
-                              animal.cartagenaColor === "rosa" ? "#FFC0CB" :
-                              animal.cartagenaColor === "negro" ? "#000000" : "#ffffff",
-                            color: ["blanco", "amarillo", "rosa", "naranja"].includes(animal.cartagenaColor || "") ? "#333" : "#fff"
-                          }}
-                        >
-                          &nbsp;
-                        </Badge>
-                      </div>
-                    </Link>
-                  </td>
-                  <td className="py-2 px-4">{getCategoryLabel(animal.category)}</td>
-                  <td className="py-2 px-4">{getRaceLabel(animal.race)}</td>
-                  <td className="py-2 px-4 hidden md:table-cell">
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center">
+                      <i className={`${getCategoryIcon(animal.category)} mr-2`}></i>
+                      <div className="font-medium">{animal.cartagena}</div>
+                      <Badge 
+                        className="ml-2"
+                        style={{ 
+                          backgroundColor: animal.cartagenaColor === "blanco" ? "#ffffff" : 
+                            animal.cartagenaColor === "amarillo" ? "#FFD700" :
+                            animal.cartagenaColor === "rojo" ? "#FF0000" :
+                            animal.cartagenaColor === "verde" ? "#008000" :
+                            animal.cartagenaColor === "azul" ? "#0000FF" :
+                            animal.cartagenaColor === "violeta" ? "#8A2BE2" :
+                            animal.cartagenaColor === "naranja" ? "#FFA500" :
+                            animal.cartagenaColor === "rosa" ? "#FFC0CB" :
+                            animal.cartagenaColor === "negro" ? "#000000" : "#ffffff",
+                          color: ["blanco", "amarillo", "rosa", "naranja"].includes(animal.cartagenaColor || "") ? "#333" : "#fff"
+                        }}
+                      >
+                        &nbsp;
+                      </Badge>
+                    </div>
+                  </TableCell>
+                  <TableCell>{getCategoryLabel(animal.category)}</TableCell>
+                  <TableCell>{getRaceLabel(animal.race)}</TableCell>
+                  <TableCell className="hidden md:table-cell">
                     {animal.reproductiveStatus ? getReproductiveStatusLabel(animal.reproductiveStatus) : "-"}
-                  </td>
-                  <td className="py-2 px-4 hidden md:table-cell">
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">
                     {animal.location ? animal.location.replace(/_/g, ' ') : "-"}
-                  </td>
-                  <td className="py-2 px-4 text-right">
+                  </TableCell>
+                  <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center justify-end space-x-1">
                       {/* Veterinaria (1º) */}
-                      <Button variant="ghost" size="icon" asChild className="h-8 w-8" title="Evento veterinario">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        asChild 
+                        className="h-8 w-8" 
+                        title="Evento veterinario"
+                      >
                         <Link href={`/animals/${animal.id}/veterinary`}>
-                          <i className="ri-stethoscope-line text-lg"></i>
+                          <i className="ri-stethoscope-line text-green-600"></i>
                         </Link>
                       </Button>
                       
@@ -724,7 +731,7 @@ export default function AnimalsIndex() {
                         title="Registrar venta"
                       >
                         <Link href={`/finances?openForm=true&type=income&category=animales&description=Venta - Animal #${animal.cartagena}`}>
-                          <i className="ri-shopping-cart-line text-lg"></i>
+                          <i className="ri-shopping-cart-line"></i>
                         </Link>
                       </Button>
                       
@@ -734,23 +741,32 @@ export default function AnimalsIndex() {
                         size="icon" 
                         className="h-8 w-8" 
                         title="Trasladar animal"
-                        onClick={() => openTransferSheet(animal)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openTransferSheet(animal);
+                        }}
                       >
-                        <i className="ri-arrow-left-right-line text-lg"></i>
+                        <i className="ri-arrow-left-right-line text-blue-500"></i>
                       </Button>
                       
                       {/* Editar (4º) */}
-                      <Button variant="ghost" size="icon" asChild className="h-8 w-8" title="Editar">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        asChild 
+                        className="h-8 w-8" 
+                        title="Editar"
+                      >
                         <Link href={`/animals/${animal.id}/edit`}>
-                          <i className="ri-edit-line text-lg"></i>
+                          <i className="ri-edit-line text-amber-500"></i>
                         </Link>
                       </Button>
                     </div>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
       
