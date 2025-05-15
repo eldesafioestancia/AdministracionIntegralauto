@@ -12,6 +12,15 @@ import { ImageUpload } from "@/components/ui/image-upload";
 import { uploadFile } from "@/lib/fileUpload";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -629,24 +638,30 @@ export default function AnimalsIndex() {
           <p className="text-neutral-400">No se encontraron animales</p>
         </div>
       ) : (
-        <div className="border rounded-md">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b bg-muted/50">
-                <th className="py-3 px-4 text-left w-10">
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-10">
                   {/* Header checkbox placeholder - podría implementarse seleccionar todos */}
-                </th>
-                <th className="py-3 px-4 text-left">Caravana</th>
-                <th className="py-3 px-4 text-left">Categoría</th>
-                <th className="py-3 px-4 text-left">Raza</th>
-                <th className="py-3 px-4 text-left hidden md:table-cell">Estado</th>
-                <th className="py-3 px-4 text-left hidden md:table-cell">Ubicación</th>
-                <th className="py-3 px-4 text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
+                </TableHead>
+                <TableHead>Caravana</TableHead>
+                <TableHead>Categoría</TableHead>
+                <TableHead>Raza</TableHead>
+                <TableHead className="hidden md:table-cell">Estado</TableHead>
+                <TableHead className="hidden md:table-cell">Ubicación</TableHead>
+                <TableHead className="text-right">Acciones</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {filteredAnimals.map((animal) => (
-                <tr key={animal.id} className="border-b hover:bg-muted/50">
+                <TableRow 
+                  key={animal.id} 
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => {
+                    window.location.href = `/animals/${animal.id}`;
+                  }}
+                >
                   <td className="py-2 px-4">
                     <Button 
                       variant="ghost" 
