@@ -577,7 +577,7 @@ export default function MachinesIndex() {
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          className="h-10 w-10" 
+                          className="h-10 w-10 ml-2" 
                           title={selectedMachines.includes(machine.id) ? "Deseleccionar" : "Seleccionar"}
                           onClick={(e) => {
                             e.stopPropagation();

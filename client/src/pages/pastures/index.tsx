@@ -1215,26 +1215,24 @@ export default function PasturesIndex() {
                         </div>
                       </TableCell>
                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-end space-x-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-10 w-10"
-                            title="Editar"
-                            onClick={() => handleEditPasture(pasture.id)}
-                          >
-                            <i className="ri-pencil-line text-xl text-amber-500"></i>
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-10 w-10" 
-                            title={selectedPastures.includes(pasture.id) ? "Deseleccionar" : "Seleccionar"}
-                            onClick={(e) => handleSelectPasture(pasture.id, e)}
-                          >
-                            <i className={`${selectedPastures.includes(pasture.id) ? "ri-checkbox-fill text-primary" : "ri-checkbox-blank-line text-gray-400"} text-xl`}></i>
-                          </Button>
-                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-10 w-10 mr-2"
+                          title="Editar"
+                          onClick={() => handleEditPasture(pasture.id)}
+                        >
+                          <i className="ri-pencil-line text-xl text-amber-500"></i>
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-10 w-10" 
+                          title={selectedPastures.includes(pasture.id) ? "Deseleccionar" : "Seleccionar"}
+                          onClick={(e) => handleSelectPasture(pasture.id, e)}
+                        >
+                          <i className={`${selectedPastures.includes(pasture.id) ? "ri-checkbox-fill text-primary" : "ri-checkbox-blank-line text-gray-400"} text-xl`}></i>
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))
