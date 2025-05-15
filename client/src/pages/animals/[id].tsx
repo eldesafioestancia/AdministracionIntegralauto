@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import WeightHistoryChart from "@/components/animals/WeightHistoryChart";
 
 export default function AnimalDetail() {
   const { id } = useParams<{ id: string }>();
@@ -28,6 +29,11 @@ export default function AnimalDetail() {
   // Get animal finance records
   const { data: financeRecords, isLoading: financeLoading } = useQuery({
     queryKey: [`/api/animal-finances?animalId=${id}`],
+  });
+  
+  // Get animal weight records
+  const { data: weightRecords, isLoading: weightsLoading } = useQuery({
+    queryKey: [`/api/animal-weights?animalId=${id}`],
   });
 
   const handleDeleteAnimal = async () => {
@@ -291,6 +297,11 @@ export default function AnimalDetail() {
                 )}
               </CardContent>
             </Card>
+          </div>
+          
+          {/* Gráfico de evolución de peso */}
+          <div className="mt-6">
+            <WeightHistoryChart animalId={Number(id)} />
           </div>
 
           <div className="flex justify-end space-x-3">

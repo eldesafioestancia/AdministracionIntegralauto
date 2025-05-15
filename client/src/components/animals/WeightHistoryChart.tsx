@@ -35,7 +35,7 @@ export default function WeightHistoryChart({ animalId }: WeightHistoryChartProps
   const [formattedData, setFormattedData] = useState<any[]>([]);
 
   useEffect(() => {
-    if (weights && weights.length > 0) {
+    if (weights && Array.isArray(weights) && weights.length > 0) {
       // Formatear los datos para el gráfico
       const formattedWeights = weights.map((weight: WeightRecord) => ({
         date: format(parseISO(weight.date), 'dd/MM/yyyy'),
@@ -57,7 +57,7 @@ export default function WeightHistoryChart({ animalId }: WeightHistoryChartProps
     return <div className="p-4 text-center">Cargando historial de peso...</div>;
   }
 
-  if (!weights || weights.length === 0) {
+  if (!weights || !Array.isArray(weights) || weights.length === 0) {
     return (
       <Card>
         <CardHeader>
