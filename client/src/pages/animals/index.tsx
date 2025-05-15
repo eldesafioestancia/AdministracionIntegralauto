@@ -382,7 +382,20 @@ export default function AnimalsIndex() {
           <p className="text-neutral-400 text-sm">Gestiona el rodeo de tu establecimiento</p>
         </div>
         
-        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <div className="flex space-x-2">
+          {/* Botón para eliminar seleccionados - solo se muestra si hay elementos seleccionados */}
+          {selectedAnimals.length > 0 && (
+            <Button 
+              variant="destructive"
+              onClick={handleDeleteSelected}
+              className="mt-2 sm:mt-0"
+            >
+              <i className="ri-delete-bin-line mr-1"></i> 
+              Eliminar ({selectedAnimals.length})
+            </Button>
+          )}
+          
+          <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
           <SheetTrigger asChild>
             <Button className="mt-2 sm:mt-0">
               <i className="ri-add-line mr-1"></i> Nuevo animal
@@ -1008,30 +1021,32 @@ export default function AnimalsIndex() {
                 </Link>
                 
                 <div className="flex items-center space-x-1 pr-3">
-                  <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Editar">
-                    <Link href={`/animals/${animal.id}/edit`}>
-                      <i className="ri-edit-line text-lg"></i>
-                    </Link>
+                  {/* Checkbox para seleccionar el animal */}
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-9 w-9" 
+                    title={selectedAnimals.includes(animal.id) ? "Deseleccionar" : "Seleccionar"}
+                    onClick={() => handleSelectAnimal(animal.id)}
+                  >
+                    <i className={`${selectedAnimals.includes(animal.id) ? "ri-checkbox-fill text-primary" : "ri-checkbox-blank-line text-gray-400"} text-lg`}></i>
                   </Button>
                   
+                  {/* Veterinaria (1º) */}
                   <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Evento veterinario">
                     <Link href={`/animals/${animal.id}/veterinary`}>
                       <i className="ri-stethoscope-line text-lg"></i>
                     </Link>
                   </Button>
                   
+                  {/* Ventas (2º) */}
                   <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Evento reproductivo">
                     <Link href={`/animals/${animal.id}/reproduction`}>
                       <i className="ri-heart-pulse-line text-lg"></i>
                     </Link>
                   </Button>
                   
-                  <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Registrar peso">
-                    <Link href={`/animals/${animal.id}/weight`}>
-                      <i className="ri-scales-line text-lg"></i>
-                    </Link>
-                  </Button>
-                  
+                  {/* Movimientos (3º) - Traslado */}
                   <Button 
                     variant="ghost" 
                     size="icon" 
@@ -1042,15 +1057,10 @@ export default function AnimalsIndex() {
                     <i className="ri-arrow-left-right-line text-lg"></i>
                   </Button>
                   
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    asChild 
-                    className="h-9 w-9" 
-                    title="Finanzas"
-                  >
-                    <Link href={`/finances?openForm=true&type=expense&category=animales&description=Gasto - Animal #${animal.cartagena}`}>
-                      <i className="ri-money-dollar-circle-line text-lg"></i>
+                  {/* Editar (4º) */}
+                  <Button variant="ghost" size="icon" asChild className="h-9 w-9" title="Editar">
+                    <Link href={`/animals/${animal.id}/edit`}>
+                      <i className="ri-edit-line text-lg"></i>
                     </Link>
                   </Button>
                 </div>
