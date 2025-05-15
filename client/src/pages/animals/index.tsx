@@ -574,24 +574,11 @@ export default function AnimalsIndex() {
                           <FormLabel>Foto</FormLabel>
                           <FormControl>
                             <ImageUpload 
-                              onFileChange={handlePhotoChange} 
-                              onClear={() => {
-                                handlePhotoChange(null);
-                                field.onChange("");
-                              }}
-                              maxWidth={800}
-                              maxHeight={600}
+                              onChange={handlePhotoChange} 
+                              value={photoPreview}
                             />
                           </FormControl>
-                          {photoPreview && (
-                            <div className="mt-2">
-                              <img 
-                                src={photoPreview} 
-                                alt="Vista previa" 
-                                className="w-full max-h-40 object-cover rounded-md" 
-                              />
-                            </div>
-                          )}
+                          {/* La vista previa ya está incluida en el componente ImageUpload */}
                           <FormMessage />
                         </FormItem>
                       )}

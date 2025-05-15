@@ -121,9 +121,10 @@ export default function MachinesIndex() {
       // Si hay una imagen, primero la subimos
       let photoUrl = null;
       if (file) {
-        const uploadResult = await uploadFile(file);
-        if (uploadResult.success) {
-          photoUrl = uploadResult.url;
+        try {
+          photoUrl = await uploadFile(file, "machines");
+        } catch (error) {
+          console.error("Error al subir imagen:", error);
         }
       }
       
@@ -249,7 +250,7 @@ export default function MachinesIndex() {
   };
   
   // Filtrado de máquinas según búsqueda y filtro
-  const filteredMachines = machines ? machines.filter((machine: any) => {
+  const filteredMachines = machines && Array.isArray(machines) ? machines.filter((machine: any) => {
     // Filtro por búsqueda (marca, modelo, descripción)
     const searchLower = search.toLowerCase();
     const matchesSearch = search === "" || 
