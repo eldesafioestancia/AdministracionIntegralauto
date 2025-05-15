@@ -231,6 +231,7 @@ export default function PasturesIndex() {
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedPastureId, setSelectedPastureId] = useState<number | null>(null);
   const [selectedPasture, setSelectedPasture] = useState<any>(null);
+  const [selectedPastures, setSelectedPastures] = useState<number[]>([]);
   const [activeTab, setActiveTab] = useState("parcels");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>("");
