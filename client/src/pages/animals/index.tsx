@@ -677,20 +677,6 @@ export default function AnimalsIndex() {
                   }}
                 >
                   <TableCell>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8" 
-                      title={selectedAnimals.includes(animal.id) ? "Deseleccionar" : "Seleccionar"}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleSelectAnimal(animal.id);
-                      }}
-                    >
-                      <i className={`${selectedAnimals.includes(animal.id) ? "ri-checkbox-fill text-primary" : "ri-checkbox-blank-line text-gray-400"}`}></i>
-                    </Button>
-                  </TableCell>
-                  <TableCell>
                     <div className="flex items-center">
                       <Badge 
                         className="mr-2"
@@ -724,17 +710,17 @@ export default function AnimalsIndex() {
                     {animal.location ? animal.location.replace(/_/g, ' ') : "-"}
                   </TableCell>
                   <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex items-center justify-end space-x-1">
+                    <div className="flex items-center justify-end space-x-2">
                       {/* Veterinaria (1º) */}
                       <Button 
                         variant="ghost" 
                         size="icon" 
                         asChild 
-                        className="h-8 w-8" 
+                        className="h-10 w-10" 
                         title="Evento veterinario"
                       >
                         <Link href={`/animals/${animal.id}/veterinary`}>
-                          <i className="ri-stethoscope-line text-green-600"></i>
+                          <i className="ri-stethoscope-line text-xl text-green-600"></i>
                         </Link>
                       </Button>
                       
@@ -743,11 +729,11 @@ export default function AnimalsIndex() {
                         variant="ghost" 
                         size="icon" 
                         asChild 
-                        className="h-8 w-8" 
+                        className="h-10 w-10" 
                         title="Registrar venta"
                       >
                         <Link href={`/finances?openForm=true&type=income&category=animales&description=Venta - Animal #${animal.cartagena}`}>
-                          <i className="ri-shopping-cart-line"></i>
+                          <i className="ri-shopping-cart-line text-xl"></i>
                         </Link>
                       </Button>
                       
@@ -755,14 +741,14 @@ export default function AnimalsIndex() {
                       <Button 
                         variant="ghost" 
                         size="icon" 
-                        className="h-8 w-8" 
+                        className="h-10 w-10" 
                         title="Trasladar animal"
                         onClick={(e) => {
                           e.stopPropagation();
                           openTransferSheet(animal);
                         }}
                       >
-                        <i className="ri-arrow-left-right-line text-blue-500"></i>
+                        <i className="ri-arrow-left-right-line text-xl text-blue-500"></i>
                       </Button>
                       
                       {/* Editar (4º) */}
@@ -770,14 +756,28 @@ export default function AnimalsIndex() {
                         variant="ghost" 
                         size="icon" 
                         asChild 
-                        className="h-8 w-8" 
+                        className="h-10 w-10" 
                         title="Editar"
                       >
                         <Link href={`/animals/${animal.id}/edit`}>
-                          <i className="ri-edit-line text-amber-500"></i>
+                          <i className="ri-edit-line text-xl text-amber-500"></i>
                         </Link>
                       </Button>
                     </div>
+                  </TableCell>
+                  <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-10 w-10" 
+                      title={selectedAnimals.includes(animal.id) ? "Deseleccionar" : "Seleccionar"}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSelectAnimal(animal.id);
+                      }}
+                    >
+                      <i className={`${selectedAnimals.includes(animal.id) ? "ri-checkbox-fill text-primary" : "ri-checkbox-blank-line text-gray-400"} text-xl`}></i>
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
