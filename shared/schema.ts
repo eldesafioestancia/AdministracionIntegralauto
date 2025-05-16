@@ -372,7 +372,6 @@ export const pastureWorks = pgTable("pasture_works", {
   fuelUsed: decimal("fuel_used"), // litros de combustible
   operativeCost: decimal("operative_cost"), // costo operativo
   suppliesCost: decimal("supplies_cost"), // costo de insumos
-  pricePerUnit: decimal("price_per_unit"), // valor por hectárea o kilómetro
   totalCost: decimal("total_cost"), // costo total
   weatherConditions: text("weather_conditions"), // condiciones climáticas
   temperature: decimal("temperature"), // temperatura en °C
