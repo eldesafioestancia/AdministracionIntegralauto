@@ -666,18 +666,51 @@ export default function PasturesIndex() {
       
       // Si hay un costo total, lo registramos como ingreso en las finanzas
       if (values.totalCost && parseFloat(values.totalCost) > 0) {
-        const financeData = {
-          pastureId: values.pastureId,
-          date: new Date(),
-          type: "income",
-          concept: `trabajo_agricola_${values.workType}`,
-          amount: values.totalCost
-        };
-        
-        await apiRequest("POST", "/api/pasture-finances", financeData);
-        
-        // Invalidamos también la consulta de finanzas
-        queryClient.invalidateQueries({ queryKey: ["/api/pasture-finances"] });
+        try {
+          // Si tenemos una parcela válida, registramos el ingreso para esa parcela
+          if (values.pastureId > 0) {
+            const financeData = {
+              pastureId: values.pastureId,
+              date: new Date(),
+              type: "income",
+              concept: `trabajo_agricola_${values.workType}`,
+              amount: values.totalCost
+            };
+            
+            await apiRequest("POST", "/api/pasture-finances", financeData);
+            
+            // Invalidamos la consulta de finanzas
+            queryClient.invalidateQueries({ queryKey: ["/api/pasture-finances"] });
+            
+            console.log("Ingreso financiero registrado para parcela", financeData);
+          } 
+          // Si no hay parcela (camiones, vehículos), registramos el ingreso en la primera parcela disponible
+          else if (pastures && Array.isArray(pastures) && pastures.length > 0) {
+            const defaultPastureId = pastures[0].id;
+            
+            const financeData = {
+              pastureId: defaultPastureId,
+              date: new Date(),
+              type: "income",
+              concept: `servicio_${values.workType}_${values.machineId || ""}`,
+              amount: values.totalCost
+            };
+            
+            await apiRequest("POST", "/api/pasture-finances", financeData);
+            
+            // Invalidamos la consulta de finanzas
+            queryClient.invalidateQueries({ queryKey: ["/api/pasture-finances"] });
+            
+            console.log("Ingreso financiero registrado para servicio general", financeData);
+          }
+        } catch (error) {
+          console.error("Error al registrar ingreso financiero:", error);
+          toast({
+            title: "Advertencia",
+            description: "El trabajo se registró pero no se pudo registrar el ingreso en el balance",
+            variant: "destructive",
+          });
+        }
       }
       
       // Invalidamos la consulta de trabajos
