@@ -120,6 +120,7 @@ const pastureWorkFormSchema = z.object({
   machineId: z.number().optional().nullable(),
   areaWorked: z.string().optional().nullable(),
   distance: z.string().optional().nullable(),
+  valuePerUnit: z.string().optional().nullable(), // Valor por hectárea o kilómetro
   workingHours: z.string().optional().nullable(),
   fuelUsed: z.string().optional().nullable(),
   operativeCost: z.string().optional().nullable(),
@@ -331,6 +332,7 @@ export default function PasturesIndex() {
       endDate: null,
       machineId: null,
       areaWorked: null,
+      valuePerUnit: null,
       workingHours: null,
       fuelUsed: null,
       operativeCost: null,
@@ -642,13 +644,20 @@ export default function PasturesIndex() {
         }
       }
       
-      // Calculamos el costo total si hay costos de suministros y operativos
-      if (values.operativeCost && values.suppliesCost) {
-        const operativeCost = parseFloat(values.operativeCost);
-        const suppliesCost = parseFloat(values.suppliesCost);
+      // Calcular el costo total basado en el valor por hectárea/km y la cantidad
+      if (values.valuePerUnit) {
+        const valuePerUnit = parseFloat(values.valuePerUnit);
         
-        if (!isNaN(operativeCost) && !isNaN(suppliesCost)) {
-          values.totalCost = (operativeCost + suppliesCost).toString();
+        if (!isNaN(valuePerUnit)) {
+          if (values.areaWorked && !isNaN(parseFloat(values.areaWorked))) {
+            // Si hay área trabajada, calcular costo por hectárea
+            const area = parseFloat(values.areaWorked);
+            values.totalCost = (valuePerUnit * area).toString();
+          } else if (values.distance && !isNaN(parseFloat(values.distance))) {
+            // Si hay distancia recorrida, calcular costo por km
+            const distance = parseFloat(values.distance);
+            values.totalCost = (valuePerUnit * distance).toString();
+          }
         }
       }
       
