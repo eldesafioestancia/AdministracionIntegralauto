@@ -12,14 +12,14 @@ export default function MobileNav({ openMoreMenu }: MobileNavProps) {
   };
 
   return (
-    <nav className="lg:hidden bg-white border-t border-neutral-200 fixed bottom-0 w-full z-40">
+    <nav className="lg:hidden bg-white border-t border-neutral-200 fixed bottom-0 w-full z-40 shadow-lg">
       <div className="grid grid-cols-5 h-16">
         <Link href="/">
           <a
             className={`flex flex-col items-center justify-center ${
               isActive("/")
-                ? "text-primary border-t-2 border-primary"
-                : "text-neutral-400 hover:text-primary"
+                ? "text-primary border-t-2 border-primary font-medium"
+                : "text-neutral-500 hover:text-primary"
             }`}
           >
             <i className="ri-dashboard-line text-xl"></i>
@@ -31,8 +31,8 @@ export default function MobileNav({ openMoreMenu }: MobileNavProps) {
           <a
             className={`flex flex-col items-center justify-center ${
               isActive("/machines")
-                ? "text-primary border-t-2 border-primary"
-                : "text-neutral-400 hover:text-primary"
+                ? "text-primary border-t-2 border-primary font-medium"
+                : "text-neutral-500 hover:text-primary"
             }`}
           >
             <i className="ri-truck-line text-xl"></i>

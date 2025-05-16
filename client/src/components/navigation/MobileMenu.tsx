@@ -121,13 +121,13 @@ export default function MobileMenu({ open, setOpen }: MobileMenuProps) {
 
           <Link href="/salaries">
             <a
-              className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-neutral-100"
+              className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-teal-50"
               onClick={() => setOpen(false)}
             >
-              <div className="w-12 h-12 bg-success bg-opacity-10 rounded-full flex items-center justify-center mb-2">
-                <i className="ri-user-star-line text-xl text-success"></i>
+              <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mb-2">
+                <i className="ri-user-star-line text-xl text-teal-600"></i>
               </div>
-              <span className="text-xs text-neutral-500 text-center">
+              <span className="text-xs font-medium text-teal-700 text-center">
                 Sueldos
               </span>
             </a>
@@ -135,13 +135,13 @@ export default function MobileMenu({ open, setOpen }: MobileMenuProps) {
 
           <Link href="/capital">
             <a
-              className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-neutral-100"
+              className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-red-50"
               onClick={() => setOpen(false)}
             >
-              <div className="w-12 h-12 bg-error bg-opacity-10 rounded-full flex items-center justify-center mb-2">
-                <i className="ri-money-dollar-circle-line text-xl text-error"></i>
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-2">
+                <i className="ri-money-dollar-circle-line text-xl text-red-600"></i>
               </div>
-              <span className="text-xs text-neutral-500 text-center">
+              <span className="text-xs font-medium text-red-700 text-center">
                 Capital
               </span>
             </a>
@@ -149,13 +149,13 @@ export default function MobileMenu({ open, setOpen }: MobileMenuProps) {
 
           <Link href="/reports">
             <a
-              className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-neutral-100"
+              className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-slate-100"
               onClick={() => setOpen(false)}
             >
-              <div className="w-12 h-12 bg-neutral-200 rounded-full flex items-center justify-center mb-2">
-                <i className="ri-file-chart-line text-xl text-neutral-500"></i>
+              <div className="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center mb-2">
+                <i className="ri-file-chart-line text-xl text-slate-700"></i>
               </div>
-              <span className="text-xs text-neutral-500 text-center">
+              <span className="text-xs font-medium text-slate-700 text-center">
                 Reportes
               </span>
             </a>
@@ -164,7 +164,7 @@ export default function MobileMenu({ open, setOpen }: MobileMenuProps) {
         <div className="mt-6 border-t border-neutral-200 pt-4">
           <button
             onClick={handleLogout}
-            className="flex items-center justify-center text-error p-3 w-full"
+            className="flex items-center justify-center text-red-600 bg-red-50 hover:bg-red-100 p-3 rounded-lg w-full font-medium"
           >
             <i className="ri-logout-box-line mr-2"></i>
             <span>Cerrar sesión</span>
