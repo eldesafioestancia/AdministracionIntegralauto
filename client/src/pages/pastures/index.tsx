@@ -661,7 +661,24 @@ export default function PasturesIndex() {
         }
       }
       
-      await apiRequest("POST", "/api/pasture-works", values);
+      // Registramos el trabajo agrícola
+      const newWork = await apiRequest("POST", "/api/pasture-works", values);
+      
+      // Si hay un costo total, lo registramos como ingreso en las finanzas
+      if (values.totalCost && parseFloat(values.totalCost) > 0) {
+        const financeData = {
+          pastureId: values.pastureId,
+          date: new Date(),
+          type: "income",
+          concept: `trabajo_agricola_${values.workType}`,
+          amount: values.totalCost
+        };
+        
+        await apiRequest("POST", "/api/pasture-finances", financeData);
+        
+        // Invalidamos también la consulta de finanzas
+        queryClient.invalidateQueries({ queryKey: ["/api/pasture-finances"] });
+      }
       
       // Invalidamos la consulta de trabajos
       queryClient.invalidateQueries({ queryKey: ["/api/pasture-works"] });
