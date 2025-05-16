@@ -429,9 +429,13 @@ export default function MachinesIndex() {
       
       {/* Tabs para diferentes vistas */}
       <Tabs defaultValue="list" className="w-full">
-        <TabsList>
-          <TabsTrigger value="list">Lista de Maquinarias</TabsTrigger>
-          <TabsTrigger value="stats">Estadísticas</TabsTrigger>
+        <TabsList className="bg-gray-200">
+          <TabsTrigger value="list" className="data-[state=active]:bg-primary-light data-[state=active]:text-primary text-neutral-800 data-[state=active]:bg-opacity-10 hover:text-white hover:bg-gray-300">
+            <i className="ri-list-check mr-1"></i> Lista de Maquinarias
+          </TabsTrigger>
+          <TabsTrigger value="stats" className="data-[state=active]:bg-primary-light data-[state=active]:text-primary text-neutral-800 data-[state=active]:bg-opacity-10 hover:text-white hover:bg-gray-300">
+            <i className="ri-bar-chart-line mr-1"></i> Estadísticas
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="list" className="mt-4">
