@@ -124,6 +124,7 @@ const pastureWorkFormSchema = z.object({
   fuelUsed: z.string().optional().nullable(),
   operativeCost: z.string().optional().nullable(),
   suppliesCost: z.string().optional().nullable(),
+  pricePerUnit: z.string().optional().nullable(), // Valor por hectárea o km
   totalCost: z.string().optional().nullable(),
   weatherConditions: z.string().optional().nullable(),
   temperature: z.string().optional().nullable(),
@@ -335,6 +336,7 @@ export default function PasturesIndex() {
       fuelUsed: null,
       operativeCost: null,
       suppliesCost: null,
+      pricePerUnit: null,
       totalCost: null,
       weatherConditions: null,
       temperature: null,
@@ -677,6 +679,7 @@ export default function PasturesIndex() {
         fuelUsed: null,
         operativeCost: null,
         suppliesCost: null,
+        pricePerUnit: null,
         totalCost: null,
         weatherConditions: null,
         temperature: null,
