@@ -1178,9 +1178,6 @@ export default function PasturesIndex() {
                   <TableHead>Agua</TableHead>
                   <TableHead>Estado</TableHead>
                   <TableHead>Acciones</TableHead>
-                  <TableHead className="w-4">
-                    {/* Columna extra para balance */}
-                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -1229,6 +1226,7 @@ export default function PasturesIndex() {
                       </TableCell>
                       <TableCell onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-end space-x-4">
+                          {/* Trabajos (1º) */}
                           <Button
                             variant="ghost"
                             size="icon"
@@ -1238,6 +1236,8 @@ export default function PasturesIndex() {
                           >
                             <i className="ri-tools-line text-xl text-blue-500"></i>
                           </Button>
+                          
+                          {/* Finanzas (2º) */}
                           <Button
                             variant="ghost"
                             size="icon"
@@ -1249,6 +1249,8 @@ export default function PasturesIndex() {
                               <i className="ri-money-dollar-circle-line text-xl text-green-500"></i>
                             </Link>
                           </Button>
+                          
+                          {/* Editar (3º) - Posicionado entre finanzas y checkbox como solicitado */}
                           <Button
                             variant="ghost"
                             size="icon"
@@ -1258,6 +1260,8 @@ export default function PasturesIndex() {
                           >
                             <i className="ri-pencil-line text-xl text-amber-500"></i>
                           </Button>
+                          
+                          {/* Checkbox (4º) */}
                           <Button 
                             variant="ghost" 
                             size="icon" 
@@ -1268,8 +1272,6 @@ export default function PasturesIndex() {
                             <i className={`${selectedPastures.includes(pasture.id) ? "ri-checkbox-fill text-primary" : "ri-checkbox-blank-line text-gray-400"} text-xl`}></i>
                           </Button>
                         </div>
-                      </TableCell>
-                      <TableCell className="w-4" onClick={(e) => e.stopPropagation()}>
                       </TableCell>
                     </TableRow>
                   ))
