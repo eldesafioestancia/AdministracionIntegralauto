@@ -662,9 +662,6 @@ export default function AnimalsIndex() {
                     <TableHead className="hidden md:table-cell">Estado</TableHead>
                     <TableHead className="hidden md:table-cell">Ubicación</TableHead>
                     <TableHead className="text-right">Acciones</TableHead>
-                    <TableHead className="w-10 text-right">
-                      {/* Columna para checkboxes */}
-                    </TableHead>
                   </TableRow>
                 </TableHeader>
             <TableBody>
@@ -710,8 +707,8 @@ export default function AnimalsIndex() {
                     {animal.location ? animal.location.replace(/_/g, ' ') : "-"}
                   </TableCell>
                   <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex items-center justify-end space-x-2">
-                      {/* Veterinaria (1º) */}
+                    <div className="flex items-center justify-end space-x-4">
+                      {/* Veterinaria (1º) - Seguimos el orden solicitado */}
                       <Button 
                         variant="ghost" 
                         size="icon" 
@@ -724,7 +721,7 @@ export default function AnimalsIndex() {
                         </Link>
                       </Button>
                       
-                      {/* Ventas (2º) */}
+                      {/* Ventas (2º) - Seguimos el orden solicitado */}
                       <Button 
                         variant="ghost" 
                         size="icon" 
@@ -733,11 +730,11 @@ export default function AnimalsIndex() {
                         title="Registrar venta"
                       >
                         <Link href={`/finances?openForm=true&type=income&category=animales&description=Venta - Animal #${animal.cartagena}`}>
-                          <i className="ri-shopping-cart-line text-xl"></i>
+                          <i className="ri-shopping-cart-line text-xl text-green-500"></i>
                         </Link>
                       </Button>
                       
-                      {/* Movimientos (3º) */}
+                      {/* Movimientos (3º) - Seguimos el orden solicitado */}
                       <Button 
                         variant="ghost" 
                         size="icon" 
@@ -751,7 +748,7 @@ export default function AnimalsIndex() {
                         <i className="ri-arrow-left-right-line text-xl text-blue-500"></i>
                       </Button>
                       
-                      {/* Editar (4º) */}
+                      {/* Editar (4º) - Seguimos el orden solicitado */}
                       <Button 
                         variant="ghost" 
                         size="icon" 
@@ -763,21 +760,21 @@ export default function AnimalsIndex() {
                           <i className="ri-edit-line text-xl text-amber-500"></i>
                         </Link>
                       </Button>
+                      
+                      {/* Checkbox (5º) - Agregamos el checkbox al final como se solicitó */}
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-10 w-10" 
+                        title={selectedAnimals.includes(animal.id) ? "Deseleccionar" : "Seleccionar"}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSelectAnimal(animal.id);
+                        }}
+                      >
+                        <i className={`${selectedAnimals.includes(animal.id) ? "ri-checkbox-fill text-primary" : "ri-checkbox-blank-line text-gray-400"} text-xl`}></i>
+                      </Button>
                     </div>
-                  </TableCell>
-                  <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-10 w-10 ml-2" 
-                      title={selectedAnimals.includes(animal.id) ? "Deseleccionar" : "Seleccionar"}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleSelectAnimal(animal.id);
-                      }}
-                    >
-                      <i className={`${selectedAnimals.includes(animal.id) ? "ri-checkbox-fill text-primary" : "ri-checkbox-blank-line text-gray-400"} text-xl`}></i>
-                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
