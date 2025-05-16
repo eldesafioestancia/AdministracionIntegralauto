@@ -29,7 +29,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
         ></div>
       )}
 
-      <div className="p-4 relative z-10">
+      <div className="p-4 relative z-10 bg-gray-100">
         <div className="space-y-1">
           <Link 
             href="/"
@@ -45,7 +45,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
           </Link>
 
           <div className="pt-2">
-            <p className="px-3 text-xs font-semibold text-neutral-400 uppercase tracking-wider">
+            <p className="px-3 text-xs font-semibold text-neutral-600 uppercase tracking-wider">
               Módulos principales
             </p>
             <div className="mt-1 space-y-1">
@@ -113,7 +113,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
           </div>
 
           <div className="pt-2">
-            <p className="px-3 text-xs font-semibold text-neutral-400 uppercase tracking-wider">
+            <p className="px-3 text-xs font-semibold text-neutral-600 uppercase tracking-wider">
               Gestión financiera
             </p>
             <div className="mt-1 space-y-1">
@@ -206,7 +206,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
           </div>
 
           <div className="pt-2">
-            <p className="px-3 text-xs font-semibold text-neutral-400 uppercase tracking-wider">
+            <p className="px-3 text-xs font-semibold text-neutral-600 uppercase tracking-wider">
               Sistema
             </p>
             <div className="mt-1 space-y-1">
