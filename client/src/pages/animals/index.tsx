@@ -713,11 +713,11 @@ export default function AnimalsIndex() {
                         variant="ghost" 
                         size="icon" 
                         asChild 
-                        className="h-10 w-10" 
+                        className="h-10 w-10 bg-white hover:bg-blue-500 group transition-colors" 
                         title="Evento veterinario"
                       >
                         <Link href={`/animals/${animal.id}/veterinary`}>
-                          <i className="ri-stethoscope-line text-xl text-green-600"></i>
+                          <i className="ri-stethoscope-line text-xl text-black group-hover:text-white transition-colors"></i>
                         </Link>
                       </Button>
                       
@@ -726,11 +726,11 @@ export default function AnimalsIndex() {
                         variant="ghost" 
                         size="icon" 
                         asChild 
-                        className="h-10 w-10" 
+                        className="h-10 w-10 bg-white hover:bg-blue-500 group transition-colors" 
                         title="Registrar venta"
                       >
                         <Link href={`/finances?openForm=true&type=income&category=animales&description=Venta - Animal #${animal.cartagena}`}>
-                          <i className="ri-shopping-cart-line text-xl text-green-500"></i>
+                          <i className="ri-shopping-cart-line text-xl text-black group-hover:text-white transition-colors"></i>
                         </Link>
                       </Button>
                       
@@ -738,14 +738,14 @@ export default function AnimalsIndex() {
                       <Button 
                         variant="ghost" 
                         size="icon" 
-                        className="h-10 w-10" 
+                        className="h-10 w-10 bg-white hover:bg-blue-500 group transition-colors" 
                         title="Trasladar animal"
                         onClick={(e) => {
                           e.stopPropagation();
                           openTransferSheet(animal);
                         }}
                       >
-                        <i className="ri-arrow-left-right-line text-xl text-blue-500"></i>
+                        <i className="ri-arrow-left-right-line text-xl text-black group-hover:text-white transition-colors"></i>
                       </Button>
                       
                       {/* Editar (4º) - Seguimos el orden solicitado */}
@@ -753,11 +753,11 @@ export default function AnimalsIndex() {
                         variant="ghost" 
                         size="icon" 
                         asChild 
-                        className="h-10 w-10" 
+                        className="h-10 w-10 bg-white hover:bg-blue-500 group transition-colors" 
                         title="Editar"
                       >
                         <Link href={`/animals/${animal.id}/edit`}>
-                          <i className="ri-edit-line text-xl text-amber-500"></i>
+                          <i className="ri-edit-line text-xl text-black group-hover:text-white transition-colors"></i>
                         </Link>
                       </Button>
                       
@@ -765,14 +765,14 @@ export default function AnimalsIndex() {
                       <Button 
                         variant="ghost" 
                         size="icon" 
-                        className="h-10 w-10" 
+                        className="h-10 w-10 bg-white hover:bg-blue-500 group transition-colors" 
                         title={selectedAnimals.includes(animal.id) ? "Deseleccionar" : "Seleccionar"}
                         onClick={(e) => {
                           e.stopPropagation();
                           handleSelectAnimal(animal.id);
                         }}
                       >
-                        <i className={`${selectedAnimals.includes(animal.id) ? "ri-checkbox-fill text-primary" : "ri-checkbox-blank-line text-gray-400"} text-xl`}></i>
+                        <i className={`${selectedAnimals.includes(animal.id) ? "ri-checkbox-fill text-primary group-hover:text-white" : "ri-checkbox-blank-line text-black group-hover:text-white"} text-xl transition-colors`}></i>
                       </Button>
                     </div>
                   </TableCell>

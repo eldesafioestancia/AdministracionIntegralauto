@@ -542,16 +542,26 @@ export default function MachinesIndex() {
                       <TableCell onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-end space-x-4">
                           {/* Mantenimiento (1º) - Seguimos el orden solicitado */}
-                          <Button variant="ghost" size="icon" className="h-10 w-10" title="Registrar mantenimiento">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-10 w-10 bg-white hover:bg-blue-500 group transition-colors" 
+                            title="Registrar mantenimiento"
+                          >
                             <Link href={`/machines/${machine.id}/maintenance`}>
-                              <i className="ri-settings-line text-xl text-orange-500"></i>
+                              <i className="ri-settings-line text-xl text-black group-hover:text-white transition-colors"></i>
                             </Link>
                           </Button>
                           
                           {/* Trabajos (2º) - Seguimos el orden solicitado */}
-                          <Button variant="ghost" size="icon" className="h-10 w-10" title="Trabajos">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-10 w-10 bg-white hover:bg-blue-500 group transition-colors" 
+                            title="Trabajos"
+                          >
                             <Link href={`/machines/${machine.id}/work`}>
-                              <i className="ri-tools-line text-xl text-blue-500"></i>
+                              <i className="ri-tools-line text-xl text-black group-hover:text-white transition-colors"></i>
                             </Link>
                           </Button>
                           
@@ -559,28 +569,28 @@ export default function MachinesIndex() {
                           <Button 
                             variant="ghost" 
                             size="icon" 
-                            className="h-10 w-10" 
+                            className="h-10 w-10 bg-white hover:bg-blue-500 group transition-colors" 
                             title="Editar"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleEdit(machine.id);
                             }}
                           >
-                            <i className="ri-edit-line text-xl text-amber-500"></i>
+                            <i className="ri-edit-line text-xl text-black group-hover:text-white transition-colors"></i>
                           </Button>
                           
                           {/* Checkbox (4º) - Reemplazando finanzas por checkbox según lo solicitado */}
                           <Button 
                             variant="ghost" 
                             size="icon" 
-                            className="h-10 w-10" 
+                            className="h-10 w-10 bg-white hover:bg-blue-500 group transition-colors" 
                             title={selectedMachines.includes(machine.id) ? "Deseleccionar" : "Seleccionar"}
                             onClick={(e) => {
                               e.stopPropagation();
                               handleSelectMachine(machine.id);
                             }}
                           >
-                            <i className={`${selectedMachines.includes(machine.id) ? "ri-checkbox-fill text-primary" : "ri-checkbox-blank-line text-gray-400"} text-xl`}></i>
+                            <i className={`${selectedMachines.includes(machine.id) ? "ri-checkbox-fill text-primary group-hover:text-white" : "ri-checkbox-blank-line text-black group-hover:text-white"} text-xl transition-colors`}></i>
                           </Button>
                         </div>
                       </TableCell>
