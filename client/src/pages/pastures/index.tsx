@@ -357,37 +357,34 @@ export default function PasturesIndex() {
     },
   });
   
+  // Función auxiliar para convertir valores de string a number de manera segura
+  const safeParseFloat = (value: string | null | undefined): number => {
+    if (!value) return 0;
+    const parsed = parseFloat(value);
+    return isNaN(parsed) ? 0 : parsed;
+  };
+
   // Función para calcular el costo total basado en los costos y el valor por unidad
-  const updateTotalCost = (operativeCost: string, suppliesCost: string, pricePerUnit: string, areaWorked: string | null, distance: string | null) => {
+  const updateTotalCost = (
+    operativeCost: string | null | undefined, 
+    suppliesCost: string | null | undefined, 
+    pricePerUnit: string | null | undefined, 
+    areaWorked: string | null | undefined, 
+    distance: string | null | undefined
+  ) => {
     let total = 0;
     
     // Sumar costos operativos y de insumos
-    if (operativeCost) {
-      const opCost = parseFloat(operativeCost);
-      if (!isNaN(opCost)) total += opCost;
-    }
-    
-    if (suppliesCost) {
-      const supCost = parseFloat(suppliesCost);
-      if (!isNaN(supCost)) total += supCost;
-    }
+    total += safeParseFloat(operativeCost);
+    total += safeParseFloat(suppliesCost);
     
     // Añadir el cálculo del valor por unidad multiplicado por el área o distancia
-    if (pricePerUnit) {
-      const price = parseFloat(pricePerUnit);
-      
-      if (!isNaN(price)) {
-        if (areaWorked) {
-          const area = parseFloat(areaWorked);
-          if (!isNaN(area)) {
-            total += price * area;
-          }
-        } else if (distance) {
-          const dist = parseFloat(distance);
-          if (!isNaN(dist)) {
-            total += price * dist;
-          }
-        }
+    const price = safeParseFloat(pricePerUnit);
+    if (price > 0) {
+      if (areaWorked) {
+        total += price * safeParseFloat(areaWorked);
+      } else if (distance) {
+        total += price * safeParseFloat(distance);
       }
     }
     
@@ -1597,6 +1594,10 @@ export default function PasturesIndex() {
                             step="0.01"
                             {...field}
                             value={field.value || ""}
+                            onChange={(e) => {
+                              field.onChange(e);
+                              updateTotalCost(workForm.getValues("operativeCost"), workForm.getValues("suppliesCost"), workForm.getValues("pricePerUnit"), e.target.value, null);
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -1617,6 +1618,10 @@ export default function PasturesIndex() {
                             step="0.1"
                             {...field}
                             value={field.value || ""}
+                            onChange={(e) => {
+                              field.onChange(e);
+                              updateTotalCost(workForm.getValues("operativeCost"), workForm.getValues("suppliesCost"), workForm.getValues("pricePerUnit"), null, e.target.value);
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
