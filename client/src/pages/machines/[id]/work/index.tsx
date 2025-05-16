@@ -369,10 +369,60 @@ export default function MachineWorkIndex() {
               <i className="ri-arrow-left-line mr-1"></i> Volver
             </Link>
           </Button>
-          <Button asChild>
-            <Link href={`/pastures?workForm=true&preSelectMachine=${machineId}`}>
-              <i className="ri-add-line mr-1"></i> Registrar Trabajo Agrícola
-            </Link>
+          <Button onClick={() => {
+            // Actualizar tipos de trabajo disponibles según tipo de máquina
+            setSelectedMachineType(machine.type);
+            
+            // Establecer tipos de trabajo según el tipo de máquina
+            switch (machine.type) {
+              case "topadora":
+                setAvailableWorkTypes(bulldozerWorkTypes);
+                break;
+              case "camion":
+                setAvailableWorkTypes(truckWorkTypes);
+                // Para camiones no se selecciona parcela
+                workForm.setValue("pastureId", null);
+                break;
+              case "vehiculo":
+                setAvailableWorkTypes(vehicleWorkTypes);
+                // Para vehículos no se selecciona parcela
+                workForm.setValue("pastureId", null);
+                break;
+              case "tractor":
+              default:
+                setAvailableWorkTypes(defaultWorkTypes);
+            }
+            
+            workForm.reset({
+              machineId: machineId,
+              pastureId: null,
+              workType: "",
+              description: "",
+              startDate: new Date(),
+              endDate: null,
+              areaWorked: "",
+              distance: "",
+              workTime: "",
+              fuelUsed: "",
+              operationalCost: "",
+              suppliesCost: "",
+              totalCost: "",
+              weatherCondition: "",
+              temperature: "",
+              soilHumidity: "",
+              seedType: "",
+              kgPerHa: "",
+              agrochemicalType: "",
+              litersPerHa: "",
+              fertilizerType: "",
+              amountPerHa: "",
+              threadRolls: "",
+              rollsPerHa: "",
+              observations: "",
+            });
+            setWorkSheetOpen(true);
+          }}>
+            <i className="ri-add-line mr-1"></i> Nuevo Trabajo
           </Button>
         </div>
       </div>
