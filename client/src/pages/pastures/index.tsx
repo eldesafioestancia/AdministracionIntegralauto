@@ -249,43 +249,7 @@ export default function PasturesIndex() {
   const [filteredMachines, setFilteredMachines] = useState<any[]>([]);
   const [availableWorkTypes, setAvailableWorkTypes] = useState(defaultWorkTypes);
   
-  // Función para calcular el costo total basado en los costos y el valor por unidad
-  const updateTotalCost = (operativeCost: string, suppliesCost: string, pricePerUnit: string, areaWorked: string | null, distance: string | null) => {
-    let total = 0;
-    
-    // Sumar costos operativos y de insumos
-    if (operativeCost) {
-      const opCost = parseFloat(operativeCost);
-      if (!isNaN(opCost)) total += opCost;
-    }
-    
-    if (suppliesCost) {
-      const supCost = parseFloat(suppliesCost);
-      if (!isNaN(supCost)) total += supCost;
-    }
-    
-    // Añadir el cálculo del valor por unidad multiplicado por el área o distancia
-    if (pricePerUnit) {
-      const price = parseFloat(pricePerUnit);
-      
-      if (!isNaN(price)) {
-        if (areaWorked) {
-          const area = parseFloat(areaWorked);
-          if (!isNaN(area)) {
-            total += price * area;
-          }
-        } else if (distance) {
-          const dist = parseFloat(distance);
-          if (!isNaN(dist)) {
-            total += price * dist;
-          }
-        }
-      }
-    }
-    
-    // Actualizar el campo de costo total
-    workForm.setValue("totalCost", total > 0 ? total.toString() : null);
-  };
+
   const [showDistanceField, setShowDistanceField] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -392,6 +356,44 @@ export default function PasturesIndex() {
       threadRollsUsed: null,
     },
   });
+  
+  // Función para calcular el costo total basado en los costos y el valor por unidad
+  const updateTotalCost = (operativeCost: string, suppliesCost: string, pricePerUnit: string, areaWorked: string | null, distance: string | null) => {
+    let total = 0;
+    
+    // Sumar costos operativos y de insumos
+    if (operativeCost) {
+      const opCost = parseFloat(operativeCost);
+      if (!isNaN(opCost)) total += opCost;
+    }
+    
+    if (suppliesCost) {
+      const supCost = parseFloat(suppliesCost);
+      if (!isNaN(supCost)) total += supCost;
+    }
+    
+    // Añadir el cálculo del valor por unidad multiplicado por el área o distancia
+    if (pricePerUnit) {
+      const price = parseFloat(pricePerUnit);
+      
+      if (!isNaN(price)) {
+        if (areaWorked) {
+          const area = parseFloat(areaWorked);
+          if (!isNaN(area)) {
+            total += price * area;
+          }
+        } else if (distance) {
+          const dist = parseFloat(distance);
+          if (!isNaN(dist)) {
+            total += price * dist;
+          }
+        }
+      }
+    }
+    
+    // Actualizar el campo de costo total
+    workForm.setValue("totalCost", total > 0 ? total.toString() : null);
+  };
   
   // Observador para detectar cambios en el tipo de trabajo
   const selectedWorkType = workForm.watch("workType");
