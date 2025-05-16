@@ -248,6 +248,44 @@ export default function PasturesIndex() {
   const [selectedMachineType, setSelectedMachineType] = useState<string | null>(null);
   const [filteredMachines, setFilteredMachines] = useState<any[]>([]);
   const [availableWorkTypes, setAvailableWorkTypes] = useState(defaultWorkTypes);
+  
+  // Función para calcular el costo total basado en los costos y el valor por unidad
+  const updateTotalCost = (operativeCost: string, suppliesCost: string, pricePerUnit: string, areaWorked: string | null, distance: string | null) => {
+    let total = 0;
+    
+    // Sumar costos operativos y de insumos
+    if (operativeCost) {
+      const opCost = parseFloat(operativeCost);
+      if (!isNaN(opCost)) total += opCost;
+    }
+    
+    if (suppliesCost) {
+      const supCost = parseFloat(suppliesCost);
+      if (!isNaN(supCost)) total += supCost;
+    }
+    
+    // Añadir el cálculo del valor por unidad multiplicado por el área o distancia
+    if (pricePerUnit) {
+      const price = parseFloat(pricePerUnit);
+      
+      if (!isNaN(price)) {
+        if (areaWorked) {
+          const area = parseFloat(areaWorked);
+          if (!isNaN(area)) {
+            total += price * area;
+          }
+        } else if (distance) {
+          const dist = parseFloat(distance);
+          if (!isNaN(dist)) {
+            total += price * dist;
+          }
+        }
+      }
+    }
+    
+    // Actualizar el campo de costo total
+    workForm.setValue("totalCost", total > 0 ? total.toString() : null);
+  };
   const [showDistanceField, setShowDistanceField] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -644,14 +682,42 @@ export default function PasturesIndex() {
         }
       }
       
-      // Calculamos el costo total si hay costos de suministros y operativos
-      if (values.operativeCost && values.suppliesCost) {
-        const operativeCost = parseFloat(values.operativeCost);
-        const suppliesCost = parseFloat(values.suppliesCost);
+      // Calculamos el costo total incluyendo el valor por hectárea o km
+      let total = 0;
+      
+      // Sumar costos operativos y de insumos
+      if (values.operativeCost) {
+        const opCost = parseFloat(values.operativeCost);
+        if (!isNaN(opCost)) total += opCost;
+      }
+      
+      if (values.suppliesCost) {
+        const supCost = parseFloat(values.suppliesCost);
+        if (!isNaN(supCost)) total += supCost;
+      }
+      
+      // Añadir el cálculo del valor por unidad multiplicado por el área o distancia
+      if (values.pricePerUnit) {
+        const price = parseFloat(values.pricePerUnit);
         
-        if (!isNaN(operativeCost) && !isNaN(suppliesCost)) {
-          values.totalCost = (operativeCost + suppliesCost).toString();
+        if (!isNaN(price)) {
+          if (values.areaWorked) {
+            const area = parseFloat(values.areaWorked);
+            if (!isNaN(area)) {
+              total += price * area;
+            }
+          } else if (values.distance) {
+            const dist = parseFloat(values.distance);
+            if (!isNaN(dist)) {
+              total += price * dist;
+            }
+          }
         }
+      }
+      
+      // Actualizar el costo total
+      if (total > 0) {
+        values.totalCost = total.toString();
       }
       
       await apiRequest("POST", "/api/pasture-works", values);
