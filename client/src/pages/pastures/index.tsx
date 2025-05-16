@@ -1613,6 +1613,10 @@ export default function PasturesIndex() {
                           step="100"
                           {...field}
                           value={field.value || ""}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            updateTotalCost(e.target.value, workForm.getValues("suppliesCost"), workForm.getValues("pricePerUnit"), workForm.getValues("areaWorked"), workForm.getValues("distance"));
+                          }}
                         />
                       </FormControl>
                       <FormMessage />
@@ -1633,8 +1637,63 @@ export default function PasturesIndex() {
                           step="100"
                           {...field}
                           value={field.value || ""}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            updateTotalCost(workForm.getValues("operativeCost"), e.target.value, workForm.getValues("pricePerUnit"), workForm.getValues("areaWorked"), workForm.getValues("distance"));
+                          }}
                         />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  control={workForm.control}
+                  name="pricePerUnit"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Valor por {workForm.watch("areaWorked") ? "Hectárea" : "Kilómetro"} ($)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="2500"
+                          step="100"
+                          {...field}
+                          value={field.value || ""}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            updateTotalCost(workForm.getValues("operativeCost"), workForm.getValues("suppliesCost"), e.target.value, workForm.getValues("areaWorked"), workForm.getValues("distance"));
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={workForm.control}
+                  name="totalCost"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Costo Total ($)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="20000"
+                          step="100"
+                          {...field}
+                          value={field.value || ""}
+                          readOnly
+                          className="bg-gray-100"
+                        />
+                      </FormControl>
+                      <FormDescription className="text-xs">
+                        Calculado automáticamente según los costos ingresados
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
