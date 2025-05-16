@@ -202,17 +202,17 @@ export default function Dashboard() {
       
       {/* Main Tabs */}
       <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="bg-gray-200">
-          <TabsTrigger value="overview" className="data-[state=active]:bg-primary-light data-[state=active]:text-primary text-neutral-800 data-[state=active]:bg-opacity-10 hover:text-white hover:bg-gray-300">
+        <TabsList>
+          <TabsTrigger value="overview">
             <i className="ri-dashboard-line mr-1.5"></i> Vista General
           </TabsTrigger>
-          <TabsTrigger value="production" className="data-[state=active]:bg-primary-light data-[state=active]:text-primary text-neutral-800 data-[state=active]:bg-opacity-10 hover:text-white hover:bg-gray-300">
+          <TabsTrigger value="production">
             <i className="ri-plant-line mr-1.5"></i> Producción
           </TabsTrigger>
-          <TabsTrigger value="finances" className="data-[state=active]:bg-primary-light data-[state=active]:text-primary text-neutral-800 data-[state=active]:bg-opacity-10 hover:text-white hover:bg-gray-300">
+          <TabsTrigger value="finances">
             <i className="ri-money-dollar-circle-line mr-1.5"></i> Finanzas
           </TabsTrigger>
-          <TabsTrigger value="weather" className="data-[state=active]:bg-primary-light data-[state=active]:text-primary text-neutral-800 data-[state=active]:bg-opacity-10 hover:text-white hover:bg-gray-300">
+          <TabsTrigger value="weather">
             <i className="ri-sun-line mr-1.5"></i> Clima
           </TabsTrigger>
         </TabsList>
@@ -221,9 +221,9 @@ export default function Dashboard() {
         <TabsContent value="overview" className="space-y-6">
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-              <CardHeader className="pb-2 bg-gray-50">
-                <CardTitle className="text-lg flex items-center text-neutral-800">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center">
                   <i className="ri-group-line mr-2 text-xl text-purple-500"></i> Inventario
                 </CardTitle>
               </CardHeader>
@@ -268,9 +268,9 @@ export default function Dashboard() {
               </CardFooter>
             </Card>
             
-            <Card className="border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-              <CardHeader className="pb-2 bg-gray-50">
-                <CardTitle className="text-lg flex items-center text-neutral-800">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center">
                   <i className="ri-money-dollar-circle-line mr-2 text-xl text-green-500"></i> Balance Financiero
                 </CardTitle>
               </CardHeader>
@@ -311,9 +311,9 @@ export default function Dashboard() {
               </CardFooter>
             </Card>
             
-            <Card className="border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-              <CardHeader className="pb-2 bg-gray-50">
-                <CardTitle className="text-lg flex items-center text-neutral-800">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center">
                   <i className="ri-sun-fill mr-2 text-xl text-amber-500"></i> Clima Actual
                 </CardTitle>
               </CardHeader>
@@ -360,9 +360,9 @@ export default function Dashboard() {
           
           {/* Recent Activities + Quick Links */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="md:col-span-2 border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-              <CardHeader className="bg-gray-50">
-                <CardTitle className="text-lg flex items-center text-neutral-800">
+            <Card className="md:col-span-2">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center">
                   <i className="ri-history-line mr-2 text-blue-500"></i> Actividad Reciente
                 </CardTitle>
               </CardHeader>

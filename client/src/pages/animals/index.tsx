@@ -607,11 +607,11 @@ export default function AnimalsIndex() {
       
       {/* Tabs Navigation */}
       <Tabs defaultValue="list" onValueChange={setActiveTab}>
-        <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-200">
-          <TabsTrigger value="list" className="data-[state=active]:bg-primary-light data-[state=active]:text-primary text-neutral-800 data-[state=active]:bg-opacity-10 hover:text-white hover:bg-gray-300">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="list">
             <i className="ri-list-check mr-1"></i> Lista
           </TabsTrigger>
-          <TabsTrigger value="stats" className="data-[state=active]:bg-primary-light data-[state=active]:text-primary text-neutral-800 data-[state=active]:bg-opacity-10 hover:text-white hover:bg-gray-300">
+          <TabsTrigger value="stats">
             <i className="ri-pie-chart-line mr-1"></i> Estadísticas
           </TabsTrigger>
         </TabsList>
