@@ -431,6 +431,7 @@ export default function MachinesIndex() {
       <Tabs defaultValue="list" className="w-full">
         <TabsList>
           <TabsTrigger value="list">Lista de Maquinarias</TabsTrigger>
+          <TabsTrigger value="works">Trabajos Realizados</TabsTrigger>
           <TabsTrigger value="stats">Estadísticas</TabsTrigger>
         </TabsList>
         
@@ -593,6 +594,11 @@ export default function MachinesIndex() {
               </Table>
             </div>
           )}
+        </TabsContent>
+        
+        <TabsContent value="works" className="mt-4">
+          {/* Lista de trabajos realizados con las máquinas */}
+          <WorksWithMachines />
         </TabsContent>
         
         <TabsContent value="stats" className="mt-4">
