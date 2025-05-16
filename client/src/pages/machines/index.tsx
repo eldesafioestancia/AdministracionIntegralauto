@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -73,6 +73,227 @@ const machineFormSchema = z.object({
 });
 
 type MachineFormValues = z.infer<typeof machineFormSchema>;
+
+// Componente para mostrar los trabajos realizados con las máquinas
+function WorksWithMachines() {
+  const { toast } = useToast();
+  const [machineFilter, setMachineFilter] = useState<string>("all");
+  const [workTypeFilter, setWorkTypeFilter] = useState<string>("all");
+  const [dateFilter, setDateFilter] = useState<string>("all");
+
+  // Consulta para obtener la lista de trabajos agrícolas
+  const { data: pastureWorks, isLoading: isLoadingWorks } = useQuery({ 
+    queryKey: ["/api/pasture-works"], 
+    retry: 1,
+  });
+
+  // Consulta para obtener la lista de maquinarias (para el filtro)
+  const { data: machines } = useQuery({ 
+    queryKey: ["/api/machines"], 
+    retry: 1, 
+  });
+
+  // Consulta para obtener la lista de parcelas (para mostrar nombres)
+  const { data: pastures } = useQuery({ 
+    queryKey: ["/api/pastures"], 
+    retry: 1, 
+  });
+
+  // Helper para obtener el nombre de la máquina por ID
+  const getMachineName = (machineId: number): string => {
+    if (!machines || !Array.isArray(machines)) return `Máquina #${machineId}`;
+    
+    const machine = machines.find((m: any) => m.id === machineId);
+    if (!machine) return `Máquina #${machineId}`;
+    
+    return `${machine.brand} ${machine.model}`;
+  };
+
+  // Helper para obtener el nombre de la parcela por ID
+  const getPastureName = (pastureId: number): string => {
+    if (!pastures || !Array.isArray(pastures)) return `Parcela #${pastureId}`;
+    
+    const pasture = pastures.find((p: any) => p.id === pastureId);
+    if (!pasture) return `Parcela #${pastureId}`;
+    
+    return pasture.name;
+  };
+
+  // Helper para obtener etiqueta del tipo de trabajo
+  const getWorkTypeLabel = (workType: string): string => {
+    switch (workType) {
+      case "siembra": return "Siembra";
+      case "cosecha": return "Cosecha";
+      case "fumigacion": return "Fumigación";
+      case "fertilizacion": return "Fertilización";
+      case "rastra": return "Rastra";
+      case "arado": return "Arado";
+      case "cincel": return "Cincel";
+      case "corte": return "Corte";
+      case "rastrillado": return "Rastrillado";
+      case "enrollado": return "Enrollado";
+      case "disco": return "Disco";
+      case "nivelacion": return "Nivelación";
+      case "limpieza": return "Limpieza";
+      default: return workType;
+    }
+  };
+
+  // Filtrado de trabajos según filtros seleccionados
+  const filteredWorks = pastureWorks && Array.isArray(pastureWorks) ? pastureWorks.filter((work: any) => {
+    // Solo incluimos trabajos que tengan una máquina asociada
+    if (!work.machineId) return false;
+    
+    // Filtro por máquina
+    const matchesMachine = machineFilter === "all" || work.machineId.toString() === machineFilter;
+    
+    // Filtro por tipo de trabajo
+    const matchesWorkType = workTypeFilter === "all" || work.workType === workTypeFilter;
+    
+    // Filtro por fecha
+    let matchesDate = true;
+    if (dateFilter === "lastMonth") {
+      const lastMonth = new Date();
+      lastMonth.setMonth(lastMonth.getMonth() - 1);
+      matchesDate = new Date(work.startDate) >= lastMonth;
+    } else if (dateFilter === "lastWeek") {
+      const lastWeek = new Date();
+      lastWeek.setDate(lastWeek.getDate() - 7);
+      matchesDate = new Date(work.startDate) >= lastWeek;
+    }
+    
+    return matchesMachine && matchesWorkType && matchesDate;
+  }) : [];
+
+  // Obtener lista única de tipos de trabajo para el filtro
+  const workTypes = pastureWorks && Array.isArray(pastureWorks) 
+    ? [...new Set(pastureWorks.map((work: any) => work.workType))]
+    : [];
+
+  if (isLoadingWorks) {
+    return <div className="py-10 text-center">Cargando trabajos agrícolas...</div>;
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Filtros */}
+      <div className="flex flex-col sm:flex-row gap-4 mb-4">
+        {/* Filtro por máquina */}
+        <Select
+          value={machineFilter}
+          onValueChange={setMachineFilter}
+        >
+          <SelectTrigger className="w-full sm:w-[200px]">
+            <SelectValue placeholder="Filtrar por máquina" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas las máquinas</SelectItem>
+            {machines && Array.isArray(machines) && machines.map((machine: any) => (
+              <SelectItem key={machine.id} value={machine.id.toString()}>
+                {machine.brand} {machine.model}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        
+        {/* Filtro por tipo de trabajo */}
+        <Select
+          value={workTypeFilter}
+          onValueChange={setWorkTypeFilter}
+        >
+          <SelectTrigger className="w-full sm:w-[200px]">
+            <SelectValue placeholder="Filtrar por tipo" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos los tipos</SelectItem>
+            {workTypes.map((workType: string) => (
+              <SelectItem key={workType} value={workType}>
+                {getWorkTypeLabel(workType)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        
+        {/* Filtro por fecha */}
+        <Select
+          value={dateFilter}
+          onValueChange={setDateFilter}
+        >
+          <SelectTrigger className="w-full sm:w-[200px]">
+            <SelectValue placeholder="Filtrar por fecha" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todo el tiempo</SelectItem>
+            <SelectItem value="lastWeek">Última semana</SelectItem>
+            <SelectItem value="lastMonth">Último mes</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      
+      {/* Tabla de trabajos */}
+      {filteredWorks.length > 0 ? (
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Fecha</TableHead>
+                <TableHead>Parcela</TableHead>
+                <TableHead>Trabajo</TableHead>
+                <TableHead>Máquina</TableHead>
+                <TableHead>Área (ha)</TableHead>
+                <TableHead>Horas</TableHead>
+                <TableHead className="text-right">Costo Total</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredWorks.map((work: any) => (
+                <TableRow key={work.id}>
+                  <TableCell>
+                    {new Date(work.startDate).toLocaleDateString('es-AR')}
+                  </TableCell>
+                  <TableCell>
+                    {work.pastureId > 0 ? getPastureName(work.pastureId) : "Sin parcela"}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline">
+                      {getWorkTypeLabel(work.workType)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Link href={`/machines/${work.machineId}`} className="text-primary hover:underline">
+                      {getMachineName(work.machineId)}
+                    </Link>
+                  </TableCell>
+                  <TableCell>
+                    {work.areaWorked || "-"}
+                  </TableCell>
+                  <TableCell>
+                    {work.workingHours || "-"}
+                  </TableCell>
+                  <TableCell className="text-right font-medium">
+                    ${work.totalCost ? parseFloat(work.totalCost).toFixed(2) : "-"}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      ) : (
+        <div className="p-8 text-center border rounded-md">
+          <div className="flex flex-col items-center justify-center">
+            <div className="bg-neutral-100 p-4 rounded-full mb-4">
+              <i className="ri-file-list-3-line text-neutral-400 text-4xl"></i>
+            </div>
+            <h3 className="text-lg font-medium mb-2">No hay trabajos que coincidan con los filtros</h3>
+            <p className="text-neutral-500 max-w-md mb-4">
+              Cambie los filtros o registre nuevos trabajos agrícolas en la sección de Pasturas.
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function MachinesIndex() {
   const { toast } = useToast();
