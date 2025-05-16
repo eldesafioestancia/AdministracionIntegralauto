@@ -44,8 +44,8 @@ export default function MobileNav({ openMoreMenu }: MobileNavProps) {
           <a
             className={`flex flex-col items-center justify-center ${
               isActive("/animals")
-                ? "text-primary border-t-2 border-primary"
-                : "text-neutral-400 hover:text-primary"
+                ? "text-primary border-t-2 border-primary font-medium"
+                : "text-neutral-500 hover:text-primary"
             }`}
           >
             <i className="ri-bear-smile-line text-xl"></i>
@@ -57,8 +57,8 @@ export default function MobileNav({ openMoreMenu }: MobileNavProps) {
           <a
             className={`flex flex-col items-center justify-center ${
               isActive("/finances")
-                ? "text-primary border-t-2 border-primary"
-                : "text-neutral-400 hover:text-primary"
+                ? "text-primary border-t-2 border-primary font-medium"
+                : "text-neutral-500 hover:text-primary"
             }`}
           >
             <i className="ri-money-dollar-circle-line text-xl"></i>
@@ -68,7 +68,7 @@ export default function MobileNav({ openMoreMenu }: MobileNavProps) {
 
         <button
           onClick={openMoreMenu}
-          className="flex flex-col items-center justify-center text-neutral-400 hover:text-primary"
+          className="flex flex-col items-center justify-center text-neutral-500 hover:text-primary"
         >
           <i className="ri-more-line text-xl"></i>
           <span className="text-xs mt-1">Más</span>
