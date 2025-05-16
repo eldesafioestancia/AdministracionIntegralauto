@@ -670,11 +670,11 @@ export default function PasturesIndex() {
           // Si tenemos una parcela válida, registramos el ingreso para esa parcela
           if (values.pastureId > 0) {
             const financeData = {
-              pastureId: values.pastureId,
+              pastureId: parseInt(values.pastureId.toString()),
               date: new Date(),
               type: "income",
               concept: `trabajo_agricola_${values.workType}`,
-              amount: values.totalCost
+              amount: parseFloat(values.totalCost?.toString() || "0")
             };
             
             await apiRequest("POST", "/api/pasture-finances", financeData);
@@ -689,11 +689,11 @@ export default function PasturesIndex() {
             const defaultPastureId = pastures[0].id;
             
             const financeData = {
-              pastureId: defaultPastureId,
+              pastureId: parseInt(defaultPastureId.toString()),
               date: new Date(),
               type: "income",
               concept: `servicio_${values.workType}_${values.machineId || ""}`,
-              amount: values.totalCost
+              amount: parseFloat(values.totalCost?.toString() || "0")
             };
             
             await apiRequest("POST", "/api/pasture-finances", financeData);

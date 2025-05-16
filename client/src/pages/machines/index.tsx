@@ -167,7 +167,7 @@ function WorksWithMachines() {
 
   // Obtener lista única de tipos de trabajo para el filtro
   const workTypes = pastureWorks && Array.isArray(pastureWorks) 
-    ? [...new Set(pastureWorks.map((work: any) => work.workType))]
+    ? Array.from(new Set(pastureWorks.map((work: any) => work.workType)))
     : [];
 
   if (isLoadingWorks) {
@@ -206,7 +206,7 @@ function WorksWithMachines() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos los tipos</SelectItem>
-            {workTypes.map((workType: string) => (
+            {workTypes.map((workType: any) => (
               <SelectItem key={workType} value={workType}>
                 {getWorkTypeLabel(workType)}
               </SelectItem>
