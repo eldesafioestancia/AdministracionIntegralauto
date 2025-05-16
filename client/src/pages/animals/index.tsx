@@ -662,6 +662,9 @@ export default function AnimalsIndex() {
                     <TableHead className="hidden md:table-cell">Estado</TableHead>
                     <TableHead className="hidden md:table-cell">Ubicación</TableHead>
                     <TableHead className="text-right">Acciones</TableHead>
+                    <TableHead className="w-10 text-right">
+                      {/* Columna para checkboxes */}
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
             <TableBody>
@@ -707,74 +710,74 @@ export default function AnimalsIndex() {
                     {animal.location ? animal.location.replace(/_/g, ' ') : "-"}
                   </TableCell>
                   <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex items-center justify-end space-x-4">
-                      {/* Veterinaria (1º) - Seguimos el orden solicitado */}
+                    <div className="flex items-center justify-end space-x-2">
+                      {/* Veterinaria (1º) */}
                       <Button 
                         variant="ghost" 
                         size="icon" 
                         asChild 
-                        className="h-10 w-10 bg-white hover:bg-blue-500 group transition-colors" 
+                        className="h-10 w-10" 
                         title="Evento veterinario"
                       >
                         <Link href={`/animals/${animal.id}/veterinary`}>
-                          <i className="ri-stethoscope-line text-xl text-black group-hover:text-white transition-colors"></i>
+                          <i className="ri-stethoscope-line text-xl text-green-600"></i>
                         </Link>
                       </Button>
                       
-                      {/* Ventas (2º) - Seguimos el orden solicitado */}
+                      {/* Ventas (2º) */}
                       <Button 
                         variant="ghost" 
                         size="icon" 
                         asChild 
-                        className="h-10 w-10 bg-white hover:bg-blue-500 group transition-colors" 
+                        className="h-10 w-10" 
                         title="Registrar venta"
                       >
                         <Link href={`/finances?openForm=true&type=income&category=animales&description=Venta - Animal #${animal.cartagena}`}>
-                          <i className="ri-shopping-cart-line text-xl text-black group-hover:text-white transition-colors"></i>
+                          <i className="ri-shopping-cart-line text-xl"></i>
                         </Link>
                       </Button>
                       
-                      {/* Movimientos (3º) - Seguimos el orden solicitado */}
+                      {/* Movimientos (3º) */}
                       <Button 
                         variant="ghost" 
                         size="icon" 
-                        className="h-10 w-10 bg-white hover:bg-blue-500 group transition-colors" 
+                        className="h-10 w-10" 
                         title="Trasladar animal"
                         onClick={(e) => {
                           e.stopPropagation();
                           openTransferSheet(animal);
                         }}
                       >
-                        <i className="ri-arrow-left-right-line text-xl text-black group-hover:text-white transition-colors"></i>
+                        <i className="ri-arrow-left-right-line text-xl text-blue-500"></i>
                       </Button>
                       
-                      {/* Editar (4º) - Seguimos el orden solicitado */}
+                      {/* Editar (4º) */}
                       <Button 
                         variant="ghost" 
                         size="icon" 
                         asChild 
-                        className="h-10 w-10 bg-white hover:bg-blue-500 group transition-colors" 
+                        className="h-10 w-10" 
                         title="Editar"
                       >
                         <Link href={`/animals/${animal.id}/edit`}>
-                          <i className="ri-edit-line text-xl text-black group-hover:text-white transition-colors"></i>
+                          <i className="ri-edit-line text-xl text-amber-500"></i>
                         </Link>
                       </Button>
-                      
-                      {/* Checkbox (5º) - Agregamos el checkbox al final como se solicitó */}
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-10 w-10 bg-white hover:bg-blue-500 group transition-colors" 
-                        title={selectedAnimals.includes(animal.id) ? "Deseleccionar" : "Seleccionar"}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSelectAnimal(animal.id);
-                        }}
-                      >
-                        <i className={`${selectedAnimals.includes(animal.id) ? "ri-checkbox-fill text-primary group-hover:text-white" : "ri-checkbox-blank-line text-black group-hover:text-white"} text-xl transition-colors`}></i>
-                      </Button>
                     </div>
+                  </TableCell>
+                  <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-10 w-10 ml-2" 
+                      title={selectedAnimals.includes(animal.id) ? "Deseleccionar" : "Seleccionar"}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSelectAnimal(animal.id);
+                      }}
+                    >
+                      <i className={`${selectedAnimals.includes(animal.id) ? "ri-checkbox-fill text-primary" : "ri-checkbox-blank-line text-gray-400"} text-xl`}></i>
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

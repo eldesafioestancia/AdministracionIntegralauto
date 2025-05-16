@@ -1178,6 +1178,9 @@ export default function PasturesIndex() {
                   <TableHead>Agua</TableHead>
                   <TableHead>Estado</TableHead>
                   <TableHead>Acciones</TableHead>
+                  <TableHead className="w-4">
+                    {/* Columna extra para balance */}
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -1226,52 +1229,47 @@ export default function PasturesIndex() {
                       </TableCell>
                       <TableCell onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-end space-x-4">
-                          {/* Trabajos (1º) */}
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-10 w-10 bg-white hover:bg-blue-500 group transition-colors"
+                            className="h-10 w-10"
                             title="Trabajos Realizados"
                             onClick={() => handleOpenWorkSheet(pasture.id)}
                           >
-                            <i className="ri-tools-line text-xl text-black group-hover:text-white transition-colors"></i>
+                            <i className="ri-tools-line text-xl text-blue-500"></i>
                           </Button>
-                          
-                          {/* Finanzas (2º) */}
                           <Button
                             variant="ghost"
                             size="icon"
                             asChild
-                            className="h-10 w-10 bg-white hover:bg-blue-500 group transition-colors"
+                            className="h-10 w-10"
                             title="Registrar movimiento financiero"
                           >
                             <Link href={`/finances?openForm=true&type=expense&category=pasturas&description=Gasto - Parcela ${pasture.name}`}>
-                              <i className="ri-money-dollar-circle-line text-xl text-black group-hover:text-white transition-colors"></i>
+                              <i className="ri-money-dollar-circle-line text-xl text-green-500"></i>
                             </Link>
                           </Button>
-                          
-                          {/* Editar (3º) - Posicionado entre finanzas y checkbox como solicitado */}
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-10 w-10 bg-white hover:bg-blue-500 group transition-colors"
+                            className="h-10 w-10"
                             title="Editar"
                             onClick={() => handleEditPasture(pasture.id)}
                           >
-                            <i className="ri-pencil-line text-xl text-black group-hover:text-white transition-colors"></i>
+                            <i className="ri-pencil-line text-xl text-amber-500"></i>
                           </Button>
-                          
-                          {/* Checkbox (4º) */}
                           <Button 
                             variant="ghost" 
                             size="icon" 
-                            className="h-10 w-10 bg-white hover:bg-blue-500 group transition-colors" 
+                            className="h-10 w-10" 
                             title={selectedPastures.includes(pasture.id) ? "Deseleccionar" : "Seleccionar"}
                             onClick={(e) => handleSelectPasture(pasture.id, e)}
                           >
-                            <i className={`${selectedPastures.includes(pasture.id) ? "ri-checkbox-fill text-primary group-hover:text-white" : "ri-checkbox-blank-line text-black group-hover:text-white"} text-xl transition-colors`}></i>
+                            <i className={`${selectedPastures.includes(pasture.id) ? "ri-checkbox-fill text-primary" : "ri-checkbox-blank-line text-gray-400"} text-xl`}></i>
                           </Button>
                         </div>
+                      </TableCell>
+                      <TableCell className="w-4" onClick={(e) => e.stopPropagation()}>
                       </TableCell>
                     </TableRow>
                   ))

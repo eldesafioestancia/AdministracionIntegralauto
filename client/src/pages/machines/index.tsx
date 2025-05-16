@@ -484,6 +484,9 @@ export default function MachinesIndex() {
                     <TableHead>Ubicación</TableHead>
                     <TableHead>Estado</TableHead>
                     <TableHead>Acciones</TableHead>
+                    <TableHead className="w-10 text-right">
+                      {/* Columna para checkboxes */}
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -540,59 +543,49 @@ export default function MachinesIndex() {
                         </Badge>
                       </TableCell>
                       <TableCell onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-end space-x-4">
-                          {/* Mantenimiento (1º) - Seguimos el orden solicitado */}
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-10 w-10 bg-white hover:bg-blue-500 group transition-colors" 
-                            title="Registrar mantenimiento"
-                          >
+                        <div className="flex items-center justify-end space-x-2">
+                          {/* Mantenimiento (1º) */}
+                          <Button variant="ghost" size="icon" className="h-10 w-10" title="Registrar mantenimiento">
                             <Link href={`/machines/${machine.id}/maintenance`}>
-                              <i className="ri-settings-line text-xl text-black group-hover:text-white transition-colors"></i>
+                              <i className="ri-settings-line text-xl text-orange-500"></i>
                             </Link>
                           </Button>
                           
-                          {/* Trabajos (2º) - Seguimos el orden solicitado */}
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-10 w-10 bg-white hover:bg-blue-500 group transition-colors" 
-                            title="Trabajos"
-                          >
+                          {/* Trabajos (2º) */}
+                          <Button variant="ghost" size="icon" className="h-10 w-10" title="Trabajos">
                             <Link href={`/machines/${machine.id}/work`}>
-                              <i className="ri-tools-line text-xl text-black group-hover:text-white transition-colors"></i>
+                              <i className="ri-tools-line text-xl text-blue-500"></i>
                             </Link>
                           </Button>
                           
-                          {/* Editar (3º) - Seguimos el orden solicitado */}
+                          {/* Editar (3º) */}
                           <Button 
                             variant="ghost" 
                             size="icon" 
-                            className="h-10 w-10 bg-white hover:bg-blue-500 group transition-colors" 
+                            className="h-10 w-10" 
                             title="Editar"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleEdit(machine.id);
                             }}
                           >
-                            <i className="ri-edit-line text-xl text-black group-hover:text-white transition-colors"></i>
-                          </Button>
-                          
-                          {/* Checkbox (4º) - Reemplazando finanzas por checkbox según lo solicitado */}
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-10 w-10 bg-white hover:bg-blue-500 group transition-colors" 
-                            title={selectedMachines.includes(machine.id) ? "Deseleccionar" : "Seleccionar"}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleSelectMachine(machine.id);
-                            }}
-                          >
-                            <i className={`${selectedMachines.includes(machine.id) ? "ri-checkbox-fill text-primary group-hover:text-white" : "ri-checkbox-blank-line text-black group-hover:text-white"} text-xl transition-colors`}></i>
+                            <i className="ri-edit-line text-xl text-amber-500"></i>
                           </Button>
                         </div>
+                      </TableCell>
+                      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-10 w-10 ml-2" 
+                          title={selectedMachines.includes(machine.id) ? "Deseleccionar" : "Seleccionar"}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelectMachine(machine.id);
+                          }}
+                        >
+                          <i className={`${selectedMachines.includes(machine.id) ? "ri-checkbox-fill text-primary" : "ri-checkbox-blank-line text-gray-400"} text-xl`}></i>
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
