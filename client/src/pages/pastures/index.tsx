@@ -124,6 +124,7 @@ const pastureWorkFormSchema = z.object({
   fuelUsed: z.string().optional().nullable(),
   operativeCost: z.string().optional().nullable(),
   suppliesCost: z.string().optional().nullable(),
+  costPerUnit: z.string().optional().nullable(),
   totalCost: z.string().optional().nullable(),
   weatherConditions: z.string().optional().nullable(),
   temperature: z.string().optional().nullable(),
@@ -642,13 +643,15 @@ export default function PasturesIndex() {
         }
       }
       
-      // Calculamos el costo total si hay costos de suministros y operativos
-      if (values.operativeCost && values.suppliesCost) {
-        const operativeCost = parseFloat(values.operativeCost);
-        const suppliesCost = parseFloat(values.suppliesCost);
-        
-        if (!isNaN(operativeCost) && !isNaN(suppliesCost)) {
-          values.totalCost = (operativeCost + suppliesCost).toString();
+      // Si no hay un costo total ya calculado, lo calculamos basado en los costos operativos y de insumos
+      if (!values.totalCost) {
+        if (values.operativeCost && values.suppliesCost) {
+          const operativeCost = parseFloat(values.operativeCost);
+          const suppliesCost = parseFloat(values.suppliesCost);
+          
+          if (!isNaN(operativeCost) && !isNaN(suppliesCost)) {
+            values.totalCost = (operativeCost + suppliesCost).toString();
+          }
         }
       }
       
@@ -1526,6 +1529,16 @@ export default function PasturesIndex() {
                             step="0.01"
                             {...field}
                             value={field.value || ""}
+                            onChange={(e) => {
+                              field.onChange(e);
+                              // Actualizar costo total si hay valor de costo por hectárea
+                              const area = parseFloat(e.target.value);
+                              const costPerUnit = parseFloat(workForm.getValues("costPerUnit")?.toString() || "0");
+                              if (!isNaN(area) && !isNaN(costPerUnit) && area > 0 && costPerUnit > 0) {
+                                const calculatedTotal = (area * costPerUnit).toFixed(2);
+                                workForm.setValue("totalCost", calculatedTotal);
+                              }
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -1546,6 +1559,15 @@ export default function PasturesIndex() {
                             step="0.1"
                             {...field}
                             value={field.value || ""}
+                            onChange={(e) => {
+                              field.onChange(e);
+                              // Actualizar costo total si hay valor de costo por kilómetro
+                              const distance = parseFloat(e.target.value);
+                              const costPerUnit = parseFloat(workForm.getValues("costPerUnit") || "0");
+                              if (!isNaN(distance) && !isNaN(costPerUnit) && distance > 0 && costPerUnit > 0) {
+                                workForm.setValue("totalCost", (distance * costPerUnit).toFixed(2));
+                              }
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -1627,6 +1649,63 @@ export default function PasturesIndex() {
                         <Input
                           type="number"
                           placeholder="15000"
+                          step="100"
+                          {...field}
+                          value={field.value || ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              {/* Costo por hectárea/kilómetro y costo total */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  control={workForm.control}
+                  name="costPerUnit"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{showDistanceField ? 'Costo por Kilómetro ($)' : 'Costo por Hectárea ($)'}</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder={showDistanceField ? "500" : "2000"}
+                          step="10"
+                          {...field}
+                          value={field.value || ""}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            // Calcular costo total si hay área/distancia
+                            const value = parseFloat(e.target.value);
+                            if (!isNaN(value)) {
+                              const areaOrDistance = showDistanceField 
+                                ? parseFloat(workForm.getValues("distance")?.toString() || "0") 
+                                : parseFloat(workForm.getValues("areaWorked")?.toString() || "0");
+                              if (areaOrDistance > 0) {
+                                const calculatedTotal = (value * areaOrDistance).toFixed(2);
+                                workForm.setValue("totalCost", calculatedTotal);
+                              }
+                            }
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={workForm.control}
+                  name="totalCost"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Costo Total ($)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="30000"
                           step="100"
                           {...field}
                           value={field.value || ""}
