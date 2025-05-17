@@ -64,9 +64,15 @@ export default function Dashboard() {
   const [dateRange, setDateRange] = useState("30days");
   const [activeTab, setActiveTab] = useState("overview");
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["/api/dashboard", { dateRange }],
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ["/api/dashboard", dateRange],
   });
+  
+  // Recargar los datos cuando cambia el periodo de tiempo
+  const handleDateRangeChange = (newRange: string) => {
+    setDateRange(newRange);
+    // La consulta se actualizará automáticamente porque incluimos dateRange en queryKey
+  };
 
   // Consulta de datos para actividad reciente
   const { data: pastureWorks } = useQuery({
@@ -185,7 +191,7 @@ export default function Dashboard() {
         <div className="mt-3 sm:mt-0 flex items-center space-x-3">
           <Select 
             defaultValue={dateRange} 
-            onValueChange={setDateRange}
+            onValueChange={handleDateRangeChange}
           >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Período" />

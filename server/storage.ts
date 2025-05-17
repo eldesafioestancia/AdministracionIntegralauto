@@ -120,7 +120,7 @@ export interface IStorage {
   deleteAnimalWeight(id: number): Promise<boolean>;
   
   // Dashboard
-  getDashboardStats(): Promise<{
+  getDashboardStats(dateRange?: string): Promise<{
     machineCount: number;
     animalCount: number;
     pastureCount: number;
@@ -873,7 +873,7 @@ export class MemStorage implements IStorage {
   }
 
   // Dashboard
-  async getDashboardStats(): Promise<{
+  async getDashboardStats(dateRange?: string): Promise<{
     machineCount: number;
     animalCount: number;
     pastureCount: number;
@@ -884,9 +884,35 @@ export class MemStorage implements IStorage {
     const animals = await this.getAnimals();
     const pastures = await this.getPastures();
     
-    // Calculate financial stats for the current month
+    // Calculate date range based on selected filter
     const now = new Date();
-    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    let startDate = new Date(now.getFullYear(), now.getMonth(), 1); // Default: current month
+    
+    if (dateRange) {
+      switch (dateRange) {
+        case '30days':
+          // Last 30 days
+          startDate = new Date(now);
+          startDate.setDate(now.getDate() - 30);
+          break;
+        case 'thisMonth':
+          // Current month (default)
+          startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+          break;
+        case 'quarter':
+          // Last 3 months
+          startDate = new Date(now);
+          startDate.setMonth(now.getMonth() - 3);
+          break;
+        case 'year':
+          // Current year
+          startDate = new Date(now.getFullYear(), 0, 1);
+          break;
+        default:
+          // Default to current month
+          startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      }
+    }
     
     const machineFinances = await this.getMachineFinances();
     const animalFinances = await this.getAnimalFinances();
@@ -899,16 +925,16 @@ export class MemStorage implements IStorage {
       ...pastureFinances,
     ];
     
-    // Filter for current month
-    const currentMonthFinances = allFinances.filter(f => 
-      new Date(f.date) >= firstDayOfMonth && new Date(f.date) <= now
+    // Filter based on date range
+    const filteredFinances = allFinances.filter(f => 
+      new Date(f.date) >= startDate && new Date(f.date) <= now
     );
     
     // Calculate totals
     let monthlyIncome = 0;
     let monthlyExpense = 0;
     
-    currentMonthFinances.forEach(finance => {
+    filteredFinances.forEach(finance => {
       if (finance.type === 'income') {
         monthlyIncome += Number(finance.amount);
       } else {
