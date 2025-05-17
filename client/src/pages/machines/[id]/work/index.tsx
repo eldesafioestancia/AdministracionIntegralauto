@@ -292,6 +292,8 @@ export default function MachineWorkIndex() {
         operationalCost: "",
         suppliesCost: "",
         totalCost: "",
+        valuePerUnit: "",
+        totalValue: "",
         weatherCondition: "",
         temperature: "",
         soilHumidity: "",
