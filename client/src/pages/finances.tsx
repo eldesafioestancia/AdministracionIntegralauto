@@ -91,8 +91,6 @@ export default function FinancesPage() {
         subcategory: params.get('subcategory'),
         description: params.get('description'),
         machineId: params.get('machineId'),
-        animalId: params.get('animalId'),
-        animalIdentification: params.get('animalIdentification'),
       };
     }
     return {
@@ -102,8 +100,6 @@ export default function FinancesPage() {
       subcategory: null,
       description: null,
       machineId: null,
-      animalId: null,
-      animalIdentification: null,
     };
   };
 
@@ -168,15 +164,6 @@ export default function FinancesPage() {
   // Consulta para obtener las máquinas disponibles
   const { data: machines = [] } = useQuery({
     queryKey: ["/api/machines"],
-  });
-
-  // Obtener los parámetros para usar en el formulario
-  const [selectedAnimalId, setSelectedAnimalId] = useState<string | null>(null);
-  
-  // Consulta para obtener los datos del animal si se selecciona uno
-  const { data: animalData } = useQuery({
-    queryKey: ["/api/animals", selectedAnimalId],
-    enabled: !!selectedAnimalId,
   });
 
   // Calcular sumarios
@@ -422,19 +409,6 @@ export default function FinancesPage() {
     }
   };
 
-  // Efecto para actualizar el campo de identificación del animal cuando se carguen sus datos
-  useEffect(() => {
-    if (animalData && form.getValues("category") === "animales") {
-      // Obtener color y número de caravana del animal
-      const animalColor = animalData.cartagenaColor || animalData.color || '';
-      const animalNumber = animalData.cartagena || '';
-      const identification = `${animalColor} #${animalNumber}`;
-      
-      // Actualizar el formulario con la identificación del animal
-      form.setValue("animalIdentification", identification.trim());
-    }
-  }, [animalData, form]);
-  
   // Efecto para detectar parámetros y autocompletar el formulario
   useEffect(() => {
     const params = parseQueryParams();
@@ -471,17 +445,6 @@ export default function FinancesPage() {
               // Seleccionar la máquina específica
               form.setValue("machineId", machineId);
             }
-          }
-        }
-        
-        // Si la categoría es animales y existe un ID de animal
-        if (params.category === "animales" && params.animalId) {
-          // Guardar el ID del animal seleccionado para buscar sus datos
-          setSelectedAnimalId(params.animalId);
-          
-          // Si ya se proporcionó la identificación del animal en los parámetros
-          if (params.animalIdentification) {
-            form.setValue("animalIdentification", params.animalIdentification);
           }
         }
       }
