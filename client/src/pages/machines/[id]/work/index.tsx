@@ -96,11 +96,12 @@ const machineWorkFormSchema = z.object({
   distance: z.string().optional(),
   workTime: z.string().optional(),
   fuelUsed: z.string().optional(),
+  costPerUnit: z.string().optional(), // Costo por hectárea o kilómetro
+  unitType: z.string().optional(), // Tipo de unidad (hectárea o kilómetro)
   operationalCost: z.string().optional(),
   suppliesCost: z.string().optional(),
   totalCost: z.string().optional(),
-  valuePerUnit: z.string().optional(), // Valor por hectárea o por kilómetro
-  totalValue: z.string().optional(),   // Valor total del trabajo (ingreso)
+  revenueAmount: z.string().optional(), // Monto a registrar como ingreso
   weatherCondition: z.string().optional(),
   temperature: z.string().optional(),
   soilHumidity: z.string().optional(),
@@ -184,11 +185,12 @@ export default function MachineWorkIndex() {
       distance: "",
       workTime: "",
       fuelUsed: "",
+      costPerUnit: "",
+      unitType: machine?.type === "vehiculo" || machine?.type === "camion" ? "km" : "ha",
       operationalCost: "",
       suppliesCost: "",
       totalCost: "",
-      valuePerUnit: "",
-      totalValue: "",
+      revenueAmount: "",
       weatherCondition: "",
       temperature: "",
       soilHumidity: "",
@@ -204,20 +206,49 @@ export default function MachineWorkIndex() {
     },
   });
 
-  // Calcular el costo total sumando costos operativos y de suministros
+  // Calcular el costo total y el monto de ingreso
   useEffect(() => {
     const calculateTotal = () => {
+      // Cálculo tradicional: costo operativo + costo de suministros
       const operational = parseFloat(workForm.watch("operationalCost") || "0");
       const supplies = parseFloat(workForm.watch("suppliesCost") || "0");
-      const total = operational + supplies;
+      const totalExpenses = operational + supplies;
       
-      if (!isNaN(total)) {
-        workForm.setValue("totalCost", total.toString());
+      if (!isNaN(totalExpenses)) {
+        workForm.setValue("totalCost", totalExpenses.toString());
+      }
+      
+      // Cálculo del ingreso basado en costo por unidad (hectárea o kilómetro)
+      const costPerUnit = parseFloat(workForm.watch("costPerUnit") || "0");
+      let unitValue = 0;
+      
+      // Determinamos qué valor usar según el tipo de unidad
+      const unitType = workForm.watch("unitType");
+      if (unitType === "km") {
+        unitValue = parseFloat(workForm.watch("distance") || "0");
+      } else { // "ha" por defecto
+        unitValue = parseFloat(workForm.watch("areaWorked") || "0");
+      }
+      
+      // Calculamos el ingreso como costo por unidad * cantidad de unidades
+      const revenue = costPerUnit * unitValue;
+      
+      if (!isNaN(revenue) && revenue > 0) {
+        workForm.setValue("revenueAmount", revenue.toString());
+      } else {
+        workForm.setValue("revenueAmount", "");
       }
     };
     
     calculateTotal();
-  }, [workForm.watch("operationalCost"), workForm.watch("suppliesCost")]);
+  }, [
+    workForm.watch("operationalCost"), 
+    workForm.watch("suppliesCost"),
+    workForm.watch("costPerUnit"),
+    workForm.watch("areaWorked"),
+    workForm.watch("distance"),
+    workForm.watch("unitType")
+  ]);
 
   // Función para agregar un nuevo registro de trabajo
   async function handleWorkSubmit(values: MachineWorkFormValues) {
@@ -228,54 +259,45 @@ export default function MachineWorkIndex() {
       // Actualizar datos de trabajos
       queryClient.invalidateQueries({ queryKey: ["/api/pasture-works"] });
       
-      // Obtener el nombre de la parcela si existe
-      let pastureDetails = "No especificada";
-      if (values.pastureId) {
-        // Si hay una parcela asociada, buscar su nombre
-        const pasture = pastures?.find((p: any) => p.id === values.pastureId);
-        if (pasture) {
-          pastureDetails = pasture.name;
+      // Si hay un valor de revenueAmount, registrar como ingreso financiero para la máquina
+      if (values.revenueAmount && parseFloat(values.revenueAmount) > 0) {
+        // Obtener el nombre de la parcela si existe
+        let pastureDetails = "No especificada";
+        if (values.pastureId) {
+          // Si hay una parcela asociada, buscar su nombre
+          const pasture = pastures?.find((p: any) => p.id === values.pastureId);
+          if (pasture) {
+            pastureDetails = pasture.name;
+          }
         }
-      }
-      
-      // Si hay un costo total (como gasto de operación)
-      if (values.totalCost && parseFloat(values.totalCost) > 0) {
-        // Crear un registro financiero de gasto
-        await apiRequest("POST", "/api/machine-finances", {
-          machineId: machineId,
-          date: values.startDate,
-          type: "expense", // Tipo gasto
-          concept: `Gastos operativos: ${values.workType} ${pastureDetails ? 'en ' + pastureDetails : ''}`,
-          amount: values.totalCost
-        });
-      }
-      
-      // Si hay un valor total (como ingreso por servicio)
-      if (values.totalValue && parseFloat(values.totalValue) > 0) {
-        // Crear un registro financiero de ingreso
+        
+        // Determinar qué unidad se está usando
+        const unitLabel = values.unitType === 'km' ? 'kilómetros' : 'hectáreas';
+        const unitValue = values.unitType === 'km' ? values.distance : values.areaWorked;
+        const costPerUnit = values.costPerUnit;
+        
+        // Crear un registro financiero de ingreso con información detallada
         await apiRequest("POST", "/api/machine-finances", {
           machineId: machineId,
           date: values.startDate,
           type: "income", // Tipo ingreso
-          concept: `Servicio: ${values.workType} ${pastureDetails ? 'en ' + pastureDetails : ''} ${machine?.type === 'camion' || machine?.type === 'vehiculo' ? '(' + (values.distance || '0') + ' km)' : '(' + (values.areaWorked || '0') + ' ha)'}`,
-          amount: values.totalValue
+          concept: `Trabajo agrícola: ${values.workType} ${pastureDetails ? 'en ' + pastureDetails : ''} (${unitValue} ${unitLabel} a $${costPerUnit}/${values.unitType})`,
+          amount: values.revenueAmount
         });
         
-        // Mostrar mensaje de éxito con información del ingreso
+        // Invalidar consulta de finanzas para esta máquina
+        queryClient.invalidateQueries({ queryKey: [`/api/machine-finances?machineId=${machineId}`] });
+        
         toast({
-          title: "Trabajo registrado",
-          description: "El trabajo agrícola ha sido registrado exitosamente y se ha registrado como ingreso",
+          title: "Trabajo e ingreso registrados",
+          description: `El trabajo agrícola ha sido registrado exitosamente con un ingreso de $${parseFloat(values.revenueAmount).toLocaleString('es-AR')}`,
         });
       } else {
-        // Mostrar mensaje de éxito normal
         toast({
           title: "Trabajo registrado",
           description: "El trabajo agrícola ha sido registrado exitosamente",
         });
       }
-      
-      // Invalidar consulta de finanzas para esta máquina
-      queryClient.invalidateQueries({ queryKey: [`/api/machine-finances?machineId=${machineId}`] });
       
       setWorkSheetOpen(false);
       workForm.reset({
@@ -289,11 +311,12 @@ export default function MachineWorkIndex() {
         distance: "",
         workTime: "",
         fuelUsed: "",
+        costPerUnit: "",
+        unitType: machine?.type === "vehiculo" || machine?.type === "camion" ? "km" : "ha",
         operationalCost: "",
         suppliesCost: "",
         totalCost: "",
-        valuePerUnit: "",
-        totalValue: "",
+        revenueAmount: "",
         weatherCondition: "",
         temperature: "",
         soilHumidity: "",
@@ -796,17 +819,6 @@ export default function MachineWorkIndex() {
                             step="0.01" 
                             {...field}
                             value={field.value || ""}
-                            onChange={(e) => {
-                              field.onChange(e);
-                              const area = parseFloat(e.target.value) || 0;
-                              const valuePerUnit = parseFloat(workForm.getValues("valuePerUnit") || "0");
-                              
-                              if (area > 0 && valuePerUnit > 0) {
-                                workForm.setValue("totalValue", (valuePerUnit * area).toString());
-                              } else {
-                                workForm.setValue("totalValue", "");
-                              }
-                            }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -830,17 +842,6 @@ export default function MachineWorkIndex() {
                             step="0.1" 
                             {...field}
                             value={field.value || ""}
-                            onChange={(e) => {
-                              field.onChange(e);
-                              const distance = parseFloat(e.target.value) || 0;
-                              const valuePerUnit = parseFloat(workForm.getValues("valuePerUnit") || "0");
-                              
-                              if (distance > 0 && valuePerUnit > 0) {
-                                workForm.setValue("totalValue", (valuePerUnit * distance).toString());
-                              } else {
-                                workForm.setValue("totalValue", "");
-                              }
-                            }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -956,21 +957,16 @@ export default function MachineWorkIndex() {
                   </FormItem>
                 )}
               />
-
-              <h3 className="text-sm font-medium text-neutral-500 pt-2">Valores a cobrar</h3>
               
-              <div className="grid grid-cols-2 gap-4">
+              <h3 className="text-sm font-medium text-neutral-500 pt-4 mt-2 border-t border-neutral-200">Facturación del Trabajo</h3>
+              
+              <div className="grid grid-cols-2 gap-4 mt-2">
                 <FormField
                   control={workForm.control}
-                  name="valuePerUnit"
+                  name="costPerUnit"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>
-                        {machine?.type === 'camion' || machine?.type === 'vehiculo' 
-                          ? 'Valor por kilómetro ($)' 
-                          : 'Valor por hectárea ($)'
-                        }
-                      </FormLabel>
+                      <FormLabel>Costo por {workForm.watch("unitType") === "km" ? "kilómetro" : "hectárea"} ($)</FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
@@ -978,19 +974,6 @@ export default function MachineWorkIndex() {
                           step="0.01" 
                           {...field}
                           value={field.value || ""}
-                          onChange={(e) => {
-                            field.onChange(e);
-                            const valuePerUnit = parseFloat(e.target.value) || 0;
-                            const unit = machine?.type === 'camion' || machine?.type === 'vehiculo'
-                              ? parseFloat(workForm.getValues("distance") || "0")
-                              : parseFloat(workForm.getValues("areaWorked") || "0");
-                            
-                            if (unit > 0 && valuePerUnit > 0) {
-                              workForm.setValue("totalValue", (valuePerUnit * unit).toString());
-                            } else {
-                              workForm.setValue("totalValue", "");
-                            }
-                          }}
                         />
                       </FormControl>
                       <FormMessage />
@@ -1000,30 +983,57 @@ export default function MachineWorkIndex() {
                 
                 <FormField
                   control={workForm.control}
-                  name="totalValue"
+                  name="unitType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Valor total ($)</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          placeholder="0" 
-                          disabled
-                          {...field}
-                          value={field.value || ""}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        {machine?.type === 'camion' || machine?.type === 'vehiculo' 
-                          ? 'Kilómetros × Valor por km' 
-                          : 'Hectáreas × Valor por ha'
-                        }
-                      </FormDescription>
+                      <FormLabel>Tipo de unidad</FormLabel>
+                      <Select 
+                        value={field.value} 
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          // Resetear el valor automáticamente cuando cambia la unidad
+                          workForm.setValue("revenueAmount", "");
+                        }}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccione tipo de unidad" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="ha">Hectárea (ha)</SelectItem>
+                          <SelectItem value="km">Kilómetro (km)</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
+
+              <FormField
+                control={workForm.control}
+                name="revenueAmount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Ingreso total a cobrar ($)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        placeholder="0" 
+                        disabled 
+                        {...field}
+                        value={field.value || ""}
+                        className="font-medium bg-amber-50 border-amber-200"
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Monto que se registrará como ingreso en el balance
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               
               <h3 className="text-sm font-medium text-neutral-500 pt-2">Condiciones</h3>
               
