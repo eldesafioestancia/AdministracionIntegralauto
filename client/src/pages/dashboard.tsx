@@ -142,8 +142,17 @@ export default function Dashboard() {
 
   // Generar datos para gráficos
   const financialData = [
-    { name: 'Ingresos', value: stats.monthlyIncome },
-    { name: 'Gastos', value: stats.monthlyExpense },
+    { name: 'Ingresos', value: financialSummary.overall.income || stats.monthlyIncome },
+    { name: 'Gastos', value: financialSummary.overall.expense || stats.monthlyExpense },
+  ];
+  
+  // Datos para el gráfico por áreas
+  const financialAreaData = [
+    { name: 'Animales', income: financialSummary.animals.income, expense: financialSummary.animals.expense, balance: financialSummary.animals.total },
+    { name: 'Maquinaria', income: financialSummary.machines.income, expense: financialSummary.machines.expense, balance: financialSummary.machines.total },
+    { name: 'Pasturas', income: financialSummary.pastures.income, expense: financialSummary.pastures.expense, balance: financialSummary.pastures.total },
+    { name: 'Inversiones', income: financialSummary.investments.income, expense: financialSummary.investments.expense, balance: financialSummary.investments.total },
+    { name: 'Capital', income: financialSummary.capital.income, expense: financialSummary.capital.expense, balance: financialSummary.capital.total }
   ];
 
   // Hacer una cuenta rápida de cuántos animales, maquinarias y parcelas existen
@@ -895,18 +904,18 @@ export default function Dashboard() {
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="text-center p-3 bg-green-50 rounded-md">
-                      <div className="text-2xl font-semibold text-green-600">${stats.monthlyIncome.toLocaleString()}</div>
+                      <div className="text-2xl font-semibold text-green-600">${(financialSummary.overall.income || stats.monthlyIncome).toLocaleString()}</div>
                       <div className="text-sm text-gray-500">Ingresos</div>
                     </div>
                     <div className="text-center p-3 bg-red-50 rounded-md">
-                      <div className="text-2xl font-semibold text-red-600">${stats.monthlyExpense.toLocaleString()}</div>
+                      <div className="text-2xl font-semibold text-red-600">${(financialSummary.overall.expense || stats.monthlyExpense).toLocaleString()}</div>
                       <div className="text-sm text-gray-500">Gastos</div>
                     </div>
                   </div>
                   
                   <div className="text-center p-3 bg-blue-50 rounded-md">
                     <div className="text-2xl font-semibold text-blue-600">
-                      ${(stats.monthlyIncome - stats.monthlyExpense).toLocaleString()}
+                      ${financialBalance.toLocaleString()}
                     </div>
                     <div className="text-sm text-gray-500">Balance</div>
                   </div>
