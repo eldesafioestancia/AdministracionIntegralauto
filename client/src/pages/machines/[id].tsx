@@ -72,6 +72,11 @@ export default function MachineDetail() {
     queryKey: ["/api/pasture-works"],
   });
   
+  // Get all pastures to display their names
+  const { data: pastures, isLoading: pasturesLoading } = useQuery({
+    queryKey: ["/api/pastures"],
+  });
+  
   // Filter works for this machine
   const machineWorks = allPastureWorks && Array.isArray(allPastureWorks) 
     ? allPastureWorks.filter((work) => work.machineId === numericId)
