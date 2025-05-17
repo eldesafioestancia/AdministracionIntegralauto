@@ -96,12 +96,9 @@ const machineWorkFormSchema = z.object({
   distance: z.string().optional(),
   workTime: z.string().optional(),
   fuelUsed: z.string().optional(),
-  costPerUnit: z.string().optional(), // Costo por hectárea o kilómetro
-  unitType: z.string().optional(), // Tipo de unidad (hectárea o kilómetro)
   operationalCost: z.string().optional(),
   suppliesCost: z.string().optional(),
   totalCost: z.string().optional(),
-  revenueAmount: z.string().optional(), // Monto a registrar como ingreso
   weatherCondition: z.string().optional(),
   temperature: z.string().optional(),
   soilHumidity: z.string().optional(),
@@ -185,12 +182,9 @@ export default function MachineWorkIndex() {
       distance: "",
       workTime: "",
       fuelUsed: "",
-      costPerUnit: "",
-      unitType: machine?.type === "vehiculo" || machine?.type === "camion" ? "km" : "ha",
       operationalCost: "",
       suppliesCost: "",
       totalCost: "",
-      revenueAmount: "",
       weatherCondition: "",
       temperature: "",
       soilHumidity: "",
@@ -206,49 +200,20 @@ export default function MachineWorkIndex() {
     },
   });
 
-  // Calcular el costo total y el monto de ingreso
+  // Calcular el costo total sumando costos operativos y de suministros
   useEffect(() => {
     const calculateTotal = () => {
-      // Cálculo tradicional: costo operativo + costo de suministros
       const operational = parseFloat(workForm.watch("operationalCost") || "0");
       const supplies = parseFloat(workForm.watch("suppliesCost") || "0");
-      const totalExpenses = operational + supplies;
+      const total = operational + supplies;
       
-      if (!isNaN(totalExpenses)) {
-        workForm.setValue("totalCost", totalExpenses.toString());
-      }
-      
-      // Cálculo del ingreso basado en costo por unidad (hectárea o kilómetro)
-      const costPerUnit = parseFloat(workForm.watch("costPerUnit") || "0");
-      let unitValue = 0;
-      
-      // Determinamos qué valor usar según el tipo de unidad
-      const unitType = workForm.watch("unitType");
-      if (unitType === "km") {
-        unitValue = parseFloat(workForm.watch("distance") || "0");
-      } else { // "ha" por defecto
-        unitValue = parseFloat(workForm.watch("areaWorked") || "0");
-      }
-      
-      // Calculamos el ingreso como costo por unidad * cantidad de unidades
-      const revenue = costPerUnit * unitValue;
-      
-      if (!isNaN(revenue) && revenue > 0) {
-        workForm.setValue("revenueAmount", revenue.toString());
-      } else {
-        workForm.setValue("revenueAmount", "");
+      if (!isNaN(total)) {
+        workForm.setValue("totalCost", total.toString());
       }
     };
     
     calculateTotal();
-  }, [
-    workForm.watch("operationalCost"), 
-    workForm.watch("suppliesCost"),
-    workForm.watch("costPerUnit"),
-    workForm.watch("areaWorked"),
-    workForm.watch("distance"),
-    workForm.watch("unitType")
-  ]);
+  }, [workForm.watch("operationalCost"), workForm.watch("suppliesCost")]);
 
   // Función para agregar un nuevo registro de trabajo
   async function handleWorkSubmit(values: MachineWorkFormValues) {
@@ -259,8 +224,8 @@ export default function MachineWorkIndex() {
       // Actualizar datos de trabajos
       queryClient.invalidateQueries({ queryKey: ["/api/pasture-works"] });
       
-      // Si hay un valor de revenueAmount, registrar como ingreso financiero para la máquina
-      if (values.revenueAmount && parseFloat(values.revenueAmount) > 0) {
+      // Si hay un valor de totalCost, registrar como ingreso financiero para la máquina
+      if (values.totalCost && parseFloat(values.totalCost) > 0) {
         // Obtener el nombre de la parcela si existe
         let pastureDetails = "No especificada";
         if (values.pastureId) {
@@ -271,26 +236,21 @@ export default function MachineWorkIndex() {
           }
         }
         
-        // Determinar qué unidad se está usando
-        const unitLabel = values.unitType === 'km' ? 'kilómetros' : 'hectáreas';
-        const unitValue = values.unitType === 'km' ? values.distance : values.areaWorked;
-        const costPerUnit = values.costPerUnit;
-        
-        // Crear un registro financiero de ingreso con información detallada
+        // Crear un registro financiero de ingreso
         await apiRequest("POST", "/api/machine-finances", {
           machineId: machineId,
           date: values.startDate,
           type: "income", // Tipo ingreso
-          concept: `Trabajo agrícola: ${values.workType} ${pastureDetails ? 'en ' + pastureDetails : ''} (${unitValue} ${unitLabel} a $${costPerUnit}/${values.unitType})`,
-          amount: values.revenueAmount
+          concept: `Trabajo agrícola: ${values.workType} ${pastureDetails ? 'en ' + pastureDetails : ''}`,
+          amount: values.totalCost
         });
         
         // Invalidar consulta de finanzas para esta máquina
         queryClient.invalidateQueries({ queryKey: [`/api/machine-finances?machineId=${machineId}`] });
         
         toast({
-          title: "Trabajo e ingreso registrados",
-          description: `El trabajo agrícola ha sido registrado exitosamente con un ingreso de $${parseFloat(values.revenueAmount).toLocaleString('es-AR')}`,
+          title: "Trabajo registrado",
+          description: "El trabajo agrícola ha sido registrado exitosamente y se ha registrado como ingreso",
         });
       } else {
         toast({
@@ -311,12 +271,9 @@ export default function MachineWorkIndex() {
         distance: "",
         workTime: "",
         fuelUsed: "",
-        costPerUnit: "",
-        unitType: machine?.type === "vehiculo" || machine?.type === "camion" ? "km" : "ha",
         operationalCost: "",
         suppliesCost: "",
         totalCost: "",
-        revenueAmount: "",
         weatherCondition: "",
         temperature: "",
         soilHumidity: "",
@@ -952,83 +909,6 @@ export default function MachineWorkIndex() {
                     </FormControl>
                     <FormDescription>
                       Suma de costos operativos y de insumos
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <h3 className="text-sm font-medium text-neutral-500 pt-4 mt-2 border-t border-neutral-200">Facturación del Trabajo</h3>
-              
-              <div className="grid grid-cols-2 gap-4 mt-2">
-                <FormField
-                  control={workForm.control}
-                  name="costPerUnit"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Costo por {workForm.watch("unitType") === "km" ? "kilómetro" : "hectárea"} ($)</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          placeholder="0" 
-                          step="0.01" 
-                          {...field}
-                          value={field.value || ""}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={workForm.control}
-                  name="unitType"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tipo de unidad</FormLabel>
-                      <Select 
-                        value={field.value} 
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          // Resetear el valor automáticamente cuando cambia la unidad
-                          workForm.setValue("revenueAmount", "");
-                        }}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccione tipo de unidad" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="ha">Hectárea (ha)</SelectItem>
-                          <SelectItem value="km">Kilómetro (km)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={workForm.control}
-                name="revenueAmount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Ingreso total a cobrar ($)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        placeholder="0" 
-                        disabled 
-                        {...field}
-                        value={field.value || ""}
-                        className="font-medium bg-amber-50 border-amber-200"
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Monto que se registrará como ingreso en el balance
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
