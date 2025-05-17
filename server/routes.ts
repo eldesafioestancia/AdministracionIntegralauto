@@ -2,7 +2,6 @@ import { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
-import { resetAllData } from "./reset-data";
 import { 
   getPublicKey, 
   subscribe, 
@@ -42,17 +41,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Ruta para subir archivos
   app.post("/api/upload", handleFileUpload);
-  
-  // Ruta admin para reiniciar datos
-  app.post("/api/admin/reset-data", async (req: Request, res: Response) => {
-    try {
-      const result = await resetAllData();
-      res.json(result);
-    } catch (error) {
-      console.error("Error al reiniciar datos:", error);
-      res.status(500).json({ success: false, message: "Error al reiniciar datos" });
-    }
-  });
   // Rutas de autenticación simuladas - sin verificación real
   app.post("/api/auth/login", async (req: Request, res: Response) => {
     try {
