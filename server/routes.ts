@@ -11,6 +11,13 @@ import {
   sendTestNotification, 
   sendCriticalAlert 
 } from "./notifications";
+import {
+  resetData,
+  createBackup,
+  exportData,
+  importData,
+  getDatabaseStats
+} from "./database";
 import { generateToken, hashPassword, verifyPassword, authenticateToken, checkRole } from "./auth";
 import {
   insertUserSchema,
