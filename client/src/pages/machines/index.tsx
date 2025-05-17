@@ -196,9 +196,21 @@ export default function MachinesIndex() {
     }
     
     try {
-      for (const id of selectedMachines) {
-        await apiRequest(`/api/machines/${id}`, "DELETE", {});
-      }
+      // Crear un array de promesas para eliminar todas las máquinas seleccionadas
+      const deletePromises = selectedMachines.map(id => 
+        fetch(`/api/machines/${id}`, {
+          method: "DELETE",
+          credentials: "include"
+        }).then(response => {
+          if (!response.ok) {
+            throw new Error(`Error al eliminar máquina ID ${id}: ${response.statusText}`);
+          }
+          return response;
+        })
+      );
+      
+      // Ejecutar todas las promesas
+      await Promise.all(deletePromises);
       
       toast({
         description: `${selectedMachines.length} ${selectedMachines.length === 1 ? 'máquina eliminada' : 'máquinas eliminadas'} correctamente`,
@@ -210,7 +222,7 @@ export default function MachinesIndex() {
       console.error("Error al eliminar máquinas:", error);
       toast({
         variant: "destructive",
-        description: "Error al eliminar máquinas",
+        description: "Error al eliminar máquinas. Por favor, intente nuevamente."
       });
     }
   };
