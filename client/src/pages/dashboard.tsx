@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { PieChart, Pie, Cell } from "recharts";
+import FinancialAreaBreakdown from "@/components/dashboard/FinancialAreaBreakdown";
 
 // Componentes de Clima
 import { WeatherWidget } from "@/components/weather/WeatherWidget";
@@ -892,6 +893,12 @@ export default function Dashboard() {
         
         {/* Finances Tab */}
         <TabsContent value="finances" className="space-y-6">
+          {/* Balance financiero por áreas */}
+          <FinancialAreaBreakdown
+            financialAreaData={financialAreaData}
+            financialSummary={financialSummary}
+          />
+
           {/* Financial Overview */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card>
