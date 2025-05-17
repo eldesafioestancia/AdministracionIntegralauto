@@ -20,7 +20,7 @@ export default function ResetPage() {
     try {
       const response = await apiRequest("POST", "/api/admin/reset-data");
       
-      if (response.success) {
+      if (response && response.success === true) {
         toast({
           title: "Datos reiniciados",
           description: "Todos los datos de la aplicación han sido eliminados correctamente.",
