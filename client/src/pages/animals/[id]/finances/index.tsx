@@ -265,9 +265,9 @@ export default function AnimalFinances() {
                             </>
                           ) : (
                             <>
-                              <SelectItem value="sale">Venta</SelectItem>
-                              <SelectItem value="rent">Alquiler</SelectItem>
-                              <SelectItem value="other">Otro</SelectItem>
+                              <SelectItem value="venta">Venta</SelectItem>
+                              <SelectItem value="baja">Baja</SelectItem>
+                              <SelectItem value="otro">Otro</SelectItem>
                             </>
                           )}
                         </SelectContent>
@@ -276,8 +276,28 @@ export default function AnimalFinances() {
                     </FormItem>
                   )}
                 />
+                
+                {form.watch("type") === "income" && (
+                  <FormField
+                    control={form.control}
+                    name="animalIdentification"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Identificación del animal</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Color y número de caravana" 
+                            {...field} 
+                            defaultValue={animal ? `${animal.cartagenaColor} #${animal.cartagena}` : ""}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
 
-                {form.watch("type") === "income" && form.watch("concept") === "sale" && (
+                {form.watch("type") === "income" && form.watch("concept") === "venta" && (
                   <>
                     <FormField
                       control={form.control}
@@ -432,8 +452,10 @@ export default function AnimalFinances() {
                              finance.concept === 'vaccine' ? 'Vacuna' :
                              finance.concept === 'vet' ? 'Veterinario' :
                              finance.concept === 'food' ? 'Alimentación' :
-                             finance.concept === 'sale' ? 'Venta' :
-                             finance.concept === 'rent' ? 'Alquiler' : 'Otro'}
+                             finance.concept === 'venta' ? 'Venta' :
+                             finance.concept === 'baja' ? 'Baja' :
+                             finance.concept === 'otro' ? 'Otro' : 
+                             finance.concept}
                           </h3>
                           <Badge className="ml-2 px-2 py-0 h-5" variant={finance.type === 'income' ? 'default' : 'destructive'}>
                             {finance.type === 'income' ? 'Ingreso' : 'Gasto'}
@@ -444,6 +466,13 @@ export default function AnimalFinances() {
                             <i className="ri-calendar-line mr-1"></i>
                             {format(new Date(finance.date), "dd/MM/yyyy")}
                           </span>
+                          
+                          {finance.animalIdentification && (
+                            <span className="flex items-center">
+                              <i className="ri-bookmark-line mr-1"></i>
+                              {finance.animalIdentification}
+                            </span>
+                          )}
                           
                           {finance.animalCategory && (
                             <span className="flex items-center">
