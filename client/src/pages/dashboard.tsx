@@ -143,13 +143,39 @@ export default function Dashboard() {
     { name: 'Parcelas', value: stats.pastureCount },
   ];
 
+  // Definir interfaces para los tipos de actividades
+  interface Activity {
+    id: string;
+    type: string;
+    title: string;
+    description: string;
+    date: Date;
+    icon: string;
+    iconColor: string;
+    link: string;
+  }
+
+  interface Maintenance {
+    id: number;
+    machineId: number;
+    date: string;
+    type: string;
+  }
+
+  interface PastureWork {
+    id: number;
+    pastureId: number;
+    workType: string;
+    startDate: string;
+  }
+
   // Generar actividades recientes
-  const getRecentActivities = () => {
-    const activities = [];
+  const getRecentActivities = (): Activity[] => {
+    const activities: Activity[] = [];
     
     // Agregar mantenimientos recientes
     if (maintenances && Array.isArray(maintenances)) {
-      maintenances.slice(0, 5).forEach((maintenance) => {
+      maintenances.slice(0, 5).forEach((maintenance: Maintenance) => {
         activities.push({
           id: `m-${maintenance.id}`,
           type: 'maintenance',
@@ -165,7 +191,7 @@ export default function Dashboard() {
     
     // Agregar trabajos de parcelas recientes
     if (pastureWorks && Array.isArray(pastureWorks)) {
-      pastureWorks.slice(0, 5).forEach((work) => {
+      pastureWorks.slice(0, 5).forEach((work: PastureWork) => {
         activities.push({
           id: `pw-${work.id}`,
           type: 'pasture',

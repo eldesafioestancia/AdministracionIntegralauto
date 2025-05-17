@@ -11,6 +11,7 @@ import {
   sendTestNotification, 
   sendCriticalAlert 
 } from "./notifications";
+import { generateToken, hashPassword, verifyPassword, authenticateToken, checkRole } from "./auth";
 import {
   insertUserSchema,
   insertMachineSchema,
@@ -44,22 +45,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Rutas de autenticación simuladas - sin verificación real
   app.post("/api/auth/login", async (req: Request, res: Response) => {
     try {
-      const { username } = req.body;
+      const { username, password } = req.body;
       
-      // Simulamos un login exitoso con un usuario demo
+      if (!username || !password) {
+        return res.status(400).json({ message: "Se requieren nombre de usuario y contraseña" });
+      }
+      
+      // En un sistema real, consultaríamos la base de datos
+      // Por ahora, usamos un usuario demo para desarrollo
       const demoUser = {
         id: 1,
         username: username || "usuario@ejemplo.com",
         fullName: "Usuario Demo",
-        role: "admin"
+        role: "admin",
+        // En producción, esto estaría hasheado y se verificaría con bcrypt
+        password: "password123"
       };
       
-      // Token ficticio
-      const demoToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoidXN1YXJpb0BlamVtcGxvLmNvbSIsInJvbGUiOiJhZG1pbiJ9.demo-token";
+      // En producción, verificar contraseña con bcrypt
+      // const passwordMatch = await verifyPassword(password, demoUser.password);
+      const passwordMatch = password === demoUser.password;
+      
+      if (!passwordMatch) {
+        return res.status(401).json({ message: "Credenciales inválidas" });
+      }
+      
+      // Generar un token real
+      const token = generateToken(demoUser.id, demoUser.username, demoUser.role);
+      
+      // No devolver la contraseña al cliente
+      const { password: _, ...userWithoutPassword } = demoUser;
       
       res.json({
-        token: demoToken,
-        user: demoUser
+        token,
+        user: userWithoutPassword
       });
     } catch (error) {
       console.error("Login error:", error);
@@ -69,15 +88,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/auth/register", async (req: Request, res: Response) => {
     try {
-      const { username, fullName, role } = req.body;
+      const { username, password, fullName, role } = req.body;
       
-      // Simulamos un registro exitoso con un usuario demo
-      res.status(201).json({
+      if (!username || !password || !fullName) {
+        return res.status(400).json({ message: "Faltan campos obligatorios" });
+      }
+      
+      // En un sistema real, verificaríamos si el usuario ya existe en la base de datos
+      // Y hashearíamos la contraseña con bcrypt
+
+      // Simular la generación de un hash para la contraseña
+      const hashedPassword = await hashPassword(password);
+      
+      // Simulamos un registro exitoso
+      // En producción, esto guardaría el usuario en la base de datos
+      const newUser = {
         id: 1,
-        username: username || "usuario@ejemplo.com",
-        fullName: fullName || "Usuario Demo",
-        role: role || "admin"
-      });
+        username,
+        fullName,
+        role: role || "operator", // valor predeterminado: operador
+        createdAt: new Date()
+      };
+      
+      // No devolver la contraseña hasheada al cliente
+      res.status(201).json(newUser);
     } catch (error) {
       console.error("Registration error:", error);
       res.status(500).json({ message: "Error durante el proceso de registro" });
