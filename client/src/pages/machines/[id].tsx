@@ -570,7 +570,7 @@ export default function MachineDetail() {
                     <th className="text-left py-3 px-4 font-medium text-neutral-500">Tipo</th>
                     <th className="text-left py-3 px-4 font-medium text-neutral-500">Parcela</th>
                     <th className="text-left py-3 px-4 font-medium text-neutral-500">Área/Dist.</th>
-                    <th className="text-right py-3 px-4 font-medium text-neutral-500">Costo</th>
+                    <th className="text-right py-3 px-4 font-medium text-neutral-500">Ingreso</th>
                     <th className="text-right py-3 px-4 font-medium text-neutral-500"></th>
                   </tr>
                 </thead>
@@ -598,7 +598,7 @@ export default function MachineDetail() {
                       <td className="py-3 px-4">
                         {work.areaWorked ? `${work.areaWorked} Ha` : work.distance ? `${work.distance} Km` : "N/A"}
                       </td>
-                      <td className="py-3 px-4 text-right text-neutral-600 font-medium">
+                      <td className="py-3 px-4 text-right text-green-600 font-medium">
                         {work.totalCost ? `$${work.totalCost}` : work.operativeCost ? `$${work.operativeCost}` : "N/A"}
                       </td>
                       <td className="py-3 px-4 text-right">
