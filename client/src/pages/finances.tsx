@@ -60,6 +60,7 @@ const financeFormSchema = z.object({
   machineType: z.string().optional(),
   machineId: z.string().optional(),
   // Campos específicos para animales
+  animalId: z.string().optional(),
   animalCaravana: z.string().optional(),
   animalColor: z.string().optional(),
   animalWeight: z.string().optional(),
@@ -166,6 +167,11 @@ export default function FinancesPage() {
   const { data: machines = [] } = useQuery({
     queryKey: ["/api/machines"],
   });
+  
+  // Consulta para obtener los animales disponibles
+  const { data: animals = [] } = useQuery({
+    queryKey: ["/api/animals"],
+  });
 
   // Calcular sumarios
   const totalIncome = financeData
@@ -211,6 +217,7 @@ export default function FinancesPage() {
       amount: "",
       paymentMethod: "Efectivo",
       status: "completed",
+      animalId: "",
       animalCaravana: "",
       animalColor: "",
       animalWeight: "",
@@ -799,12 +806,48 @@ export default function FinancesPage() {
                   <>
                     <FormField
                       control={form.control}
+                      name="animalId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Seleccionar Animal</FormLabel>
+                          <Select 
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              // Encontrar el animal seleccionado para autocompletar los otros campos
+                              const selectedAnimal = animals.find((animal: any) => animal.id.toString() === value);
+                              if (selectedAnimal) {
+                                form.setValue("animalCaravana", selectedAnimal.cartagena || "");
+                                form.setValue("animalColor", selectedAnimal.cartagenaColor || "");
+                              }
+                            }} 
+                            value={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Seleccione un animal" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {animals.map((animal: any) => (
+                                <SelectItem key={animal.id} value={animal.id.toString()}>
+                                  {`${animal.cartagenaColor || ""} - #${animal.cartagena || ""} (${animal.category || ""})`}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
                       name="animalCaravana"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Número de Caravana</FormLabel>
                           <FormControl>
-                            <Input placeholder="Ingrese el número de caravana" {...field} />
+                            <Input placeholder="Ingrese el número de caravana" {...field} disabled />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -817,7 +860,7 @@ export default function FinancesPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Color de Caravana</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
+                          <Select onValueChange={field.onChange} value={field.value} disabled>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Seleccione el color" />
