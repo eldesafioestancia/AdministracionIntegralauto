@@ -133,10 +133,124 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const upcomingMaintenances = await storage.getUpcomingMaintenances();
       const recentTransactions = await storage.getRecentTransactions();
       
+      // Obtener datos financieros detallados por áreas
+      const animalFinances = await storage.getAnimalFinances();
+      const machineFinances = await storage.getMachineFinances();
+      const pastureFinances = await storage.getPastureFinances();
+      const investments = await storage.getInvestments();
+      const capitalTransactions = await storage.getCapitalTransactions();
+      
+      // Calcular totales por área
+      const financialSummary = {
+        animals: {
+          income: 0,
+          expense: 0,
+          total: 0
+        },
+        machines: {
+          income: 0,
+          expense: 0,
+          total: 0
+        },
+        pastures: {
+          income: 0,
+          expense: 0,
+          total: 0
+        },
+        investments: {
+          income: 0,
+          expense: 0,
+          total: 0
+        },
+        capital: {
+          income: 0,
+          expense: 0,
+          total: 0
+        },
+        overall: {
+          income: 0,
+          expense: 0,
+          total: 0
+        }
+      };
+      
+      // Procesar finanzas de animales
+      for (const record of animalFinances) {
+        const amount = parseFloat(record.amount);
+        if (record.type === 'income') {
+          financialSummary.animals.income += amount;
+        } else {
+          financialSummary.animals.expense += amount;
+        }
+      }
+      financialSummary.animals.total = financialSummary.animals.income - financialSummary.animals.expense;
+      
+      // Procesar finanzas de maquinarias
+      for (const record of machineFinances) {
+        const amount = parseFloat(record.amount);
+        if (record.type === 'income') {
+          financialSummary.machines.income += amount;
+        } else {
+          financialSummary.machines.expense += amount;
+        }
+      }
+      financialSummary.machines.total = financialSummary.machines.income - financialSummary.machines.expense;
+      
+      // Procesar finanzas de pasturas
+      for (const record of pastureFinances) {
+        const amount = parseFloat(record.amount);
+        if (record.type === 'income') {
+          financialSummary.pastures.income += amount;
+        } else {
+          financialSummary.pastures.expense += amount;
+        }
+      }
+      financialSummary.pastures.total = financialSummary.pastures.income - financialSummary.pastures.expense;
+      
+      // Procesar inversiones
+      for (const record of investments) {
+        const amount = parseFloat(record.amount);
+        if (record.type === 'income') {
+          financialSummary.investments.income += amount;
+        } else {
+          financialSummary.investments.expense += amount;
+        }
+      }
+      financialSummary.investments.total = financialSummary.investments.income - financialSummary.investments.expense;
+      
+      // Procesar transacciones de capital
+      for (const record of capitalTransactions) {
+        const amount = parseFloat(record.amount);
+        if (record.type === 'income') {
+          financialSummary.capital.income += amount;
+        } else {
+          financialSummary.capital.expense += amount;
+        }
+      }
+      financialSummary.capital.total = financialSummary.capital.income - financialSummary.capital.expense;
+      
+      // Calcular totales generales
+      financialSummary.overall.income = 
+        financialSummary.animals.income + 
+        financialSummary.machines.income + 
+        financialSummary.pastures.income +
+        financialSummary.investments.income +
+        financialSummary.capital.income;
+        
+      financialSummary.overall.expense = 
+        financialSummary.animals.expense + 
+        financialSummary.machines.expense + 
+        financialSummary.pastures.expense +
+        financialSummary.investments.expense +
+        financialSummary.capital.expense;
+        
+      financialSummary.overall.total = financialSummary.overall.income - financialSummary.overall.expense;
+      
       res.json({
         stats,
         upcomingMaintenances,
         recentTransactions,
+        financialSummary
       });
     } catch (error) {
       console.error("Dashboard error:", error);
