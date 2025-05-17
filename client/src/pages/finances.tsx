@@ -60,7 +60,8 @@ const financeFormSchema = z.object({
   machineType: z.string().optional(),
   machineId: z.string().optional(),
   // Campos específicos para animales
-  animalIdentification: z.string().optional(),
+  animalCaravana: z.string().optional(),
+  animalColor: z.string().optional(),
   animalWeight: z.string().optional(),
   pricePerKg: z.string().optional(),
   totalValue: z.string().optional(),
@@ -210,7 +211,8 @@ export default function FinancesPage() {
       amount: "",
       paymentMethod: "Efectivo",
       status: "completed",
-      animalIdentification: "",
+      animalCaravana: "",
+      animalColor: "",
       animalWeight: "",
       pricePerKg: "",
       totalValue: "",
@@ -369,7 +371,8 @@ export default function FinancesPage() {
       form.setValue("machineType", "");
       form.setValue("machineId", "");
       // Limpiar campos específicos de animales
-      form.setValue("animalIdentification", "");
+      form.setValue("animalCaravana", "");
+      form.setValue("animalColor", "");
       form.setValue("animalWeight", "");
       form.setValue("pricePerKg", "");
       form.setValue("totalValue", "");
@@ -387,7 +390,8 @@ export default function FinancesPage() {
       // Si selecciona otra categoría, limpiamos los campos específicos de maquinarias y animales
       form.setValue("machineType", "");
       form.setValue("machineId", "");
-      form.setValue("animalIdentification", "");
+      form.setValue("animalCaravana", "");
+      form.setValue("animalColor", "");
       form.setValue("animalWeight", "");
       form.setValue("pricePerKg", "");
       form.setValue("totalValue", "");
@@ -795,12 +799,26 @@ export default function FinancesPage() {
                   <>
                     <FormField
                       control={form.control}
-                      name="animalIdentification"
+                      name="animalCaravana"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Identificación del Animal</FormLabel>
+                          <FormLabel>Número de Caravana</FormLabel>
                           <FormControl>
-                            <Input placeholder="Color y número de caravana" {...field} />
+                            <Input placeholder="Ingrese el número de caravana" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="animalColor"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Color</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Ingrese el color del animal" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
