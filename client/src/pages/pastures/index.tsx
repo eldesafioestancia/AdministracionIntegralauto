@@ -336,6 +336,7 @@ export default function PasturesIndex() {
       fuelUsed: null,
       operativeCost: null,
       suppliesCost: null,
+      costPerUnit: null,
       totalCost: null,
       weatherConditions: null,
       temperature: null,
@@ -1563,9 +1564,10 @@ export default function PasturesIndex() {
                               field.onChange(e);
                               // Actualizar costo total si hay valor de costo por kilómetro
                               const distance = parseFloat(e.target.value);
-                              const costPerUnit = parseFloat(workForm.getValues("costPerUnit") || "0");
+                              const costPerUnit = parseFloat(workForm.getValues("costPerUnit")?.toString() || "0");
                               if (!isNaN(distance) && !isNaN(costPerUnit) && distance > 0 && costPerUnit > 0) {
-                                workForm.setValue("totalCost", (distance * costPerUnit).toFixed(2));
+                                const calculatedTotal = (distance * costPerUnit).toFixed(2);
+                                workForm.setValue("totalCost", calculatedTotal);
                               }
                             }}
                           />
@@ -1662,59 +1664,54 @@ export default function PasturesIndex() {
               
               {/* Costo por hectárea/kilómetro y costo total */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <FormField
-                  control={workForm.control}
-                  name="costPerUnit"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{showDistanceField ? 'Costo por Kilómetro ($)' : 'Costo por Hectárea ($)'}</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder={showDistanceField ? "500" : "2000"}
-                          step="10"
-                          {...field}
-                          value={field.value || ""}
-                          onChange={(e) => {
-                            field.onChange(e);
-                            // Calcular costo total si hay área/distancia
-                            const value = parseFloat(e.target.value);
-                            if (!isNaN(value)) {
-                              const areaOrDistance = showDistanceField 
-                                ? parseFloat(workForm.getValues("distance")?.toString() || "0") 
-                                : parseFloat(workForm.getValues("areaWorked")?.toString() || "0");
-                              if (areaOrDistance > 0) {
-                                const calculatedTotal = (value * areaOrDistance).toFixed(2);
-                                workForm.setValue("totalCost", calculatedTotal);
-                              }
-                            }
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                {/* Usando una implementación alternativa para evitar problemas de tipado */}
+                <div className="space-y-2">
+                  <Label>{showDistanceField ? 'Costo por Kilómetro ($)' : 'Costo por Hectárea ($)'}</Label>
+                  <Input
+                    type="number"
+                    placeholder={showDistanceField ? "500" : "2000"}
+                    step="10"
+                    value={workForm.watch("costPerUnit") || ""}
+                    onChange={(e) => {
+                      workForm.setValue("costPerUnit", e.target.value);
+                      // Calcular costo total si hay área/distancia
+                      const value = parseFloat(e.target.value);
+                      if (!isNaN(value)) {
+                        const areaOrDistance = showDistanceField 
+                          ? parseFloat(workForm.getValues("distance")?.toString() || "0") 
+                          : parseFloat(workForm.getValues("areaWorked")?.toString() || "0");
+                        if (areaOrDistance > 0) {
+                          const calculatedTotal = (value * areaOrDistance).toFixed(2);
+                          workForm.setValue("totalCost", calculatedTotal);
+                        }
+                      }
+                    }}
+                  />
+                  {workForm.formState.errors.costPerUnit && (
+                    <p className="text-sm font-medium text-destructive">
+                      {workForm.formState.errors.costPerUnit.message}
+                    </p>
                   )}
-                />
+                </div>
                 
-                <FormField
-                  control={workForm.control}
-                  name="totalCost"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Costo Total ($)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="30000"
-                          step="100"
-                          {...field}
-                          value={field.value || ""}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                {/* Implementación alternativa para evitar problemas de tipado */}
+                <div className="space-y-2">
+                  <Label>Costo Total ($)</Label>
+                  <Input
+                    type="number"
+                    placeholder="30000"
+                    step="100"
+                    value={workForm.watch("totalCost") || ""}
+                    onChange={(e) => {
+                      workForm.setValue("totalCost", e.target.value);
+                    }}
+                  />
+                  {workForm.formState.errors.totalCost && (
+                    <p className="text-sm font-medium text-destructive">
+                      {workForm.formState.errors.totalCost.message}
+                    </p>
                   )}
-                />
+                </div>
               </div>
               
               {/* Condiciones ambientales */}
