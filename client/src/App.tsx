@@ -33,6 +33,7 @@ import Settings from "@/pages/settings/index";
 import NotificationsSettings from "@/pages/settings/notifications";
 import ProfileSettings from "@/pages/settings/profile";
 import GeneralSettings from "@/pages/settings/general";
+import DatabaseSettings from "@/pages/settings/database";
 import AppLayout from "@/components/layouts/AppLayout";
 
 function App() {
@@ -255,6 +256,12 @@ function App() {
         <Route path="/settings/general">
           <AppLayout>
             <GeneralSettings />
+          </AppLayout>
+        </Route>
+
+        <Route path="/settings/database">
+          <AppLayout>
+            <DatabaseSettings />
           </AppLayout>
         </Route>
         

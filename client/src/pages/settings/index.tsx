@@ -1,6 +1,6 @@
 import { Link } from 'wouter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Bell, User, Settings } from 'lucide-react';
+import { Bell, User, Settings, Database, AlertTriangle } from 'lucide-react';
 
 const SettingsPage = () => {
   return (
@@ -54,6 +54,23 @@ const SettingsPage = () => {
             <CardContent>
               <p className="text-sm text-muted-foreground">
                 Administra idioma, región, unidades de medida y otras preferencias generales
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+        
+        <Link href="/settings/database">
+          <Card className="cursor-pointer hover:shadow-md transition-shadow">
+            <CardHeader>
+              <Database className="h-8 w-8 text-primary mb-2" />
+              <CardTitle>Base de Datos</CardTitle>
+              <CardDescription>
+                Administración y mantenimiento de la base de datos
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Crea respaldos, reinicia datos del sistema o exporta/importa información
               </p>
             </CardContent>
           </Card>
