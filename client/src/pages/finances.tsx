@@ -91,6 +91,8 @@ export default function FinancesPage() {
         subcategory: params.get('subcategory'),
         description: params.get('description'),
         machineId: params.get('machineId'),
+        animalId: params.get('animalId'),
+        animalIdentification: params.get('animalIdentification'),
       };
     }
     return {
@@ -100,6 +102,8 @@ export default function FinancesPage() {
       subcategory: null,
       description: null,
       machineId: null,
+      animalId: null,
+      animalIdentification: null,
     };
   };
 
@@ -164,6 +168,16 @@ export default function FinancesPage() {
   // Consulta para obtener las máquinas disponibles
   const { data: machines = [] } = useQuery({
     queryKey: ["/api/machines"],
+  });
+
+  // Obtener ID del animal si está presente en la URL
+  const params = parseQueryParams();
+  const animalId = params.animalId;
+
+  // Consulta para obtener los datos del animal si hay un ID presente
+  const { data: animal } = useQuery({
+    queryKey: ["/api/animals", animalId],
+    enabled: !!animalId, // Solo ejecuta la consulta si hay un ID de animal
   });
 
   // Calcular sumarios
