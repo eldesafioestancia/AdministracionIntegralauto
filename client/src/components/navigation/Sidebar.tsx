@@ -29,14 +29,14 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
         ></div>
       )}
 
-      <div className="p-4 relative z-10">
+      <div className="p-4 relative z-10 bg-gray-100">
         <div className="space-y-1">
           <Link 
             href="/"
             className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
               isActive("/")
                 ? "bg-primary-light bg-opacity-10 text-primary" 
-                : "text-neutral-500 hover:bg-neutral-100"
+                : "text-neutral-800 bg-gray-200 hover:bg-gray-300 hover:text-white"
             }`}
             onClick={closeSidebar}
           >
@@ -45,7 +45,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
           </Link>
 
           <div className="pt-2">
-            <p className="px-3 text-xs font-semibold text-neutral-400 uppercase tracking-wider">
+            <p className="px-3 text-xs font-semibold text-neutral-600 uppercase tracking-wider">
               Módulos principales
             </p>
             <div className="mt-1 space-y-1">
@@ -54,7 +54,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                 className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
                   isActive("/machines")
                     ? "bg-primary-light bg-opacity-10 text-primary"
-                    : "text-neutral-500 hover:bg-neutral-100"
+                    : "text-neutral-800 bg-gray-200 hover:bg-gray-300 hover:text-white"
                 }`}
                 onClick={closeSidebar}
               >
@@ -66,7 +66,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                 className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
                   isActive("/animals")
                     ? "bg-primary-light bg-opacity-10 text-primary"
-                    : "text-neutral-500 hover:bg-neutral-100"
+                    : "text-neutral-800 bg-gray-200 hover:bg-gray-300 hover:text-white"
                 }`}
                 onClick={closeSidebar}
               >
@@ -78,7 +78,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                 className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
                   isActive("/pastures")
                     ? "bg-primary-light bg-opacity-10 text-primary"
-                    : "text-neutral-500 hover:bg-neutral-100"
+                    : "text-neutral-800 bg-gray-200 hover:bg-gray-300 hover:text-white"
                 }`}
                 onClick={closeSidebar}
               >
@@ -90,7 +90,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                 className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
                   isActive("/warehouse")
                     ? "bg-primary-light bg-opacity-10 text-primary"
-                    : "text-neutral-500 hover:bg-neutral-100"
+                    : "text-neutral-800 bg-gray-200 hover:bg-gray-300 hover:text-white"
                 }`}
                 onClick={closeSidebar}
               >
@@ -102,7 +102,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                 className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
                   isActive("/weather")
                     ? "bg-primary-light bg-opacity-10 text-primary"
-                    : "text-neutral-500 hover:bg-neutral-100"
+                    : "text-neutral-800 bg-gray-200 hover:bg-gray-300 hover:text-white"
                 }`}
                 onClick={closeSidebar}
               >
@@ -113,7 +113,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
           </div>
 
           <div className="pt-2">
-            <p className="px-3 text-xs font-semibold text-neutral-400 uppercase tracking-wider">
+            <p className="px-3 text-xs font-semibold text-neutral-600 uppercase tracking-wider">
               Gestión financiera
             </p>
             <div className="mt-1 space-y-1">
@@ -122,7 +122,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                 className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
                   isActive("/investments")
                     ? "bg-primary-light bg-opacity-10 text-primary"
-                    : "text-neutral-500 hover:bg-neutral-100"
+                    : "text-neutral-800 bg-gray-200 hover:bg-gray-300 hover:text-white"
                 }`}
                 onClick={closeSidebar}
               >
@@ -134,7 +134,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                 className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
                   isActive("/services")
                     ? "bg-primary-light bg-opacity-10 text-primary"
-                    : "text-neutral-500 hover:bg-neutral-100"
+                    : "text-neutral-800 bg-gray-200 hover:bg-gray-300 hover:text-white"
                 }`}
                 onClick={closeSidebar}
               >
@@ -146,7 +146,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                 className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
                   isActive("/taxes")
                     ? "bg-primary-light bg-opacity-10 text-primary"
-                    : "text-neutral-500 hover:bg-neutral-100"
+                    : "text-neutral-800 bg-gray-200 hover:bg-gray-300 hover:text-white"
                 }`}
                 onClick={closeSidebar}
               >
@@ -158,7 +158,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                 className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
                   isActive("/repairs")
                     ? "bg-primary-light bg-opacity-10 text-primary"
-                    : "text-neutral-500 hover:bg-neutral-100"
+                    : "text-neutral-800 bg-gray-200 hover:bg-gray-300 hover:text-white"
                 }`}
                 onClick={closeSidebar}
               >
@@ -171,7 +171,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                 className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
                   isActive("/salaries")
                     ? "bg-primary-light bg-opacity-10 text-primary"
-                    : "text-neutral-500 hover:bg-neutral-100"
+                    : "text-neutral-800 bg-gray-200 hover:bg-gray-300 hover:text-white"
                 }`}
                 onClick={closeSidebar}
               >
@@ -183,7 +183,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                 className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
                   isActive("/capital")
                     ? "bg-primary-light bg-opacity-10 text-primary"
-                    : "text-neutral-500 hover:bg-neutral-100"
+                    : "text-neutral-800 bg-gray-200 hover:bg-gray-300 hover:text-white"
                 }`}
                 onClick={closeSidebar}
               >
@@ -195,7 +195,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                 className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
                   isActive("/finances")
                     ? "bg-primary-light bg-opacity-10 text-primary"
-                    : "text-neutral-500 hover:bg-neutral-100"
+                    : "text-neutral-800 bg-gray-200 hover:bg-gray-300 hover:text-white"
                 }`}
                 onClick={closeSidebar}
               >
@@ -206,7 +206,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
           </div>
 
           <div className="pt-2">
-            <p className="px-3 text-xs font-semibold text-neutral-400 uppercase tracking-wider">
+            <p className="px-3 text-xs font-semibold text-neutral-600 uppercase tracking-wider">
               Sistema
             </p>
             <div className="mt-1 space-y-1">
@@ -215,7 +215,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                 className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
                   isActive("/reports")
                     ? "bg-primary-light bg-opacity-10 text-primary"
-                    : "text-neutral-500 hover:bg-neutral-100"
+                    : "text-neutral-800 bg-gray-200 hover:bg-gray-300 hover:text-white"
                 }`}
                 onClick={closeSidebar}
               >
@@ -227,7 +227,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                 className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
                   isActive("/settings") && !isActive("/settings/notifications")
                     ? "bg-primary-light bg-opacity-10 text-primary"
-                    : "text-neutral-500 hover:bg-neutral-100"
+                    : "text-neutral-800 bg-gray-200 hover:bg-gray-300 hover:text-white"
                 }`}
                 onClick={closeSidebar}
               >
@@ -240,7 +240,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                 className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
                   isActive("/settings/notifications")
                     ? "bg-primary-light bg-opacity-10 text-primary"
-                    : "text-neutral-500 hover:bg-neutral-100"
+                    : "text-neutral-800 bg-gray-200 hover:bg-gray-300 hover:text-white"
                 }`}
                 onClick={closeSidebar}
               >
