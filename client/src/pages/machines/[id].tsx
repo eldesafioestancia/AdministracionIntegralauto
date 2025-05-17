@@ -525,6 +525,94 @@ export default function MachineDetail() {
             </div>
           )}
         </TabsContent>
+
+        {/* Trabajos Realizados Tab */}
+        <TabsContent value="works" className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-header font-semibold text-neutral-500">Trabajos Realizados</h2>
+            <Button asChild>
+              <Link href={`/pastures?workForm=true&preSelectMachine=${id}`}>
+                <i className="ri-add-line mr-1"></i> Nuevo trabajo
+              </Link>
+            </Button>
+          </div>
+
+          {worksLoading ? (
+            <div className="text-center py-10">Cargando registros de trabajos agrícolas...</div>
+          ) : worksError ? (
+            <div className="text-center py-10 text-destructive">
+              Error al cargar los trabajos agrícolas
+            </div>
+          ) : !machineWorks || machineWorks.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-10">
+                <i className="ri-tractor-line text-4xl text-neutral-300 mb-2"></i>
+                <h3 className="text-lg font-medium text-neutral-500 mb-1">No hay trabajos registrados</h3>
+                <p className="text-neutral-400 mb-4">Registre el primer trabajo agrícola para esta máquina</p>
+                <Button asChild>
+                  <Link href={`/pastures?workForm=true&preSelectMachine=${id}`}>
+                    <i className="ri-add-line mr-1"></i> Registrar trabajo
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr>
+                    <th className="text-left py-3 px-4 font-medium text-neutral-500">Fecha</th>
+                    <th className="text-left py-3 px-4 font-medium text-neutral-500">Tipo</th>
+                    <th className="text-left py-3 px-4 font-medium text-neutral-500">Parcela</th>
+                    <th className="text-left py-3 px-4 font-medium text-neutral-500">Área/Dist.</th>
+                    <th className="text-right py-3 px-4 font-medium text-neutral-500">Costo</th>
+                    <th className="text-right py-3 px-4 font-medium text-neutral-500"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {machineWorks.map((work) => (
+                    <tr key={work.id} className="border-b border-neutral-200 hover:bg-neutral-50">
+                      <td className="py-3 px-4 whitespace-nowrap">
+                        {format(new Date(work.startDate), "dd/MM/yyyy")}
+                      </td>
+                      <td className="py-3 px-4">
+                        <Badge variant="outline" className="capitalize">
+                          {work.workType}
+                        </Badge>
+                      </td>
+                      <td className="py-3 px-4">
+                        {work.pastureId ? (
+                          <Link href={`/pastures/${work.pastureId}`} className="text-primary hover:underline">
+                            {pastures && Array.isArray(pastures) && 
+                             pastures.find(p => p.id === work.pastureId)?.name || `Parcela #${work.pastureId}`}
+                          </Link>
+                        ) : (
+                          "Sin parcela"
+                        )}
+                      </td>
+                      <td className="py-3 px-4">
+                        {work.areaWorked ? `${work.areaWorked} Ha` : work.distance ? `${work.distance} Km` : "N/A"}
+                      </td>
+                      <td className="py-3 px-4 text-right text-neutral-600 font-medium">
+                        {work.totalCost ? `$${work.totalCost}` : work.operativeCost ? `$${work.operativeCost}` : "N/A"}
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-neutral-400 hover:text-neutral-600"
+                          onClick={() => navigate(`/machines/${id}/work?workId=${work.id}`)}
+                        >
+                          <i className="ri-eye-line"></i>
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </TabsContent>
       </Tabs>
     </div>
   );
