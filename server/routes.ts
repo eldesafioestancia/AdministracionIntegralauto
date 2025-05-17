@@ -1078,7 +1078,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Historial de precipitaciones
   app.get("/api/weather/historical-precipitation", async (req: Request, res: Response) => {
     try {
-      const { lat, lon } = req.query;
+      const { lat, lon, period, startYear, endYear } = req.query;
       
       if (!lat || !lon) {
         return res.status(400).json({ 
@@ -1086,10 +1086,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
+      // Procesar el periodo solicitado
+      let yearsToFetch = 20; // Valor por defecto: 20 años
+      let customRange = false;
+      let customStart: number | undefined;
+      let customEnd: number | undefined;
+      
+      if (period) {
+        switch(period) {
+          case '10years':
+            yearsToFetch = 10;
+            break;
+          case '20years':
+            yearsToFetch = 20;
+            break;
+          case '30years':
+            yearsToFetch = 30;
+            break;
+          case '50years':
+            yearsToFetch = 50;
+            break;
+          case 'custom':
+            customRange = true;
+            if (startYear && endYear) {
+              customStart = parseInt(startYear as string);
+              customEnd = parseInt(endYear as string);
+            }
+            break;
+        }
+      }
+      
       // Obtener datos históricos de precipitaciones
       const historicalData = await getHistoricalPrecipitation(
         parseFloat(lat as string), 
-        parseFloat(lon as string)
+        parseFloat(lon as string),
+        customRange ? undefined : yearsToFetch,
+        customStart,
+        customEnd
       );
       
       res.json(historicalData);

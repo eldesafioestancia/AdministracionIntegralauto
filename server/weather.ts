@@ -343,8 +343,14 @@ interface HistoricalWeatherData {
   recentMonths: MonthlyPrecipitation[];
 }
 
-// Generar datos históricos de precipitaciones (20 años hasta 3 meses)
-export async function getHistoricalPrecipitation(lat: number, lon: number): Promise<HistoricalWeatherData> {
+// Generar datos históricos de precipitaciones (periodo configurable)
+export async function getHistoricalPrecipitation(
+  lat: number, 
+  lon: number, 
+  years: number = 20, 
+  customStartYear?: number,
+  customEndYear?: number
+): Promise<HistoricalWeatherData> {
   try {
     const apiKey = process.env.OPENWEATHER_API_KEY;
     if (!apiKey) {
@@ -383,13 +389,38 @@ export async function getHistoricalPrecipitation(lat: number, lon: number): Prom
       precipitationPattern = 'continental';
     }
     
+    // Preparar los parámetros para generar el modelo de datos históricos
+    let yearsToGenerate = years;
+    let specificStartYear: number | undefined;
+    let specificEndYear: number | undefined;
+    
+    // Si se proporcionan años de inicio y fin personalizados
+    if (customStartYear && customEndYear) {
+      // Verificar que el rango es válido
+      if (customEndYear < customStartYear) {
+        throw new Error('El año final debe ser mayor que el año inicial');
+      }
+      
+      // Calcular la cantidad de años en el rango
+      yearsToGenerate = customEndYear - customStartYear + 1;
+      specificStartYear = customStartYear;
+      specificEndYear = customEndYear;
+    }
+    
+    // Limitar a 50 años como máximo para rendimiento (si no es rango personalizado)
+    if (!customStartYear && yearsToGenerate > 50) {
+      yearsToGenerate = 50;
+    }
+    
     // Generar el modelo de precipitaciones históricas basado en el patrón climático
     const historicalData = generateHistoricalPrecipitationModel(
       precipitationPattern, 
       isNorthernHemisphere, 
       regionName,
       countryCode,
-      20 // años
+      yearsToGenerate,
+      specificStartYear,
+      specificEndYear
     );
     
     return historicalData;
@@ -405,7 +436,9 @@ function generateHistoricalPrecipitationModel(
   isNorthernHemisphere: boolean,
   regionName: string,
   countryCode: string,
-  years: number
+  years: number,
+  customStartYear?: number,
+  customEndYear?: number
 ): HistoricalWeatherData {
   // Patrones climáticos típicos por mes (valores medios y variabilidad)
   // Estos valores están basados en promedios climáticos globales
@@ -459,7 +492,20 @@ function generateHistoricalPrecipitationModel(
   }
   
   const currentYear = new Date().getFullYear();
-  const startYear = currentYear - years;
+  
+  // Determinar años de inicio y fin para la generación de datos
+  let startYearValue: number;
+  let endYearValue: number;
+  
+  if (customStartYear && customEndYear) {
+    // Usar el rango de años especificado
+    startYearValue = customStartYear;
+    endYearValue = customEndYear;
+  } else {
+    // Usar el periodo relativo (últimos N años)
+    endYearValue = currentYear;
+    startYearValue = currentYear - years;
+  }
   
   const monthNames = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -476,7 +522,7 @@ function generateHistoricalPrecipitationModel(
   let elNinoYear = false;
   let laNinaYear = false;
   
-  for (let year = startYear; year < currentYear; year++) {
+  for (let year = startYearValue; year <= endYearValue; year++) {
     // Determinar si es un año de El Niño o La Niña
     if (year % 5 === 0) elNinoYear = true;
     else if (year % 5 === 3) laNinaYear = true;
