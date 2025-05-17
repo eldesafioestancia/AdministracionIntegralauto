@@ -63,7 +63,10 @@ const workFormSchema = z.object({
 type WorkFormValues = z.infer<typeof workFormSchema>;
 
 export default function EditMachineWork() {
-  const { id, workId } = useParams();
+  // Usamos los parámetros de la URL
+  const params = useParams();
+  const id = params.id || "";
+  const workId = params.workId || "";
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -71,17 +74,17 @@ export default function EditMachineWork() {
   const workIdNum = parseInt(workId);
   
   // Consultar información de la máquina
-  const { data: machine, isLoading: isLoadingMachine } = useQuery({
+  const { data: machine = {}, isLoading: isLoadingMachine } = useQuery<any>({
     queryKey: [`/api/machines/${machineId}`],
   });
   
   // Consultar las parcelas para mostrar en el formulario
-  const { data: pastures, isLoading: isLoadingPastures } = useQuery({
+  const { data: pastures = [], isLoading: isLoadingPastures } = useQuery<any[]>({
     queryKey: ["/api/pastures"],
   });
   
   // Consultar los trabajos para obtener el trabajo específico
-  const { data: allWorks, isLoading: isLoadingWorks } = useQuery({
+  const { data: allWorks = [], isLoading: isLoadingWorks } = useQuery<any[]>({
     queryKey: ["/api/pasture-works"],
   });
   
@@ -110,7 +113,7 @@ export default function EditMachineWork() {
   ];
   
   // Obtener los tipos de trabajo según el tipo de máquina
-  const getWorkTypesByMachineType = (machineType) => {
+  const getWorkTypesByMachineType = (machineType: string) => {
     switch (machineType) {
       case "topadora": return bulldozerWorkTypes;
       case "camion": return truckWorkTypes;

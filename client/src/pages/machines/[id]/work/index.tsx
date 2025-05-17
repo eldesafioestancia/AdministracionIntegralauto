@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "wouter";
+import { useParams, Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -120,6 +120,7 @@ type MachineWorkFormValues = z.infer<typeof machineWorkFormSchema>;
 
 export default function MachineWorkIndex() {
   const { id } = useParams();
+  const [, navigate] = useLocation();
   const machineId = parseInt(id);
   const [workSheetOpen, setWorkSheetOpen] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
@@ -606,11 +607,11 @@ export default function MachineWorkIndex() {
                             size="icon"
                             className="h-8 w-8"
                             title="Editar"
-                            asChild
+                            onClick={() => {
+                              navigate(`/machines/${machineId}/work/edit/${work.id}`);
+                            }}
                           >
-                            <Link href={`/machines/${machineId}/work/edit/${work.id}`}>
-                              <i className="ri-edit-line text-blue-500"></i>
-                            </Link>
+                            <i className="ri-edit-line text-blue-500"></i>
                           </Button>
                           <Button
                             variant="ghost"
