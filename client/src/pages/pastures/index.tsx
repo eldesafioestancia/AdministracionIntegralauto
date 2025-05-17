@@ -233,9 +233,6 @@ export default function PasturesIndex() {
   const preSelectedMachineId = queryParams.get('preSelectMachine') 
     ? parseInt(queryParams.get('preSelectMachine') || '0') 
     : null;
-  const editWorkId = queryParams.get('editWork') 
-    ? parseInt(queryParams.get('editWork') || '0') 
-    : null;
   
   const [sheetOpen, setSheetOpen] = useState(false);
   const [workSheetOpen, setWorkSheetOpen] = useState(shouldOpenWorkForm);
@@ -265,8 +262,6 @@ export default function PasturesIndex() {
   const { data: machines } = useQuery({
     queryKey: ["/api/machines"]
   });
-  
-
   
   // Efecto para inicializar las máquinas filtradas
   useEffect(() => {
