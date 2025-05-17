@@ -303,37 +303,6 @@ export class MemStorage implements IStorage {
   }
 
   async deleteMachine(id: number): Promise<boolean> {
-    // Primero verificamos si existe la máquina
-    const machine = this.machines.get(id);
-    if (!machine) {
-      return false;
-    }
-    
-    // Obtener todos los registros relacionados
-    const maintenanceRecords = Array.from(this.maintenances.values()).filter(m => m.machineId === id);
-    const financeRecords = Array.from(this.machineFinances.values()).filter(f => f.machineId === id);
-    const pastureWorks = Array.from(this.pastureWorks.values()).filter(w => w.machineId === id);
-    
-    // Eliminar registros relacionados
-    for (const maintenance of maintenanceRecords) {
-      this.maintenances.delete(maintenance.id);
-    }
-    
-    for (const finance of financeRecords) {
-      this.machineFinances.delete(finance.id);
-    }
-    
-    for (const work of pastureWorks) {
-      // Para trabajos agrícolas, eliminamos solo la referencia a la máquina
-      // ya que el trabajo puede seguir siendo relevante para la parcela
-      const workRecord = this.pastureWorks.get(work.id);
-      if (workRecord) {
-        const updatedWork = { ...workRecord, machineId: null };
-        this.pastureWorks.set(work.id, updatedWork);
-      }
-    }
-    
-    // Finalmente, eliminar la máquina
     return this.machines.delete(id);
   }
 
