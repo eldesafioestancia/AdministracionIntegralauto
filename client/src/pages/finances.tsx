@@ -59,6 +59,11 @@ const financeFormSchema = z.object({
   // Campos específicos para maquinarias
   machineType: z.string().optional(),
   machineId: z.string().optional(),
+  // Campos específicos para animales
+  animalIdentification: z.string().optional(),
+  animalWeight: z.string().optional(),
+  pricePerKg: z.string().optional(),
+  totalValue: z.string().optional(),
   // Campos comunes
   date: z.string().min(1, { message: "La fecha es requerida" }),
   description: z.string().min(1, { message: "La descripción es requerida" }),
@@ -205,6 +210,10 @@ export default function FinancesPage() {
       amount: "",
       paymentMethod: "Efectivo",
       status: "completed",
+      animalIdentification: "",
+      animalWeight: "",
+      pricePerKg: "",
+      totalValue: "",
     },
   });
 
@@ -359,12 +368,29 @@ export default function FinancesPage() {
       form.setValue("subcategory", "");
       form.setValue("machineType", "");
       form.setValue("machineId", "");
+      // Limpiar campos específicos de animales
+      form.setValue("animalIdentification", "");
+      form.setValue("animalWeight", "");
+      form.setValue("pricePerKg", "");
+      form.setValue("totalValue", "");
       setSelectedMachineType("");
       setFilteredMachines([]);
-    } else {
-      // Si selecciona otra categoría, limpiamos los campos específicos de maquinarias
+    } else if (category === "animales") {
+      // Si selecciona animales, limpiamos los campos específicos de maquinarias
       form.setValue("machineType", "");
       form.setValue("machineId", "");
+      setSelectedMachineType("");
+      setFilteredMachines([]);
+      // La descripción en animales debe tener opciones predefinidas, así que la dejamos vacía
+      form.setValue("description", "");
+    } else {
+      // Si selecciona otra categoría, limpiamos los campos específicos de maquinarias y animales
+      form.setValue("machineType", "");
+      form.setValue("machineId", "");
+      form.setValue("animalIdentification", "");
+      form.setValue("animalWeight", "");
+      form.setValue("pricePerKg", "");
+      form.setValue("totalValue", "");
       setSelectedMachineType("");
       setFilteredMachines([]);
     }
@@ -763,6 +789,105 @@ export default function FinancesPage() {
                 />
                 
                 {/* El campo de subcategoría ha sido completamente eliminado */}
+                
+                {/* Campos específicos para animales - solo aparece cuando la categoría es "animales" */}
+                {form.watch("category") === "animales" && (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name="animalIdentification"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Identificación del Animal</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Color y número de caravana" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="animalWeight"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Peso de Venta (kg)</FormLabel>
+                          <FormControl>
+                            <Input type="number" placeholder="0" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="pricePerKg"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Valor por kg (ARS)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              placeholder="0" 
+                              {...field} 
+                              onChange={(e) => {
+                                field.onChange(e);
+                                // Calcula el valor total cuando cambia el precio por kg
+                                const weight = form.getValues("animalWeight");
+                                const pricePerKg = e.target.value;
+                                if (weight && pricePerKg) {
+                                  const total = parseFloat(weight) * parseFloat(pricePerKg);
+                                  form.setValue("totalValue", total.toString());
+                                  form.setValue("amount", total.toString());
+                                }
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="totalValue"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Valor Total (ARS)</FormLabel>
+                          <FormControl>
+                            <Input type="number" placeholder="0" {...field} disabled />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tipo de Operación</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecciona el tipo de operación" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="baja">Baja</SelectItem>
+                              <SelectItem value="venta">Venta</SelectItem>
+                              <SelectItem value="otro">Otro</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
                 
                 {/* Campo para el tipo de maquinaria - solo aparece cuando la categoría es "maquinarias" */}
                 {form.watch("category") === "maquinarias" && (
