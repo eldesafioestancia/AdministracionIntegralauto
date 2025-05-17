@@ -5,6 +5,10 @@ interface User {
   username: string;
   fullName: string;
   role: string;
+  email?: string;
+  phone?: string;
+  position?: string;
+  bio?: string;
 }
 
 interface AuthContextType {
@@ -21,7 +25,11 @@ const defaultUser: User = {
   id: 1,
   username: 'usuario@ejemplo.com',
   fullName: 'Usuario Demo',
-  role: 'admin'
+  role: 'admin',
+  email: 'usuario@ejemplo.com',
+  phone: '+54 9 11 1234 5678',
+  position: 'Administrador',
+  bio: 'Perfil de administrador del sistema de gestión agropecuaria'
 };
 
 export const AuthContext = createContext<AuthContextType>({

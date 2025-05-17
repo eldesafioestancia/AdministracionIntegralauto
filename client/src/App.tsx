@@ -31,6 +31,8 @@ import Weather from "@/pages/weather";
 import Reports from "@/pages/reports/index";
 import Settings from "@/pages/settings/index";
 import NotificationsSettings from "@/pages/settings/notifications";
+import ProfileSettings from "@/pages/settings/profile";
+import GeneralSettings from "@/pages/settings/general";
 import AppLayout from "@/components/layouts/AppLayout";
 
 function App() {
@@ -241,6 +243,18 @@ function App() {
         <Route path="/settings/notifications">
           <AppLayout>
             <NotificationsSettings />
+          </AppLayout>
+        </Route>
+
+        <Route path="/settings/profile">
+          <AppLayout>
+            <ProfileSettings />
+          </AppLayout>
+        </Route>
+
+        <Route path="/settings/general">
+          <AppLayout>
+            <GeneralSettings />
           </AppLayout>
         </Route>
         
