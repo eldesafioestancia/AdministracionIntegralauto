@@ -27,6 +27,17 @@ interface Machine {
   [key: string]: any; // Para otras propiedades que pueda tener una máquina
 }
 
+// Definir el tipo para animales
+interface Animal {
+  id: number;
+  cartagena?: string;
+  cartagenaColor?: string;
+  category?: string;
+  race?: string;
+  birthDate?: string;
+  [key: string]: any; // Para otras propiedades que pueda tener un animal
+}
+
 // Definición de tipos
 interface FinanceEntry {
   id: number;
@@ -93,6 +104,7 @@ export default function FinancesPage() {
         subcategory: params.get('subcategory'),
         description: params.get('description'),
         machineId: params.get('machineId'),
+        animalId: params.get('animalId'), // Añadimos el ID del animal
       };
     }
     return {
@@ -102,6 +114,7 @@ export default function FinancesPage() {
       subcategory: null,
       description: null,
       machineId: null,
+      animalId: null,
     };
   };
 
@@ -455,6 +468,28 @@ export default function FinancesPage() {
               
               // Seleccionar la máquina específica
               form.setValue("machineId", machineId);
+            }
+          }
+        }
+        
+        // Si la categoría es animales y existe un ID de animal
+        else if (params.category === "animales" && params.animalId) {
+          const animalId = params.animalId;
+          
+          // Buscar el animal por ID
+          if (animals && Array.isArray(animals) && animals.length > 0) {
+            const animal = animals.find((a: any) => a.id.toString() === animalId);
+            
+            if (animal) {
+              // Establecer los valores del animal
+              form.setValue("animalId", animalId);
+              form.setValue("animalCaravana", animal.cartagena || "");
+              form.setValue("animalColor", animal.cartagenaColor || "");
+              
+              // Por defecto, seleccionar "venta" como descripción si no hay otra
+              if (!params.description) {
+                form.setValue("description", "venta");
+              }
             }
           }
         }
