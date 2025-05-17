@@ -96,9 +96,12 @@ const machineWorkFormSchema = z.object({
   distance: z.string().optional(),
   workTime: z.string().optional(),
   fuelUsed: z.string().optional(),
+  costPerUnit: z.string().optional(), // Costo por hectárea o kilómetro
+  unitType: z.string().optional(), // Tipo de unidad (hectárea o kilómetro)
   operationalCost: z.string().optional(),
   suppliesCost: z.string().optional(),
   totalCost: z.string().optional(),
+  revenueAmount: z.string().optional(), // Monto a registrar como ingreso
   weatherCondition: z.string().optional(),
   temperature: z.string().optional(),
   soilHumidity: z.string().optional(),
@@ -182,9 +185,12 @@ export default function MachineWorkIndex() {
       distance: "",
       workTime: "",
       fuelUsed: "",
+      costPerUnit: "",
+      unitType: machine?.type === "vehiculo" || machine?.type === "camion" ? "km" : "ha",
       operationalCost: "",
       suppliesCost: "",
       totalCost: "",
+      revenueAmount: "",
       weatherCondition: "",
       temperature: "",
       soilHumidity: "",
@@ -200,20 +206,49 @@ export default function MachineWorkIndex() {
     },
   });
 
-  // Calcular el costo total sumando costos operativos y de suministros
+  // Calcular el costo total y el monto de ingreso
   useEffect(() => {
     const calculateTotal = () => {
+      // Cálculo tradicional: costo operativo + costo de suministros
       const operational = parseFloat(workForm.watch("operationalCost") || "0");
       const supplies = parseFloat(workForm.watch("suppliesCost") || "0");
-      const total = operational + supplies;
+      const totalExpenses = operational + supplies;
       
-      if (!isNaN(total)) {
-        workForm.setValue("totalCost", total.toString());
+      if (!isNaN(totalExpenses)) {
+        workForm.setValue("totalCost", totalExpenses.toString());
+      }
+      
+      // Cálculo del ingreso basado en costo por unidad (hectárea o kilómetro)
+      const costPerUnit = parseFloat(workForm.watch("costPerUnit") || "0");
+      let unitValue = 0;
+      
+      // Determinamos qué valor usar según el tipo de unidad
+      const unitType = workForm.watch("unitType");
+      if (unitType === "km") {
+        unitValue = parseFloat(workForm.watch("distance") || "0");
+      } else { // "ha" por defecto
+        unitValue = parseFloat(workForm.watch("areaWorked") || "0");
+      }
+      
+      // Calculamos el ingreso como costo por unidad * cantidad de unidades
+      const revenue = costPerUnit * unitValue;
+      
+      if (!isNaN(revenue) && revenue > 0) {
+        workForm.setValue("revenueAmount", revenue.toString());
+      } else {
+        workForm.setValue("revenueAmount", "");
       }
     };
     
     calculateTotal();
-  }, [workForm.watch("operationalCost"), workForm.watch("suppliesCost")]);
+  }, [
+    workForm.watch("operationalCost"), 
+    workForm.watch("suppliesCost"),
+    workForm.watch("costPerUnit"),
+    workForm.watch("areaWorked"),
+    workForm.watch("distance"),
+    workForm.watch("unitType")
+  ]);
 
   // Función para agregar un nuevo registro de trabajo
   async function handleWorkSubmit(values: MachineWorkFormValues) {
@@ -224,8 +259,8 @@ export default function MachineWorkIndex() {
       // Actualizar datos de trabajos
       queryClient.invalidateQueries({ queryKey: ["/api/pasture-works"] });
       
-      // Si hay un valor de totalCost, registrar como ingreso financiero para la máquina
-      if (values.totalCost && parseFloat(values.totalCost) > 0) {
+      // Si hay un valor de revenueAmount, registrar como ingreso financiero para la máquina
+      if (values.revenueAmount && parseFloat(values.revenueAmount) > 0) {
         // Obtener el nombre de la parcela si existe
         let pastureDetails = "No especificada";
         if (values.pastureId) {
@@ -236,21 +271,26 @@ export default function MachineWorkIndex() {
           }
         }
         
-        // Crear un registro financiero de ingreso
+        // Determinar qué unidad se está usando
+        const unitLabel = values.unitType === 'km' ? 'kilómetros' : 'hectáreas';
+        const unitValue = values.unitType === 'km' ? values.distance : values.areaWorked;
+        const costPerUnit = values.costPerUnit;
+        
+        // Crear un registro financiero de ingreso con información detallada
         await apiRequest("POST", "/api/machine-finances", {
           machineId: machineId,
           date: values.startDate,
           type: "income", // Tipo ingreso
-          concept: `Trabajo agrícola: ${values.workType} ${pastureDetails ? 'en ' + pastureDetails : ''}`,
-          amount: values.totalCost
+          concept: `Trabajo agrícola: ${values.workType} ${pastureDetails ? 'en ' + pastureDetails : ''} (${unitValue} ${unitLabel} a $${costPerUnit}/${values.unitType})`,
+          amount: values.revenueAmount
         });
         
         // Invalidar consulta de finanzas para esta máquina
         queryClient.invalidateQueries({ queryKey: [`/api/machine-finances?machineId=${machineId}`] });
         
         toast({
-          title: "Trabajo registrado",
-          description: "El trabajo agrícola ha sido registrado exitosamente y se ha registrado como ingreso",
+          title: "Trabajo e ingreso registrados",
+          description: `El trabajo agrícola ha sido registrado exitosamente con un ingreso de $${parseFloat(values.revenueAmount).toLocaleString('es-AR')}`,
         });
       } else {
         toast({
