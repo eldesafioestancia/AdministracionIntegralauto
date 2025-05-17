@@ -64,23 +64,39 @@ export default function Dashboard() {
   const [dateRange, setDateRange] = useState("30days");
   const [activeTab, setActiveTab] = useState("overview");
 
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["/api/dashboard", dateRange],
+    queryFn: async () => {
+      // Incluir el periodo seleccionado como parámetro de consulta
+      const response = await fetch(`/api/dashboard?period=${dateRange}`);
+      if (!response.ok) {
+        throw new Error('Error al cargar datos del dashboard');
+      }
+      return response.json();
+    }
   });
-  
-  // Recargar los datos cuando cambia el periodo de tiempo
-  const handleDateRangeChange = (newRange: string) => {
-    setDateRange(newRange);
-    // La consulta se actualizará automáticamente porque incluimos dateRange en queryKey
-  };
 
   // Consulta de datos para actividad reciente
   const { data: pastureWorks } = useQuery({
-    queryKey: ["/api/pasture-works"],
+    queryKey: ["/api/pasture-works", dateRange],
+    queryFn: async () => {
+      const response = await fetch(`/api/pasture-works?period=${dateRange}`);
+      if (!response.ok) {
+        throw new Error('Error al cargar trabajos de parcelas');
+      }
+      return response.json();
+    }
   });
 
   const { data: maintenances } = useQuery({
-    queryKey: ["/api/maintenance"],
+    queryKey: ["/api/maintenance", dateRange],
+    queryFn: async () => {
+      const response = await fetch(`/api/maintenance?period=${dateRange}`);
+      if (!response.ok) {
+        throw new Error('Error al cargar mantenimientos');
+      }
+      return response.json();
+    }
   });
 
   if (isLoading) {
@@ -191,7 +207,7 @@ export default function Dashboard() {
         <div className="mt-3 sm:mt-0 flex items-center space-x-3">
           <Select 
             defaultValue={dateRange} 
-            onValueChange={handleDateRangeChange}
+            onValueChange={setDateRange}
           >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Período" />
