@@ -814,7 +814,22 @@ export default function FinancesPage() {
                         <FormItem>
                           <FormLabel>Peso de Venta (kg)</FormLabel>
                           <FormControl>
-                            <Input type="number" placeholder="0" {...field} />
+                            <Input 
+                              type="number" 
+                              placeholder="0" 
+                              {...field} 
+                              onChange={(e) => {
+                                field.onChange(e);
+                                // Calcula el valor total cuando cambia el peso
+                                const weight = e.target.value;
+                                const pricePerKg = form.getValues("pricePerKg");
+                                if (weight && pricePerKg) {
+                                  const total = parseFloat(weight) * parseFloat(pricePerKg);
+                                  form.setValue("totalValue", total.toString());
+                                  form.setValue("amount", total.toString());
+                                }
+                              }}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
