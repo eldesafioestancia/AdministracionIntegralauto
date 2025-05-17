@@ -266,10 +266,7 @@ export default function PasturesIndex() {
     queryKey: ["/api/machines"]
   });
   
-  // Consultar los trabajos agrícolas
-  const { data: pastureWorks } = useQuery({
-    queryKey: ["/api/pasture-works"]
-  });
+
   
   // Efecto para inicializar las máquinas filtradas
   useEffect(() => {
