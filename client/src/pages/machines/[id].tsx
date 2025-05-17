@@ -602,14 +602,24 @@ export default function MachineDetail() {
                         {work.totalCost ? `$${work.totalCost}` : work.operativeCost ? `$${work.operativeCost}` : "N/A"}
                       </td>
                       <td className="py-3 px-4 text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-neutral-400 hover:text-neutral-600"
-                          onClick={() => navigate(`/machines/${id}/work?workId=${work.id}`)}
-                        >
-                          <i className="ri-eye-line"></i>
-                        </Button>
+                        <div className="flex justify-end space-x-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-neutral-400 hover:text-neutral-600"
+                            onClick={() => navigate(`/machines/${id}/work?workId=${work.id}`)}
+                          >
+                            <i className="ri-eye-line"></i>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-neutral-400 hover:text-blue-600"
+                            onClick={() => navigate(`/pastures?editWork=${work.id}&preSelectMachine=${id}`)}
+                          >
+                            <i className="ri-edit-line"></i>
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}

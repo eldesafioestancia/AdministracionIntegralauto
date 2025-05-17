@@ -233,6 +233,9 @@ export default function PasturesIndex() {
   const preSelectedMachineId = queryParams.get('preSelectMachine') 
     ? parseInt(queryParams.get('preSelectMachine') || '0') 
     : null;
+  const editWorkId = queryParams.get('editWork') 
+    ? parseInt(queryParams.get('editWork') || '0') 
+    : null;
   
   const [sheetOpen, setSheetOpen] = useState(false);
   const [workSheetOpen, setWorkSheetOpen] = useState(shouldOpenWorkForm);
@@ -261,6 +264,11 @@ export default function PasturesIndex() {
   // Consultar las máquinas para el formulario de trabajos
   const { data: machines } = useQuery({
     queryKey: ["/api/machines"]
+  });
+  
+  // Consultar los trabajos agrícolas
+  const { data: pastureWorks } = useQuery({
+    queryKey: ["/api/pasture-works"]
   });
   
   // Efecto para inicializar las máquinas filtradas
