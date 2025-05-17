@@ -789,7 +789,7 @@ export default function Dashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {pastureWorks && pastureWorks.slice(0, 5).map((work, index) => (
+                  {pastureWorks && pastureWorks.slice(0, 5).map((work: PastureWork, index: number) => (
                     <TableRow key={`work-${work.id}`}>
                       <TableCell>
                         <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">

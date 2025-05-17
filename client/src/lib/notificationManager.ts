@@ -42,10 +42,10 @@ export class NotificationManager {
   }
   
   // Inicializar el service worker y comprobar suscripción
-  public async init(): Promise<void> {
+  public async init(): Promise<boolean> {
     if (!this.isPushSupported()) {
       console.warn('Push notifications are not supported in this browser');
-      return;
+      return false;
     }
     
     try {
@@ -58,8 +58,10 @@ export class NotificationManager {
       this.isSubscribed = !!subscription;
       
       console.log('Notification service initialized', this.isSubscribed ? 'subscribed' : 'not subscribed');
+      return true;
     } catch (error) {
       console.error('Error initializing notification service:', error);
+      return false;
     }
   }
   
