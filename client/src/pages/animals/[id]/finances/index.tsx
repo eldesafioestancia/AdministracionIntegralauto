@@ -44,6 +44,7 @@ const financeFormSchema = z.object({
   }).min(1, {
     message: "El concepto es requerido"
   }),
+  animalIdentification: z.string().optional(),
   animalCategory: z.string().optional(),
   totalKg: z.string().optional(),
   pricePerKg: z.string().optional(),
@@ -79,6 +80,7 @@ export default function AnimalFinances() {
       date: new Date(),
       type: "expense",
       concept: "",
+      animalIdentification: "",
       animalCategory: "",
       totalKg: "",
       pricePerKg: "",
