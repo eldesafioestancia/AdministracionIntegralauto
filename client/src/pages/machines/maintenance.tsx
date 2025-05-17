@@ -224,9 +224,8 @@ export default function MachineMaintenance() {
           machineId: numericId,
           date: values.date,
           type: "expense",
-          concept: `Mantenimiento y reparación: ${values.diagnosis || 'General'}`,
-          amount: values.totalCost,
-          notes: `Repuestos: ${values.spareParts || 'N/A'}, Mano de obra: ${values.labor || 'N/A'}`
+          concept: `Mantenimiento y reparación: ${values.diagnosis ? values.diagnosis.substring(0, 30) + '...' : 'General'}`,
+          amount: values.totalCost
         });
         
         // Invalidar la consulta de finanzas
