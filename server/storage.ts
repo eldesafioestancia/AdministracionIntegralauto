@@ -303,6 +303,32 @@ export class MemStorage implements IStorage {
   }
 
   async deleteMachine(id: number): Promise<boolean> {
+    // Primero verificamos si la máquina existe
+    const machine = this.machines.get(id);
+    if (!machine) return false;
+
+    // Eliminamos todos los registros de mantenimiento asociados a esta máquina
+    for (const [maintId, maint] of this.maintenances.entries()) {
+      if (maint.machineId === id) {
+        this.maintenances.delete(maintId);
+      }
+    }
+
+    // Eliminamos todos los registros financieros asociados a esta máquina
+    for (const [financeId, finance] of this.machineFinances.entries()) {
+      if (finance.machineId === id) {
+        this.machineFinances.delete(financeId);
+      }
+    }
+
+    // Eliminamos todos los trabajos agrícolas asociados a esta máquina
+    for (const [workId, work] of this.pastureWorks.entries()) {
+      if (work.machineId === id) {
+        this.pastureWorks.delete(workId);
+      }
+    }
+
+    // Finalmente eliminamos la máquina
     return this.machines.delete(id);
   }
 
