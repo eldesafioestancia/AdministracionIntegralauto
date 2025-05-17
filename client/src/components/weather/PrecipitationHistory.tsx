@@ -55,6 +55,14 @@ const lineChartColors = [
   'rgb(199, 199, 199)'
 ];
 
+interface PrecipitationHistoryProps {
+  location: {
+    lat: number;
+    lon: number;
+    name: string;
+  };
+}
+
 interface YearlyData {
   year: number;
   precipitation: number;
@@ -92,30 +100,23 @@ export function PrecipitationHistory({ location }: PrecipitationHistoryProps) {
   };
   const [activeTab, setActiveTab] = useState("monthly");
   const [selectedYear, setSelectedYear] = useState<string>("all");
-  const [selectedPeriod, setSelectedPeriod] = useState<string>("20years");
-  const [customStartYear, setCustomStartYear] = useState<string>("1975");
-  const [customEndYear, setCustomEndYear] = useState<string>("2025");
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("all");
   
   // Usar la ubicación por defecto si no se proporciona una
   const locationData = location || defaultLocation;
   
   const { data, isLoading, error } = useQuery<HistoricalWeatherData>({
-    queryKey: ['/api/weather/historical-precipitation', locationData.lat, locationData.lon, selectedPeriod, customStartYear, customEndYear],
+    queryKey: ['/api/weather/historical-precipitation', locationData.lat, locationData.lon],
     queryFn: async () => {
-      let url = `/api/weather/historical-precipitation?lat=${locationData.lat}&lon=${locationData.lon}&period=${selectedPeriod}`;
-      
-      // Si el periodo es personalizado, incluir años inicio y fin
-      if (selectedPeriod === 'custom') {
-        url += `&startYear=${customStartYear}&endYear=${customEndYear}`;
-      }
-      
-      const response = await fetch(url);
+      const response = await fetch(
+        `/api/weather/historical-precipitation?lat=${locationData.lat}&lon=${locationData.lon}`
+      );
       if (!response.ok) {
         throw new Error('Error al obtener datos históricos de precipitaciones');
       }
       return response.json();
     },
-    enabled: Boolean(locationData?.lat && locationData?.lon),
+    enabled: Boolean(location.lat && location.lon),
     staleTime: 24 * 60 * 60 * 1000, // 24 horas
   });
 
@@ -289,65 +290,12 @@ export function PrecipitationHistory({ location }: PrecipitationHistoryProps) {
   return (
     <Card className="shadow-md mt-6">
       <CardHeader>
-        <CardTitle className="text-xl">Historial de Precipitaciones en {locationData.name}</CardTitle>
+        <CardTitle className="text-xl">Historial de Precipitaciones en {location.name}</CardTitle>
         <CardDescription>
-          Datos históricos de precipitaciones y análisis comparativo
+          Datos históricos de los últimos 20 años y análisis comparativo
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <div>
-            <label className="text-sm text-neutral-500 mb-1 block">Período de datos</label>
-            <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Seleccionar período" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="10years">Últimos 10 años</SelectItem>
-                <SelectItem value="20years">Últimos 20 años</SelectItem>
-                <SelectItem value="30years">Últimos 30 años</SelectItem>
-                <SelectItem value="50years">Últimos 50 años</SelectItem>
-                <SelectItem value="custom">Período personalizado</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          {selectedPeriod === "custom" && (
-            <div className="flex gap-2 items-center">
-              <div>
-                <label className="text-sm text-neutral-500 mb-1 block">Desde</label>
-                <Select value={customStartYear} onValueChange={setCustomStartYear}>
-                  <SelectTrigger className="w-[120px]">
-                    <SelectValue placeholder="Año inicio" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.from({ length: 76 }, (_, i) => 1950 + i).map(year => (
-                      <SelectItem key={year} value={year.toString()}>
-                        {year}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="text-sm text-neutral-500 mb-1 block">Hasta</label>
-                <Select value={customEndYear} onValueChange={setCustomEndYear}>
-                  <SelectTrigger className="w-[120px]">
-                    <SelectValue placeholder="Año fin" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.from({ length: 76 }, (_, i) => 1950 + i).map(year => (
-                      <SelectItem key={year} value={year.toString()}>
-                        {year}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          )}
-        </div>
-      
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="monthly">Mensual</TabsTrigger>

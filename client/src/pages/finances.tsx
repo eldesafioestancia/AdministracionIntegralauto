@@ -27,6 +27,17 @@ interface Machine {
   [key: string]: any; // Para otras propiedades que pueda tener una máquina
 }
 
+// Definir el tipo para animales
+interface Animal {
+  id: number;
+  cartagena?: string;
+  cartagenaColor?: string;
+  category?: string;
+  race?: string;
+  birthDate?: string;
+  [key: string]: any; // Para otras propiedades que pueda tener un animal
+}
+
 // Definición de tipos
 interface FinanceEntry {
   id: number;
@@ -93,6 +104,7 @@ export default function FinancesPage() {
         subcategory: params.get('subcategory'),
         description: params.get('description'),
         machineId: params.get('machineId'),
+        animalId: params.get('animalId'), // Añadimos el ID del animal
       };
     }
     return {
@@ -102,6 +114,7 @@ export default function FinancesPage() {
       subcategory: null,
       description: null,
       machineId: null,
+      animalId: null,
     };
   };
 
@@ -169,7 +182,7 @@ export default function FinancesPage() {
   });
   
   // Consulta para obtener los animales disponibles
-  const { data: animals = [] } = useQuery({
+  const { data: animals = [] as Animal[] } = useQuery<Animal[]>({
     queryKey: ["/api/animals"],
   });
 
@@ -458,6 +471,28 @@ export default function FinancesPage() {
             }
           }
         }
+        
+        // Si la categoría es animales y existe un ID de animal
+        else if (params.category === "animales" && params.animalId) {
+          const animalId = params.animalId;
+          
+          // Buscar el animal por ID
+          if (animals && Array.isArray(animals) && animals.length > 0) {
+            const animal = animals.find((a: any) => a.id.toString() === animalId);
+            
+            if (animal) {
+              // Establecer los valores del animal
+              form.setValue("animalId", animalId);
+              form.setValue("animalCaravana", animal.cartagena || "");
+              form.setValue("animalColor", animal.cartagenaColor || "");
+              
+              // Por defecto, seleccionar "venta" como descripción si no hay otra
+              if (!params.description) {
+                form.setValue("description", "venta");
+              }
+            }
+          }
+        }
       }
       
       // Establecer subcategoría si existe y la categoría está establecida
@@ -480,7 +515,7 @@ export default function FinancesPage() {
       // Abrir el formulario
       setIsAddSheetOpen(true);
     }
-  }, [location, machines]); // Se ejecuta cuando cambia la URL o las máquinas están disponibles
+  }, [location, machines, animals]); // Se ejecuta cuando cambia la URL o están disponibles las máquinas o animales
 
   // Funciones para formatear moneda y fechas
   const formatCurrency = (amount: number | string) => {
@@ -828,7 +863,7 @@ export default function FinancesPage() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {animals.map((animal: any) => (
+                              {animals.map((animal) => (
                                 <SelectItem key={animal.id} value={animal.id.toString()}>
                                   {`${animal.cartagenaColor || ""} - #${animal.cartagena || ""} (${animal.category || ""})`}
                                 </SelectItem>

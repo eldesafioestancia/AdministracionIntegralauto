@@ -65,38 +65,16 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["/api/dashboard", dateRange],
-    queryFn: async () => {
-      // Incluir el periodo seleccionado como parámetro de consulta
-      const response = await fetch(`/api/dashboard?period=${dateRange}`);
-      if (!response.ok) {
-        throw new Error('Error al cargar datos del dashboard');
-      }
-      return response.json();
-    }
+    queryKey: ["/api/dashboard"],
   });
 
   // Consulta de datos para actividad reciente
   const { data: pastureWorks } = useQuery({
-    queryKey: ["/api/pasture-works", dateRange],
-    queryFn: async () => {
-      const response = await fetch(`/api/pasture-works?period=${dateRange}`);
-      if (!response.ok) {
-        throw new Error('Error al cargar trabajos de parcelas');
-      }
-      return response.json();
-    }
+    queryKey: ["/api/pasture-works"],
   });
 
   const { data: maintenances } = useQuery({
-    queryKey: ["/api/maintenance", dateRange],
-    queryFn: async () => {
-      const response = await fetch(`/api/maintenance?period=${dateRange}`);
-      if (!response.ok) {
-        throw new Error('Error al cargar mantenimientos');
-      }
-      return response.json();
-    }
+    queryKey: ["/api/maintenance"],
   });
 
   if (isLoading) {
