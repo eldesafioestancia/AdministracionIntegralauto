@@ -66,6 +66,16 @@ export default function MachineDetail() {
   const { data: finances, isLoading: financesLoading, error: financesError } = useQuery({
     queryKey: [`/api/machine-finances?machineId=${id}`],
   });
+  
+  // Get work records (trabajos agrícolas)
+  const { data: allPastureWorks, isLoading: worksLoading, error: worksError } = useQuery({
+    queryKey: ["/api/pasture-works"],
+  });
+  
+  // Filter works for this machine
+  const machineWorks = allPastureWorks && Array.isArray(allPastureWorks) 
+    ? allPastureWorks.filter((work) => work.machineId === numericId)
+    : [];
 
   const financeForm = useForm<FinanceFormValues>({
     resolver: zodResolver(financeFormSchema),
@@ -230,9 +240,10 @@ export default function MachineDetail() {
 
       {/* Tabs for history */}
       <Tabs defaultValue="maintenance" className="w-full">
-        <TabsList className="grid grid-cols-2 mb-4">
+        <TabsList className="grid grid-cols-3 mb-4">
           <TabsTrigger value="maintenance">Historial de Mantenimiento</TabsTrigger>
           <TabsTrigger value="finances">Ingresos y Gastos</TabsTrigger>
+          <TabsTrigger value="works">Trabajos Realizados</TabsTrigger>
         </TabsList>
 
         {/* Maintenance History Tab */}
