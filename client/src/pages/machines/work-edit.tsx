@@ -198,13 +198,11 @@ export default function EditMachineWork() {
   const onSubmit = async (values: WorkFormValues) => {
     try {
       // Calcular costo total si no existe
-      let totalCostValue = values.totalCost;
-      if (!totalCostValue && values.operationalCost && values.suppliesCost) {
+      if (!values.totalCost && values.operationalCost && values.suppliesCost) {
         const opCost = parseFloat(values.operationalCost);
         const supCost = parseFloat(values.suppliesCost);
         if (!isNaN(opCost) && !isNaN(supCost)) {
-          totalCostValue = (opCost + supCost).toString();
-          values.totalCost = totalCostValue;
+          values.totalCost = (opCost + supCost).toString();
         }
       }
       
@@ -243,32 +241,12 @@ export default function EditMachineWork() {
       // Llamar a la API para actualizar el trabajo
       await apiRequest("PUT", `/api/pasture-works/${workIdNum}`, workData);
       
-      // Si hay un costo total, registrarlo como ingreso en las finanzas
-      if (totalCostValue && parseFloat(totalCostValue) > 0) {
-        // Crear un registro financiero
-        const financeData = {
-          machineId: machineId,
-          date: new Date(),
-          type: "income",
-          concept: "work",
-          description: `Ingreso por trabajo: ${values.workType} - ${values.description}`,
-          amount: totalCostValue,
-          paymentMethod: "transference"
-        };
-        
-        // Guardar el registro financiero
-        await apiRequest("POST", "/api/machine-finances", financeData);
-        
-        // También invalidar las consultas de finanzas
-        queryClient.invalidateQueries({ queryKey: ["/api/machine-finances"] });
-      }
-      
       // Invalidar consultas para refrescar datos
       queryClient.invalidateQueries({ queryKey: ["/api/pasture-works"] });
       
       toast({
         title: "Trabajo actualizado",
-        description: "El trabajo ha sido actualizado exitosamente y registrado como ingreso en el balance",
+        description: "El trabajo ha sido actualizado exitosamente",
       });
       
       // Redirigir a la página de detalles de la máquina
