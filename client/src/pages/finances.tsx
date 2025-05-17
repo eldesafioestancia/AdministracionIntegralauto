@@ -182,7 +182,7 @@ export default function FinancesPage() {
   });
   
   // Consulta para obtener los animales disponibles
-  const { data: animals = [] } = useQuery({
+  const { data: animals = [] as Animal[] } = useQuery<Animal[]>({
     queryKey: ["/api/animals"],
   });
 
@@ -515,7 +515,7 @@ export default function FinancesPage() {
       // Abrir el formulario
       setIsAddSheetOpen(true);
     }
-  }, [location, machines]); // Se ejecuta cuando cambia la URL o las máquinas están disponibles
+  }, [location, machines, animals]); // Se ejecuta cuando cambia la URL o están disponibles las máquinas o animales
 
   // Funciones para formatear moneda y fechas
   const formatCurrency = (amount: number | string) => {
@@ -863,7 +863,7 @@ export default function FinancesPage() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {animals.map((animal: any) => (
+                              {animals.map((animal) => (
                                 <SelectItem key={animal.id} value={animal.id.toString()}>
                                   {`${animal.cartagenaColor || ""} - #${animal.cartagena || ""} (${animal.category || ""})`}
                                 </SelectItem>

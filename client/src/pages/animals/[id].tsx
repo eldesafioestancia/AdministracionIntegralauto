@@ -386,7 +386,7 @@ export default function AnimalDetail() {
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-medium">Registros financieros</h3>
             <Button asChild>
-              <a href={`/animals/${id}/finance`}>
+              <a href={`/finances?openForm=true&type=income&category=animales&animalId=${id}`}>
                 <i className="ri-money-dollar-circle-line mr-1"></i> Registrar transacción
               </a>
             </Button>
