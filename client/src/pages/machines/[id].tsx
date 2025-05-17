@@ -266,31 +266,41 @@ export default function MachineDetail() {
               </CardContent>
             </Card>
           ) : (
-            <div className="space-y-4">
-              {maintenances.map((maintenance) => (
-                <Card key={maintenance.id}>
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between">
-                      <CardTitle>{getMaintenanceTypeLabel(maintenance.type)}</CardTitle>
-                      <Badge variant="outline">
-                        {format(new Date(maintenance.date), "dd/MM/yyyy")}
-                      </Badge>
-                    </div>
-                    <CardDescription>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          {maintenance.time && `Hora: ${maintenance.time}`}
-                        </div>
-                        {maintenance.isModified && 
-                          <div className="text-amber-500 flex items-center">
-                            <i className="ri-edit-line mr-1"></i>
-                            <span>Modificado</span>
-                          </div>
-                        }
-                      </div>
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr>
+                    <th className="text-left py-3 px-4 font-medium text-neutral-500">Fecha</th>
+                    <th className="text-left py-3 px-4 font-medium text-neutral-500">Tipo</th>
+                    <th className="text-left py-3 px-4 font-medium text-neutral-500">Detalles</th>
+                    <th className="text-right py-3 px-4 font-medium text-neutral-500">Costo</th>
+                    <th className="text-right py-3 px-4 font-medium text-neutral-500"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {maintenances.map((maintenance) => (
+                    <tr key={maintenance.id} className="border-b border-neutral-200 hover:bg-neutral-50">
+                      <td className="py-3 px-4">{format(new Date(maintenance.date), "dd/MM/yyyy")}</td>
+                      <td className="py-3 px-4">
+                        <Badge className={
+                          maintenance.type === "maintenance_repair" 
+                            ? "bg-red-100 text-red-800" 
+                            : "bg-blue-100 text-blue-800"
+                        }>
+                          {getMaintenanceTypeLabel(maintenance.type)}
+                        </Badge>
+                      </td>
+                      <td className="py-3 px-4">
+                        {maintenance.diagnosis ? maintenance.diagnosis.substring(0, 50) + "..." : 
+                         maintenance.workshopName ? "Taller: " + maintenance.workshopName : 
+                         "Conductor: " + (maintenance.driver || "No registrado")}
+                      </td>
+                      <td className="py-3 px-4 text-right font-medium">
+                        {maintenance.totalCost ? 
+                          <span className="text-destructive">-${maintenance.totalCost}</span> : 
+                          "N/A"}
+                      </td>
+                      <td className="py-3 px-4 text-right">
                     {maintenance.type === "maintenance_repair" ? (
                       <div className="space-y-3">
                         {maintenance.workshopName && (
