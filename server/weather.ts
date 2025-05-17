@@ -406,6 +406,22 @@ export async function getHistoricalPrecipitation(
       precipitationPattern = 'continental';
     }
     
+    // Para Argentina, ajustar según la ubicación
+    if (countryCode === 'AR') {
+      // Región central (pampa húmeda)
+      if (lat > -38 && lat < -30 && lon > -65 && lon < -57) {
+        precipitationPattern = 'temperate';
+      }
+      // Región noroeste (más árida)
+      else if (lat > -32 && lat < -22 && lon > -70 && lon < -62) {
+        precipitationPattern = 'arid';
+      }
+      // Región noreste (más tropical)
+      else if (lat > -32 && lat < -25 && lon > -60 && lon < -53) {
+        precipitationPattern = 'tropical';
+      }
+    }
+    
     // Preparar los parámetros para generar el modelo de datos históricos
     let yearsToGenerate = years;
     let specificStartYear: number | undefined;
@@ -540,9 +556,16 @@ function generateHistoricalPrecipitationModel(
   let laNinaYear = false;
   
   for (let year = startYearValue; year <= endYearValue; year++) {
-    // Determinar si es un año de El Niño o La Niña
-    if (year % 5 === 0) elNinoYear = true;
-    else if (year % 5 === 3) laNinaYear = true;
+    // Determinar si es un año de El Niño o La Niña basado en un patrón simplificado
+    // En la realidad, El Niño/La Niña ocurren con periodos irregulares
+    if (year % 5 === 0) {
+      elNinoYear = true;
+      laNinaYear = false;
+    }
+    else if (year % 5 === 3) {
+      elNinoYear = false;
+      laNinaYear = true;
+    }
     else {
       elNinoYear = false;
       laNinaYear = false;
