@@ -2,7 +2,6 @@ import { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
-import { resetAllData } from "./reset-data";
 import { 
   getPublicKey, 
   subscribe, 
@@ -42,17 +41,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Ruta para subir archivos
   app.post("/api/upload", handleFileUpload);
-  
-  // Ruta admin para reiniciar datos
-  app.post("/api/admin/reset-data", async (req: Request, res: Response) => {
-    try {
-      const result = await resetAllData();
-      res.json(result);
-    } catch (error) {
-      console.error("Error al reiniciar datos:", error);
-      res.status(500).json({ success: false, message: "Error al reiniciar datos" });
-    }
-  });
   // Rutas de autenticación simuladas - sin verificación real
   app.post("/api/auth/login", async (req: Request, res: Response) => {
     try {
@@ -603,25 +591,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const animalId = req.query.animalId ? parseInt(req.query.animalId as string) : undefined;
       const finances = await storage.getAnimalFinances(animalId);
-      
-      // Procesamos los registros para extraer la identificación del animal si está presente
-      const processedFinances = finances.map(finance => {
-        let animalIdentification = "";
-        
-        // Extraemos la identificación del animal del campo concept si existe
-        if (finance.concept && finance.concept.includes("|ID:")) {
-          const parts = finance.concept.split("|ID:");
-          finance.concept = parts[0]; // Restauramos el concepto original
-          animalIdentification = parts[1]; // Obtenemos la identificación
-        }
-        
-        return {
-          ...finance,
-          animalIdentification
-        };
-      });
-      
-      res.json(processedFinances);
+      res.json(finances);
     } catch (error) {
       console.error("Error fetching animal finances:", error);
       res.status(500).json({ message: "Error fetching animal finances" });
@@ -630,29 +600,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/animal-finances", async (req: Request, res: Response) => {
     try {
-      // Si estamos recibiendo campos nuevos, los procesamos antes de validar
-      let financeData = req.body;
-      
-      // Si se recibe identificación de animal, la guardamos en el campo de descripción
-      // como workaround mientras se actualiza el esquema
-      if (financeData.animalIdentification) {
-        // Guardamos la información en el campo concept o description, dependiendo de lo que esté disponible
-        if (financeData.concept) {
-          financeData.concept = `${financeData.concept}|ID:${financeData.animalIdentification}`;
-        }
-      }
-      
-      // Validamos y procesamos con el esquema normal
-      const validatedData = insertAnimalFinanceSchema.parse(financeData);
-      const newFinance = await storage.createAnimalFinance(validatedData);
-      
-      // Devolvemos el objeto con los campos adicionales para que el frontend los muestre
-      const responseData = {
-        ...newFinance,
-        animalIdentification: financeData.animalIdentification || ""
-      };
-      
-      res.status(201).json(responseData);
+      const financeData = insertAnimalFinanceSchema.parse(req.body);
+      const newFinance = await storage.createAnimalFinance(financeData);
+      res.status(201).json(newFinance);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid finance data", errors: error.errors });

@@ -31,7 +31,6 @@ import Weather from "@/pages/weather";
 import Reports from "@/pages/reports/index";
 import Settings from "@/pages/settings/index";
 import NotificationsSettings from "@/pages/settings/notifications";
-import Reset from "@/pages/admin/reset";
 import AppLayout from "@/components/layouts/AppLayout";
 
 function App() {
@@ -242,13 +241,6 @@ function App() {
         <Route path="/settings/notifications">
           <AppLayout>
             <NotificationsSettings />
-          </AppLayout>
-        </Route>
-        
-        {/* Ruta para administración */}
-        <Route path="/admin/reset">
-          <AppLayout>
-            <Reset />
           </AppLayout>
         </Route>
         

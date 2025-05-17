@@ -306,12 +306,11 @@ export const animalFinances = pgTable("animal_finances", {
   animalId: integer("animal_id").notNull(),
   date: timestamp("date").notNull(),
   type: text("type").notNull(), // expense, income
-  concept: text("concept").notNull(), // baja, venta, otro
-  animalIdentification: text("animal_identification"), // Color y número de caravana
+  concept: text("concept").notNull(), // senasa, vaccine, vet, food, other
   animalCategory: text("animal_category"), // ternero, novillo, vaquillona, vaca, toro
-  totalKg: decimal("total_kg"), // peso de venta
-  pricePerKg: decimal("price_per_kg"), // valor por kg
-  amount: decimal("amount").notNull(), // valor total
+  totalKg: decimal("total_kg"),
+  pricePerKg: decimal("price_per_kg"),
+  amount: decimal("amount").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
