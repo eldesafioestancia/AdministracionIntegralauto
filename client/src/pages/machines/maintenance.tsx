@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useLocation } from "wouter";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -189,20 +190,54 @@ export default function MachineMaintenance() {
   const addOilChecked = form.watch("addOil");
   const addFuelChecked = form.watch("addFuel");
   const maintenanceType = form.watch("type");
+  const sparePartsCost = form.watch("sparePartsCost");
+  const laborCost = form.watch("laborCost");
+
+  // Calcular el costo total cuando cambian los valores de costo de repuestos o mano de obra
+  React.useEffect(() => {
+    if (maintenanceType === "maintenance_repair") {
+      const spareCost = parseFloat(sparePartsCost) || 0;
+      const labCost = parseFloat(laborCost) || 0;
+      const total = spareCost + labCost;
+      
+      if (!isNaN(total) && (spareCost > 0 || labCost > 0)) {
+        form.setValue("totalCost", total.toString());
+      }
+    }
+  }, [sparePartsCost, laborCost, maintenanceType, form]);
 
   async function onSubmit(values: MaintenanceFormValues) {
     try {
-      await apiRequest("POST", "/api/maintenance", {
+      // Crear el registro de mantenimiento
+      const maintenance = await apiRequest("POST", "/api/maintenance", {
         ...values,
         machineId: numericId
       });
 
       // Invalidate maintenance query to refresh the list
       queryClient.invalidateQueries({ queryKey: [`/api/maintenance?machineId=${id}`] });
+      
+      // Si es mantenimiento y reparación, registrar el costo total como gasto financiero
+      if (values.type === "maintenance_repair" && values.totalCost && parseFloat(values.totalCost) > 0) {
+        // Crear un registro financiero para el gasto
+        await apiRequest("POST", "/api/machine-finances", {
+          machineId: numericId,
+          date: values.date,
+          type: "expense",
+          concept: `Mantenimiento y reparación: ${values.diagnosis || 'General'}`,
+          amount: values.totalCost,
+          notes: `Repuestos: ${values.spareParts || 'N/A'}, Mano de obra: ${values.labor || 'N/A'}`
+        });
+        
+        // Invalidar la consulta de finanzas
+        queryClient.invalidateQueries({ queryKey: [`/api/machine-finances?machineId=${id}`] });
+      }
 
       toast({
         title: "Mantenimiento registrado",
-        description: "El registro de mantenimiento ha sido creado exitosamente",
+        description: values.type === "maintenance_repair" && values.totalCost ? 
+          "El registro de mantenimiento ha sido creado exitosamente y el costo total ha sido registrado como gasto" :
+          "El registro de mantenimiento ha sido creado exitosamente",
       });
 
       // Navigate back to machine details
