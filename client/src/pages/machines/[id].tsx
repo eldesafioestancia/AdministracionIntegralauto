@@ -617,7 +617,7 @@ export default function MachineDetail() {
                             className="text-neutral-400 hover:text-blue-600"
                             asChild
                           >
-                            <Link href={`/pastures?editWork=${work.id}&preSelectMachine=${id}`}>
+                            <Link href={`/machines/${id}/work/edit/${work.id}`}>
                               <i className="ri-edit-line"></i>
                             </Link>
                           </Button>
