@@ -311,9 +311,12 @@ export default function MachineWorkIndex() {
         distance: "",
         workTime: "",
         fuelUsed: "",
+        costPerUnit: "",
+        unitType: machine?.type === "vehiculo" || machine?.type === "camion" ? "km" : "ha",
         operationalCost: "",
         suppliesCost: "",
         totalCost: "",
+        revenueAmount: "",
         weatherCondition: "",
         temperature: "",
         soilHumidity: "",
@@ -949,6 +952,83 @@ export default function MachineWorkIndex() {
                     </FormControl>
                     <FormDescription>
                       Suma de costos operativos y de insumos
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <h3 className="text-sm font-medium text-neutral-500 pt-4 mt-2 border-t border-neutral-200">Facturación del Trabajo</h3>
+              
+              <div className="grid grid-cols-2 gap-4 mt-2">
+                <FormField
+                  control={workForm.control}
+                  name="costPerUnit"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Costo por {workForm.watch("unitType") === "km" ? "kilómetro" : "hectárea"} ($)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          placeholder="0" 
+                          step="0.01" 
+                          {...field}
+                          value={field.value || ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={workForm.control}
+                  name="unitType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tipo de unidad</FormLabel>
+                      <Select 
+                        value={field.value} 
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          // Resetear el valor automáticamente cuando cambia la unidad
+                          workForm.setValue("revenueAmount", "");
+                        }}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccione tipo de unidad" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="ha">Hectárea (ha)</SelectItem>
+                          <SelectItem value="km">Kilómetro (km)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={workForm.control}
+                name="revenueAmount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Ingreso total a cobrar ($)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        placeholder="0" 
+                        disabled 
+                        {...field}
+                        value={field.value || ""}
+                        className="font-medium bg-amber-50 border-amber-200"
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Monto que se registrará como ingreso en el balance
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
