@@ -218,15 +218,46 @@ export default function MachineWorkIndex() {
   // Función para agregar un nuevo registro de trabajo
   async function handleWorkSubmit(values: MachineWorkFormValues) {
     try {
-      await apiRequest("POST", "/api/pasture-works", values);
+      // Registrar el trabajo agrícola
+      const newWork = await apiRequest("POST", "/api/pasture-works", values);
       
-      // Actualizar datos
+      // Actualizar datos de trabajos
       queryClient.invalidateQueries({ queryKey: ["/api/pasture-works"] });
       
-      toast({
-        title: "Trabajo registrado",
-        description: "El trabajo agrícola ha sido registrado exitosamente",
-      });
+      // Si hay un valor de totalCost, registrar como ingreso financiero para la máquina
+      if (values.totalCost && parseFloat(values.totalCost) > 0) {
+        // Obtener el nombre de la parcela si existe
+        let pastureDetails = "No especificada";
+        if (values.pastureId) {
+          // Si hay una parcela asociada, buscar su nombre
+          const pasture = pastures?.find((p: any) => p.id === values.pastureId);
+          if (pasture) {
+            pastureDetails = pasture.name;
+          }
+        }
+        
+        // Crear un registro financiero de ingreso
+        await apiRequest("POST", "/api/machine-finances", {
+          machineId: machineId,
+          date: values.startDate,
+          type: "income", // Tipo ingreso
+          concept: `Trabajo agrícola: ${values.workType} ${pastureDetails ? 'en ' + pastureDetails : ''}`,
+          amount: values.totalCost
+        });
+        
+        // Invalidar consulta de finanzas para esta máquina
+        queryClient.invalidateQueries({ queryKey: [`/api/machine-finances?machineId=${machineId}`] });
+        
+        toast({
+          title: "Trabajo registrado",
+          description: "El trabajo agrícola ha sido registrado exitosamente y se ha registrado como ingreso",
+        });
+      } else {
+        toast({
+          title: "Trabajo registrado",
+          description: "El trabajo agrícola ha sido registrado exitosamente",
+        });
+      }
       
       setWorkSheetOpen(false);
       workForm.reset({
