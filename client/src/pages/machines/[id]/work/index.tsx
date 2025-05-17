@@ -99,6 +99,8 @@ const machineWorkFormSchema = z.object({
   operationalCost: z.string().optional(),
   suppliesCost: z.string().optional(),
   totalCost: z.string().optional(),
+  valuePerUnit: z.string().optional(), // Valor por hectárea o por kilómetro
+  totalValue: z.string().optional(),   // Valor total del trabajo (ingreso)
   weatherCondition: z.string().optional(),
   temperature: z.string().optional(),
   soilHumidity: z.string().optional(),
@@ -914,6 +916,74 @@ export default function MachineWorkIndex() {
                   </FormItem>
                 )}
               />
+
+              <h3 className="text-sm font-medium text-neutral-500 pt-2">Valores a cobrar</h3>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={workForm.control}
+                  name="valuePerUnit"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        {machine?.type === 'camion' || machine?.type === 'vehiculo' 
+                          ? 'Valor por kilómetro ($)' 
+                          : 'Valor por hectárea ($)'
+                        }
+                      </FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          placeholder="0" 
+                          step="0.01" 
+                          {...field}
+                          value={field.value || ""}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            const valuePerUnit = parseFloat(e.target.value) || 0;
+                            const unit = machine?.type === 'camion' || machine?.type === 'vehiculo'
+                              ? parseFloat(workForm.getValues("distance") || "0")
+                              : parseFloat(workForm.getValues("areaWorked") || "0");
+                            
+                            if (unit > 0 && valuePerUnit > 0) {
+                              workForm.setValue("totalValue", (valuePerUnit * unit).toString());
+                            } else {
+                              workForm.setValue("totalValue", "");
+                            }
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={workForm.control}
+                  name="totalValue"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Valor total ($)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          placeholder="0" 
+                          disabled
+                          {...field}
+                          value={field.value || ""}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        {machine?.type === 'camion' || machine?.type === 'vehiculo' 
+                          ? 'Kilómetros × Valor por km' 
+                          : 'Hectáreas × Valor por ha'
+                        }
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               
               <h3 className="text-sm font-medium text-neutral-500 pt-2">Condiciones</h3>
               
