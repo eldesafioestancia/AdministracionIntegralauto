@@ -132,9 +132,20 @@ const DatabaseSettingsPage = () => {
     setIsResetting(true);
 
     try {
-      // En una implementación real, esto sería una llamada a la API
-      // Simulamos la llamada con un setTimeout
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Realizar una llamada real a la API
+      const response = await fetch('/api/database/reset', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ module: selectedModule }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error en la respuesta del servidor');
+      }
+
+      const result = await response.json();
 
       toast({
         title: 'Datos reseteados correctamente',
@@ -152,7 +163,7 @@ const DatabaseSettingsPage = () => {
       console.error('Error resetting data:', error);
       toast({
         title: 'Error',
-        description: 'No se pudieron resetear los datos',
+        description: 'No se pudieron resetear los datos. Intente nuevamente.',
         variant: 'destructive'
       });
     } finally {
