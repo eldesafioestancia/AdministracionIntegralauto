@@ -816,10 +816,25 @@ export default function FinancesPage() {
                       name="animalColor"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Color</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Ingrese el color del animal" {...field} />
-                          </FormControl>
+                          <FormLabel>Color de Caravana</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Seleccione el color" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="blanco">Blanco</SelectItem>
+                              <SelectItem value="amarillo">Amarillo</SelectItem>
+                              <SelectItem value="rojo">Rojo</SelectItem>
+                              <SelectItem value="verde">Verde</SelectItem>
+                              <SelectItem value="azul">Azul</SelectItem>
+                              <SelectItem value="violeta">Violeta</SelectItem>
+                              <SelectItem value="naranja">Naranja</SelectItem>
+                              <SelectItem value="rosa">Rosa</SelectItem>
+                              <SelectItem value="negro">Negro</SelectItem>
+                            </SelectContent>
+                          </Select>
                           <FormMessage />
                         </FormItem>
                       )}
