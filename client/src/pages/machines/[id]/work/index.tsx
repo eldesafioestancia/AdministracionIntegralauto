@@ -187,6 +187,8 @@ export default function MachineWorkIndex() {
       operationalCost: "",
       suppliesCost: "",
       totalCost: "",
+      valuePerUnit: "",
+      totalValue: "",
       weatherCondition: "",
       temperature: "",
       soilHumidity: "",
@@ -226,40 +228,54 @@ export default function MachineWorkIndex() {
       // Actualizar datos de trabajos
       queryClient.invalidateQueries({ queryKey: ["/api/pasture-works"] });
       
-      // Si hay un valor de totalCost, registrar como ingreso financiero para la máquina
-      if (values.totalCost && parseFloat(values.totalCost) > 0) {
-        // Obtener el nombre de la parcela si existe
-        let pastureDetails = "No especificada";
-        if (values.pastureId) {
-          // Si hay una parcela asociada, buscar su nombre
-          const pasture = pastures?.find((p: any) => p.id === values.pastureId);
-          if (pasture) {
-            pastureDetails = pasture.name;
-          }
+      // Obtener el nombre de la parcela si existe
+      let pastureDetails = "No especificada";
+      if (values.pastureId) {
+        // Si hay una parcela asociada, buscar su nombre
+        const pasture = pastures?.find((p: any) => p.id === values.pastureId);
+        if (pasture) {
+          pastureDetails = pasture.name;
         }
-        
+      }
+      
+      // Si hay un costo total (como gasto de operación)
+      if (values.totalCost && parseFloat(values.totalCost) > 0) {
+        // Crear un registro financiero de gasto
+        await apiRequest("POST", "/api/machine-finances", {
+          machineId: machineId,
+          date: values.startDate,
+          type: "expense", // Tipo gasto
+          concept: `Gastos operativos: ${values.workType} ${pastureDetails ? 'en ' + pastureDetails : ''}`,
+          amount: values.totalCost
+        });
+      }
+      
+      // Si hay un valor total (como ingreso por servicio)
+      if (values.totalValue && parseFloat(values.totalValue) > 0) {
         // Crear un registro financiero de ingreso
         await apiRequest("POST", "/api/machine-finances", {
           machineId: machineId,
           date: values.startDate,
           type: "income", // Tipo ingreso
-          concept: `Trabajo agrícola: ${values.workType} ${pastureDetails ? 'en ' + pastureDetails : ''}`,
-          amount: values.totalCost
+          concept: `Servicio: ${values.workType} ${pastureDetails ? 'en ' + pastureDetails : ''} ${machine?.type === 'camion' || machine?.type === 'vehiculo' ? '(' + (values.distance || '0') + ' km)' : '(' + (values.areaWorked || '0') + ' ha)'}`,
+          amount: values.totalValue
         });
         
-        // Invalidar consulta de finanzas para esta máquina
-        queryClient.invalidateQueries({ queryKey: [`/api/machine-finances?machineId=${machineId}`] });
-        
+        // Mostrar mensaje de éxito con información del ingreso
         toast({
           title: "Trabajo registrado",
           description: "El trabajo agrícola ha sido registrado exitosamente y se ha registrado como ingreso",
         });
       } else {
+        // Mostrar mensaje de éxito normal
         toast({
           title: "Trabajo registrado",
           description: "El trabajo agrícola ha sido registrado exitosamente",
         });
       }
+      
+      // Invalidar consulta de finanzas para esta máquina
+      queryClient.invalidateQueries({ queryKey: [`/api/machine-finances?machineId=${machineId}`] });
       
       setWorkSheetOpen(false);
       workForm.reset({
@@ -778,6 +794,17 @@ export default function MachineWorkIndex() {
                             step="0.01" 
                             {...field}
                             value={field.value || ""}
+                            onChange={(e) => {
+                              field.onChange(e);
+                              const area = parseFloat(e.target.value) || 0;
+                              const valuePerUnit = parseFloat(workForm.getValues("valuePerUnit") || "0");
+                              
+                              if (area > 0 && valuePerUnit > 0) {
+                                workForm.setValue("totalValue", (valuePerUnit * area).toString());
+                              } else {
+                                workForm.setValue("totalValue", "");
+                              }
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -801,6 +828,17 @@ export default function MachineWorkIndex() {
                             step="0.1" 
                             {...field}
                             value={field.value || ""}
+                            onChange={(e) => {
+                              field.onChange(e);
+                              const distance = parseFloat(e.target.value) || 0;
+                              const valuePerUnit = parseFloat(workForm.getValues("valuePerUnit") || "0");
+                              
+                              if (distance > 0 && valuePerUnit > 0) {
+                                workForm.setValue("totalValue", (valuePerUnit * distance).toString());
+                              } else {
+                                workForm.setValue("totalValue", "");
+                              }
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
