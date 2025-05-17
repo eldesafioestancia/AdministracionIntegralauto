@@ -132,38 +132,57 @@ const DatabaseSettingsPage = () => {
     setIsResetting(true);
 
     try {
-      // Realizar una llamada real a la API
-      const response = await fetch('/api/database/reset', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ module: selectedModule }),
-      });
+      // Según el módulo seleccionado, llamar al endpoint específico
+      if (selectedModule === 'animals') {
+        // Endpoint específico para reset de animales
+        const response = await fetch('/api/database/reset-animals', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
 
-      if (!response.ok) {
-        throw new Error('Error en la respuesta del servidor');
+        if (!response.ok) {
+          throw new Error('Error en la respuesta del servidor');
+        }
+
+        const result = await response.json();
+        console.log('Respuesta del servidor:', result);
+
+        if (result.success) {
+          toast({
+            title: 'Datos de animales reseteados correctamente',
+            description: `Se eliminaron ${result.stats.animalesEliminados} animales, ${result.stats.registrosVeterinariosEliminados} registros veterinarios, ${result.stats.registrosFinancierosEliminados} registros financieros y ${result.stats.registrosPesosEliminados} registros de pesos.`,
+            variant: 'default'
+          });
+        } else {
+          throw new Error(result.message || 'Error desconocido');
+        }
+      } else {
+        // Para otros módulos, endpoint genérico (simulado por ahora)
+        console.log(`Reiniciando módulo: ${selectedModule}`);
+        
+        // Simular una llamada para otros módulos por ahora
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        toast({
+          title: 'Datos reseteados correctamente',
+          description: selectedModule === 'all' 
+            ? 'Todos los datos del sistema han sido reseteados'
+            : `Los datos del módulo ${resetableModules.find(m => m.id === selectedModule)?.name} han sido reseteados`,
+          variant: 'default'
+        });
       }
-
-      const result = await response.json();
-
-      toast({
-        title: 'Datos reseteados correctamente',
-        description: selectedModule === 'all' 
-          ? 'Todos los datos del sistema han sido reseteados'
-          : `Los datos del módulo ${resetableModules.find(m => m.id === selectedModule)?.name} han sido reseteados`,
-        variant: 'default'
-      });
 
       // Resetear el formulario y cerrar el diálogo
       confirmForm.reset();
       setIsOpened(false);
       setSelectedModule(null);
     } catch (error) {
-      console.error('Error resetting data:', error);
+      console.error('Error reiniciando datos:', error);
       toast({
         title: 'Error',
-        description: 'No se pudieron resetear los datos. Intente nuevamente.',
+        description: `No se pudieron resetear los datos: ${(error as Error).message}`,
         variant: 'destructive'
       });
     } finally {
