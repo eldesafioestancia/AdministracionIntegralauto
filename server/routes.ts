@@ -138,7 +138,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const machineFinances = await storage.getMachineFinances();
       const pastureFinances = await storage.getPastureFinances();
       const investments = await storage.getInvestments();
-      const capitalTransactions = await storage.getCapitalTransactions();
+      const capitalTransactions = await storage.getCapital();
       
       // Calcular totales por área
       const financialSummary = {
@@ -221,7 +221,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Procesar transacciones de capital
       for (const record of capitalTransactions) {
         const amount = parseFloat(record.amount);
-        if (record.type === 'income') {
+        // Asumimos que si el tipo no está explícitamente definido como ingreso, es un gasto
+        if (record.type && record.type.toLowerCase() === 'income') {
           financialSummary.capital.income += amount;
         } else {
           financialSummary.capital.expense += amount;

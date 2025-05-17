@@ -125,9 +125,19 @@ export default function Dashboard() {
     monthlyIncome: 0,
     monthlyExpense: 0
   };
+  
+  // Datos financieros por área
+  const financialSummary = data.financialSummary || {
+    animals: { income: 0, expense: 0, total: 0 },
+    machines: { income: 0, expense: 0, total: 0 },
+    pastures: { income: 0, expense: 0, total: 0 },
+    investments: { income: 0, expense: 0, total: 0 },
+    capital: { income: 0, expense: 0, total: 0 },
+    overall: { income: 0, expense: 0, total: 0 }
+  };
 
   // Calcular balance financiero
-  const financialBalance = stats.monthlyIncome - stats.monthlyExpense;
+  const financialBalance = financialSummary.overall.total || (stats.monthlyIncome - stats.monthlyExpense);
   const isProfit = financialBalance >= 0;
 
   // Generar datos para gráficos
