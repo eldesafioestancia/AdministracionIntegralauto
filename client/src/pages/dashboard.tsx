@@ -65,7 +65,7 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["/api/dashboard"],
+    queryKey: ["/api/dashboard", { dateRange }],
   });
 
   // Consulta de datos para actividad reciente

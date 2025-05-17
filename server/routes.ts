@@ -88,7 +88,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Dashboard
   app.get("/api/dashboard", async (req: Request, res: Response) => {
     try {
-      const stats = await storage.getDashboardStats();
+      const { dateRange } = req.query as { dateRange?: string };
+      
+      const stats = await storage.getDashboardStats(dateRange);
       const upcomingMaintenances = await storage.getUpcomingMaintenances();
       const recentTransactions = await storage.getRecentTransactions();
       
