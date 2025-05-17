@@ -55,14 +55,6 @@ const lineChartColors = [
   'rgb(199, 199, 199)'
 ];
 
-interface PrecipitationHistoryProps {
-  location: {
-    lat: number;
-    lon: number;
-    name: string;
-  };
-}
-
 interface YearlyData {
   year: number;
   precipitation: number;
@@ -123,7 +115,7 @@ export function PrecipitationHistory({ location }: PrecipitationHistoryProps) {
       }
       return response.json();
     },
-    enabled: Boolean(location.lat && location.lon),
+    enabled: Boolean(locationData?.lat && locationData?.lon),
     staleTime: 24 * 60 * 60 * 1000, // 24 horas
   });
 
@@ -297,7 +289,7 @@ export function PrecipitationHistory({ location }: PrecipitationHistoryProps) {
   return (
     <Card className="shadow-md mt-6">
       <CardHeader>
-        <CardTitle className="text-xl">Historial de Precipitaciones en {location.name}</CardTitle>
+        <CardTitle className="text-xl">Historial de Precipitaciones en {locationData.name}</CardTitle>
         <CardDescription>
           Datos históricos de precipitaciones y análisis comparativo
         </CardDescription>

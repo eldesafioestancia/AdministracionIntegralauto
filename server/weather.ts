@@ -363,16 +363,33 @@ export async function getHistoricalPrecipitation(
     // de la región determinada por las coordenadas
     
     // Primero, obtenemos datos actuales para determinar la región climática
-    const currentWeather = await getCurrentWeather(lat, lon);
-    const regionName = currentWeather.name;
-    const countryCode = currentWeather.sys.country;
+    let regionName = '';
+    let countryCode = '';
+    try {
+      const currentWeather = await getCurrentWeather(lat, lon);
+      regionName = currentWeather.name || '';
+      countryCode = currentWeather.sys.country || '';
+    } catch (error) {
+      console.warn('No se pudo obtener información de ubicación actual, usando datos genéricos');
+    }
     
     // Obtener datos de las condiciones actuales para informar nuestro modelo
-    const current = {
-      temp: currentWeather.main.temp,
-      humidity: currentWeather.main.humidity,
-      pressure: currentWeather.main.pressure
+    let current = {
+      temp: 20, // Temperatura media por defecto
+      humidity: 60, // Humedad media por defecto
+      pressure: 1013 // Presión media por defecto
     };
+    
+    try {
+      const currentWeather = await getCurrentWeather(lat, lon);
+      current = {
+        temp: currentWeather.main.temp,
+        humidity: currentWeather.main.humidity,
+        pressure: currentWeather.main.pressure
+      };
+    } catch (error) {
+      console.warn('Usando datos climáticos genéricos para el modelado');
+    }
     
     // Determinar el hemisferio basado en la latitud
     const isNorthernHemisphere = lat > 0;
@@ -416,8 +433,8 @@ export async function getHistoricalPrecipitation(
     const historicalData = generateHistoricalPrecipitationModel(
       precipitationPattern, 
       isNorthernHemisphere, 
-      regionName,
-      countryCode,
+      regionName || '',
+      countryCode || '',
       yearsToGenerate,
       specificStartYear,
       specificEndYear
