@@ -605,6 +605,17 @@ export default function MachineWorkIndex() {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8"
+                            title="Editar"
+                            asChild
+                          >
+                            <Link href={`/machines/${machineId}/work/edit/${work.id}`}>
+                              <i className="ri-edit-line text-blue-500"></i>
+                            </Link>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
                             title="Eliminar"
                             onClick={() => {
                               setWorkToDelete(work.id);
