@@ -1535,15 +1535,6 @@ export default function PasturesIndex() {
                             step="0.01"
                             {...field}
                             value={field.value || ""}
-                            onChange={(e) => {
-                              field.onChange(e);
-                              // Calcular el costo total si hay valor por unidad
-                              const area = parseFloat(e.target.value);
-                              const valuePerUnit = parseFloat(workForm.getValues("valuePerUnit") || "0");
-                              if (!isNaN(area) && !isNaN(valuePerUnit) && valuePerUnit > 0) {
-                                workForm.setValue("totalCost", (area * valuePerUnit).toString());
-                              }
-                            }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -1564,15 +1555,6 @@ export default function PasturesIndex() {
                             step="0.1"
                             {...field}
                             value={field.value || ""}
-                            onChange={(e) => {
-                              field.onChange(e);
-                              // Calcular el costo total si hay valor por unidad
-                              const distance = parseFloat(e.target.value);
-                              const valuePerUnit = parseFloat(workForm.getValues("valuePerUnit") || "0");
-                              if (!isNaN(distance) && !isNaN(valuePerUnit) && valuePerUnit > 0) {
-                                workForm.setValue("totalCost", (distance * valuePerUnit).toString());
-                              }
-                            }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -1580,75 +1562,6 @@ export default function PasturesIndex() {
                     )}
                   />
                 )}
-                
-                <FormField
-                  control={workForm.control}
-                  name="valuePerUnit"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{!showDistanceField ? 'Valor por Ha ($)' : 'Valor por Km ($)'}</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="500"
-                          step="0.01"
-                          {...field}
-                          value={field.value || ""}
-                          onChange={(e) => {
-                            field.onChange(e);
-                            // Calcular el costo total según el campo activo (área o distancia)
-                            const valuePerUnit = parseFloat(e.target.value);
-                            
-                            if (!isNaN(valuePerUnit)) {
-                              if (showDistanceField) {
-                                const distance = parseFloat(workForm.getValues("distance") || "0");
-                                if (!isNaN(distance)) {
-                                  workForm.setValue("totalCost", (distance * valuePerUnit).toString());
-                                }
-                              } else {
-                                const area = parseFloat(workForm.getValues("areaWorked") || "0");
-                                if (!isNaN(area)) {
-                                  workForm.setValue("totalCost", (area * valuePerUnit).toString());
-                                }
-                              }
-                            }
-                          }}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        {!showDistanceField ? 'Precio por cada hectárea trabajada' : 'Precio por cada kilómetro recorrido'}
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <FormField
-                  control={workForm.control}
-                  name="totalCost"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Costo Total ($)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="0"
-                          step="0.01"
-                          {...field}
-                          value={field.value || ""}
-                          readOnly
-                          className="bg-gray-50"
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Calculado automáticamente: {!showDistanceField ? 'ha × valor por ha' : 'km × valor por km'}
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
                 
                 <FormField
                   control={workForm.control}
@@ -1691,6 +1604,49 @@ export default function PasturesIndex() {
                   </FormItem>
                 )}
               />
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  control={workForm.control}
+                  name="operativeCost"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Costo Operativo ($)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="5000"
+                          step="100"
+                          {...field}
+                          value={field.value || ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={workForm.control}
+                  name="suppliesCost"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Costo de Insumos ($)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="15000"
+                          step="100"
+                          {...field}
+                          value={field.value || ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
               {/* Condiciones ambientales */}
               <FormField
                 control={workForm.control}
