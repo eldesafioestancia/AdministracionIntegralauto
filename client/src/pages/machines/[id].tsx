@@ -301,184 +301,19 @@ export default function MachineDetail() {
                           "N/A"}
                       </td>
                       <td className="py-3 px-4 text-right">
-                    {maintenance.type === "maintenance_repair" ? (
-                      <div className="space-y-3">
-                        {maintenance.workshopName && (
-                          <div className="mb-4">
-                            <div className="font-medium text-neutral-600 mb-1">Taller:</div>
-                            <div className="text-sm text-neutral-500">{maintenance.workshopName}</div>
-                            {maintenance.workshopPhone && (
-                              <div className="text-sm text-neutral-500">Tel: {maintenance.workshopPhone}</div>
-                            )}
-                            {maintenance.workshopAddress && (
-                              <div className="text-sm text-neutral-500">{maintenance.workshopAddress}</div>
-                            )}
-                          </div>
-                        )}
-                        
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                          {maintenance.electricalSystem && (
-                            <div className="flex items-center">
-                              <i className="ri-checkbox-circle-line text-success mr-1"></i>
-                              <span className="text-sm">Eléctrico</span>
-                            </div>
-                          )}
-                          {maintenance.mechanicalSystem && (
-                            <div className="flex items-center">
-                              <i className="ri-checkbox-circle-line text-success mr-1"></i>
-                              <span className="text-sm">Mecánico</span>
-                            </div>
-                          )}
-                          {maintenance.frontAxle && (
-                            <div className="flex items-center">
-                              <i className="ri-checkbox-circle-line text-success mr-1"></i>
-                              <span className="text-sm">Tren delantero</span>
-                            </div>
-                          )}
-                          {maintenance.gearbox && (
-                            <div className="flex items-center">
-                              <i className="ri-checkbox-circle-line text-success mr-1"></i>
-                              <span className="text-sm">Caja</span>
-                            </div>
-                          )}
-                          {maintenance.differential && (
-                            <div className="flex items-center">
-                              <i className="ri-checkbox-circle-line text-success mr-1"></i>
-                              <span className="text-sm">Diferencial</span>
-                            </div>
-                          )}
-                          {maintenance.hydraulicSystem && (
-                            <div className="flex items-center">
-                              <i className="ri-checkbox-circle-line text-success mr-1"></i>
-                              <span className="text-sm">Hidráulico</span>
-                            </div>
-                          )}
-                          {maintenance.brakes && (
-                            <div className="flex items-center">
-                              <i className="ri-checkbox-circle-line text-success mr-1"></i>
-                              <span className="text-sm">Frenos</span>
-                            </div>
-                          )}
-                        </div>
-                        
-                        {maintenance.diagnosis && (
-                          <div className="mt-3">
-                            <div className="font-medium text-neutral-600 mb-1">Diagnóstico:</div>
-                            <div className="text-sm text-neutral-500 bg-neutral-50 p-2 rounded border">
-                              {maintenance.diagnosis}
-                            </div>
-                          </div>
-                        )}
-                        
-                        {(maintenance.spareParts || maintenance.labor || maintenance.totalCost) && (
-                          <div className="mt-3 border-t pt-3">
-                            <div className="font-medium text-neutral-600 mb-2">Costos:</div>
-                            
-                            {maintenance.spareParts && (
-                              <div className="flex items-start gap-2 mb-2">
-                                <div className="text-sm font-medium text-neutral-600 min-w-[80px]">Repuestos:</div>
-                                <div className="text-sm text-neutral-500">
-                                  <div>{maintenance.spareParts}</div>
-                                  {maintenance.sparePartsCost && (
-                                    <div className="font-medium">$ {maintenance.sparePartsCost}</div>
-                                  )}
-                                </div>
-                              </div>
-                            )}
-                            
-                            {maintenance.labor && (
-                              <div className="flex items-start gap-2 mb-2">
-                                <div className="text-sm font-medium text-neutral-600 min-w-[80px]">Mano de obra:</div>
-                                <div className="text-sm text-neutral-500">
-                                  <div>{maintenance.labor}</div>
-                                  {maintenance.laborCost && (
-                                    <div className="font-medium">$ {maintenance.laborCost}</div>
-                                  )}
-                                </div>
-                              </div>
-                            )}
-                            
-                            {maintenance.totalCost && (
-                              <div className="flex justify-end mt-2 pt-2 border-t">
-                                <div className="text-sm font-medium">Total: $ {maintenance.totalCost}</div>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
-                        {maintenance.motorOil && (
-                          <div className="flex items-center">
-                            <i className="ri-checkbox-circle-line text-success mr-1"></i>
-                            <span className="text-sm">Aceite motor: {maintenance.motorOilQuantity}L</span>
-                          </div>
-                        )}
-                        {maintenance.hydraulicOil && (
-                          <div className="flex items-center">
-                            <i className="ri-checkbox-circle-line text-success mr-1"></i>
-                            <span className="text-sm">Aceite hidráulico: {maintenance.hydraulicOilQuantity}L</span>
-                          </div>
-                        )}
-                        {maintenance.coolant && (
-                          <div className="flex items-center">
-                            <i className="ri-checkbox-circle-line text-success mr-1"></i>
-                            <span className="text-sm">Refrigerante: {maintenance.coolantQuantity}L</span>
-                          </div>
-                        )}
-                        {maintenance.oilFilter && (
-                          <div className="flex items-center">
-                            <i className="ri-checkbox-circle-line text-success mr-1"></i>
-                            <span className="text-sm">Filtro de aceite</span>
-                          </div>
-                        )}
-                        {maintenance.hydraulicFilter && (
-                          <div className="flex items-center">
-                            <i className="ri-checkbox-circle-line text-success mr-1"></i>
-                            <span className="text-sm">Filtro hidráulico</span>
-                          </div>
-                        )}
-                        {maintenance.fuelFilter && (
-                          <div className="flex items-center">
-                            <i className="ri-checkbox-circle-line text-success mr-1"></i>
-                            <span className="text-sm">Filtro de combustible</span>
-                          </div>
-                        )}
-                        {maintenance.airFilter && (
-                          <div className="flex items-center">
-                            <i className="ri-checkbox-circle-line text-success mr-1"></i>
-                            <span className="text-sm">Filtro de aire</span>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                    <div className="mt-4 pt-3 border-t border-neutral-100 flex justify-between">
-                      <div className="text-sm text-neutral-400">
-                        <div>
-                          {maintenance.driver && (
-                            <span>Conductor: <span className="text-neutral-500">{maintenance.driver}</span></span>
-                          )}
-                        </div>
-                        <div className="flex flex-col mt-2">
-                          <span>Creado: <span className="text-neutral-500">
-                            {format(new Date(maintenance.createdAt), "dd/MM/yyyy HH:mm")}
-                          </span></span>
-                          {maintenance.isModified && maintenance.modifiedAt && (
-                            <span>Modificado: <span className="text-neutral-500">
-                              {format(new Date(maintenance.modifiedAt), "dd/MM/yyyy HH:mm")}
-                            </span></span>
-                          )}
-                        </div>
-                      </div>
-                      <Button variant="outline" size="sm" asChild>
-                        <Link href={`/machines/${id}/maintenance/${maintenance.id}`}>
-                          <i className="ri-edit-line mr-1"></i> Editar
-                        </Link>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-neutral-400 hover:text-neutral-600"
+                          onClick={() => navigate(`/machines/${id}/maintenance/${maintenance.id}`)}
+                        >
+                          <i className="ri-eye-line"></i>
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </TabsContent>
@@ -503,6 +338,28 @@ export default function MachineDetail() {
 
                 <Form {...financeForm}>
                   <form onSubmit={financeForm.handleSubmit(onSubmitFinance)} className="space-y-4">
+                    <FormField
+                      control={financeForm.control}
+                      name="date"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Fecha</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="date"
+                              {...field}
+                              value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                              onChange={(e) => {
+                                const date = e.target.value ? new Date(e.target.value) : null;
+                                field.onChange(date);
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
                     <FormField
                       control={financeForm.control}
                       name="type"
@@ -530,35 +387,38 @@ export default function MachineDetail() {
 
                     <FormField
                       control={financeForm.control}
-                      name="date"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Fecha</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="date"
-                              {...field}
-                              value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-                              onChange={(e) => {
-                                const date = e.target.value ? new Date(e.target.value) : null;
-                                field.onChange(date);
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={financeForm.control}
                       name="concept"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Concepto</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Ej: Repuestos, Combustible, etc." {...field} />
-                          </FormControl>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value || undefined}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Seleccione un concepto" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {financeForm.watch("type") === "income" ? (
+                                <>
+                                  <SelectItem value="alquiler">Alquiler</SelectItem>
+                                  <SelectItem value="trabajo_agricola">Trabajo agrícola</SelectItem>
+                                  <SelectItem value="venta">Venta</SelectItem>
+                                  <SelectItem value="otro">Otro</SelectItem>
+                                </>
+                              ) : (
+                                <>
+                                  <SelectItem value="combustible">Combustible</SelectItem>
+                                  <SelectItem value="repuestos">Repuestos</SelectItem>
+                                  <SelectItem value="mantenimiento">Mantenimiento</SelectItem>
+                                  <SelectItem value="seguro">Seguro</SelectItem>
+                                  <SelectItem value="otro">Otro</SelectItem>
+                                </>
+                              )}
+                            </SelectContent>
+                          </Select>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -571,7 +431,12 @@ export default function MachineDetail() {
                         <FormItem>
                           <FormLabel>Monto</FormLabel>
                           <FormControl>
-                            <Input placeholder="0.00" {...field} />
+                            <Input
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -579,13 +444,6 @@ export default function MachineDetail() {
                     />
 
                     <DialogFooter>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setFinanceDialogOpen(false)}
-                      >
-                        Cancelar
-                      </Button>
                       <Button type="submit">Guardar</Button>
                     </DialogFooter>
                   </form>
@@ -603,7 +461,7 @@ export default function MachineDetail() {
           ) : !finances || finances.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-10">
-                <i className="ri-money-dollar-circle-line text-4xl text-neutral-300 mb-2"></i>
+                <i className="ri-bank-line text-4xl text-neutral-300 mb-2"></i>
                 <h3 className="text-lg font-medium text-neutral-500 mb-1">No hay registros financieros</h3>
                 <p className="text-neutral-400 mb-4">Registre el primer ingreso o gasto para esta unidad</p>
                 <Button onClick={() => setFinanceDialogOpen(true)}>
@@ -612,48 +470,48 @@ export default function MachineDetail() {
               </CardContent>
             </Card>
           ) : (
-            <Card>
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left p-4 text-sm font-medium text-neutral-500">Fecha</th>
-                        <th className="text-left p-4 text-sm font-medium text-neutral-500">Concepto</th>
-                        <th className="text-left p-4 text-sm font-medium text-neutral-500">Tipo</th>
-                        <th className="text-right p-4 text-sm font-medium text-neutral-500">Monto</th>
-                        <th className="p-4 w-10"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {finances.map((finance) => (
-                        <tr key={finance.id} className="border-b last:border-b-0 hover:bg-neutral-50">
-                          <td className="p-4 text-sm text-neutral-500">
-                            {format(new Date(finance.date), "dd/MM/yyyy")}
-                          </td>
-                          <td className="p-4 text-sm text-neutral-500">{finance.concept}</td>
-                          <td className="p-4">
-                            <Badge className={finance.type === "income" ? "bg-success" : "bg-destructive"}>
-                              {finance.type === "income" ? "Ingreso" : "Gasto"}
-                            </Badge>
-                          </td>
-                          <td className={`p-4 text-sm font-medium text-right ${
-                            finance.type === "income" ? "text-success" : "text-destructive"
-                          }`}>
-                            {finance.type === "income" ? "+" : "-"}${finance.amount}
-                          </td>
-                          <td className="p-4">
-                            <Button variant="ghost" size="sm">
-                              <i className="ri-more-line"></i>
-                            </Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr>
+                    <th className="text-left py-3 px-4 font-medium text-neutral-500">Fecha</th>
+                    <th className="text-left py-3 px-4 font-medium text-neutral-500">Concepto</th>
+                    <th className="py-3 px-4 font-medium text-neutral-500">Tipo</th>
+                    <th className="text-right py-3 px-4 font-medium text-neutral-500">Monto</th>
+                    <th className="py-3 px-4"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {finances.map((finance) => (
+                    <tr key={finance.id} className="border-b last:border-b-0 hover:bg-neutral-50">
+                      <td className="py-3 px-4 text-sm text-neutral-500">
+                        {format(new Date(finance.date), "dd/MM/yyyy")}
+                      </td>
+                      <td className="py-3 px-4 text-sm text-neutral-500">{finance.concept}</td>
+                      <td className="py-3 px-4">
+                        <Badge className={finance.type === "income" ? "bg-success" : "bg-destructive"}>
+                          {finance.type === "income" ? "Ingreso" : "Gasto"}
+                        </Badge>
+                      </td>
+                      <td className={`py-3 px-4 text-sm font-medium text-right ${
+                        finance.type === "income" ? "text-success" : "text-destructive"
+                      }`}>
+                        {finance.type === "income" ? "+" : "-"}${finance.amount}
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          className="text-neutral-400 hover:text-neutral-600"
+                        >
+                          <i className="ri-more-line"></i>
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </TabsContent>
       </Tabs>
