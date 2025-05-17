@@ -493,7 +493,11 @@ export default function MachinesIndex() {
                   {filteredMachines.map((machine: any) => (
                     <TableRow 
                       key={machine.id}
-                      className="hover:bg-muted/50"
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => {
+                        // Navegación a detalles de la máquina
+                        window.location.href = `/machines/${machine.id}`;
+                      }}
                     >
                       <TableCell>
                         {machine.photo ? (
