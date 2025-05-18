@@ -363,23 +363,16 @@ export default function Dashboard() {
               <CardFooter>
                 <div className="w-full pt-4">
                   <ResponsiveContainer width="100%" height={140}>
-                    <BarChart 
-                      data={[
-                        { name: 'Mensual', ingresos: stats.monthlyIncome, gastos: stats.monthlyExpense },
-                        { name: 'Total', ingresos: financialSummary.overall.income, gastos: financialSummary.overall.expense }
-                      ]}
-                      margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <BarChart data={financialData}>
+                      <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" />
-                      <YAxis tickFormatter={(value) => `$${value/1000}k`} />
-                      <Tooltip 
-                        formatter={(value) => [`$${value.toLocaleString()}`, '']} 
-                        labelFormatter={(label) => `Período: ${label}`}
-                      />
-                      <Legend />
-                      <Bar dataKey="ingresos" name="Ingresos" fill={COLORS.income} radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="gastos" name="Gastos" fill={COLORS.expense} radius={[4, 4, 0, 0]} />
+                      <YAxis />
+                      <Tooltip formatter={(value) => [`$${value}`, 'Monto']} />
+                      <Bar dataKey="value" name="Monto">
+                        {financialData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS.finance[index % COLORS.finance.length]} />
+                        ))}
+                      </Bar>
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
