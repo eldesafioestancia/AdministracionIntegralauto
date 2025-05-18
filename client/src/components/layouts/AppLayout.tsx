@@ -30,11 +30,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
             <div className="flex items-center">
               <img
                 src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?ixlib=rb-1.2.1&auto=format&fit=crop&w=40&h=40&q=80"
-                alt="AgroGest Logo"
+                alt="Agro Gestión Integral Logo"
                 className="h-8 w-8 rounded-md"
               />
               <h1 className="text-primary font-header font-bold text-lg ml-2 hidden sm:inline-block">
-                AgroGest
+                Agro Gestión Integral
               </h1>
             </div>
           </div>
