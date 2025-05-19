@@ -1,8 +1,19 @@
-// Service Worker para manejar notificaciones push
+// Service Worker para manejar notificaciones push, cámara y funcionalidad offline/online
 
-const CACHE_NAME = 'agro-app-cache-v1';
+const CACHE_NAME = 'agro-app-cache-v2';
 const OFFLINE_URL = '/offline.html';
 const ICON_URL = '/icons/notification-icon.png';
+
+// Lista de archivos a cachear para funcionamiento offline
+const ASSETS_TO_CACHE = [
+  '/',
+  '/index.html',
+  '/offline.html',
+  '/icons/notification-icon.png',
+  '/icons/badge-icon.png',
+  '/icons/badge-icon.svg',
+  '/manifest.json'
+];
 
 // Eventos del ciclo de vida del service worker
 self.addEventListener('install', (event) => {
@@ -10,11 +21,7 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log('[Service Worker] Creando caché');
-      return cache.addAll([
-        OFFLINE_URL,
-        ICON_URL,
-        '/icons/badge-icon.png'
-      ]);
+      return cache.addAll(ASSETS_TO_CACHE);
     })
   );
 });
@@ -140,6 +147,39 @@ self.addEventListener('notificationclick', (event) => {
   );
 });
 
+// Manejo de permisos de cámara
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'CAMERA_PERMISSION_REQUEST') {
+    navigator.permissions.query({ name: 'camera' })
+      .then((permissionStatus) => {
+        // Enviar estado actual del permiso
+        event.ports[0].postMessage({
+          status: permissionStatus.state
+        });
+        
+        // Escuchar cambios en el permiso
+        permissionStatus.onchange = () => {
+          // Informar al cliente del cambio de permiso
+          clients.matchAll().then((clients) => {
+            clients.forEach((client) => {
+              client.postMessage({
+                type: 'CAMERA_PERMISSION_CHANGE',
+                state: permissionStatus.state
+              });
+            });
+          });
+        };
+      })
+      .catch((error) => {
+        console.error('[Service Worker] Error consultando permiso de cámara:', error);
+        event.ports[0].postMessage({
+          status: 'error',
+          message: error.toString()
+        });
+      });
+  }
+});
+
 // Sincronización de notificaciones en segundo plano
 async function syncNotifications() {
   try {
@@ -195,6 +235,20 @@ self.addEventListener('periodicsync', (event) => {
 
 // Manejar peticiones de red fallidas
 self.addEventListener('fetch', (event) => {
+  // Prevenir indexación por buscadores
+  if (event.request.headers.get('User-Agent') && 
+      event.request.headers.get('User-Agent').includes('bot')) {
+    // Rechazar peticiones de bots de búsqueda
+    event.respondWith(
+      new Response('', {
+        status: 403,
+        statusText: 'Acceso prohibido para bots'
+      })
+    );
+    return;
+  }
+
+  // Manejar solicitudes de navegación
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request)
@@ -205,5 +259,38 @@ self.addEventListener('fetch', (event) => {
             });
         })
     );
+    return;
   }
+
+  // Estrategia cache-first para archivos estáticos
+  if (event.request.url.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|webp)$/)) {
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        return cachedResponse || fetch(event.request).then((networkResponse) => {
+          return caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, networkResponse.clone());
+            return networkResponse;
+          });
+        });
+      }).catch(() => {
+        // Devolver una respuesta vacía o un placeholder si no hay red ni caché
+        if (event.request.url.match(/\.(png|jpg|jpeg|gif|svg|ico|webp)$/)) {
+          return caches.match('/icons/badge-icon.png');
+        }
+        return new Response('Content not available offline', {
+          status: 503,
+          statusText: 'Service Unavailable'
+        });
+      })
+    );
+    return;
+  }
+
+  // Estrategia de red primero para API y demás solicitudes
+  event.respondWith(
+    fetch(event.request)
+      .catch(() => {
+        return caches.match(event.request);
+      })
+  );
 });

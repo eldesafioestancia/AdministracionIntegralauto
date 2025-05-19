@@ -2,25 +2,25 @@
   "name": "Agro Gestión Integral",
   "short_name": "AgroGest",
   "description": "Sistema de Gestión Agropecuaria con funcionalidad online/offline",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#3B7A57",
   "icons": [
     {
-      "src": "/icons/icon-192x192.png",
+      "src": "/icons/badge-icon.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/icon-512x512.png",
+      "src": "/icons/badge-icon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
   ],
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "categories": ["productivity", "business", "agriculture"],
   "shortcuts": [
     {
@@ -35,5 +35,22 @@
       "name": "Animales",
       "url": "/animals"
     }
-  ]
+  ],
+  "permissions": [
+    "camera",
+    "notifications"
+  ],
+  "scope": "/",
+  "serviceworker": {
+    "src": "/service-worker.js",
+    "scope": "/"
+  },
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "iarc_rating_id": "",
+  "screenshots": [],
+  "lang": "es-ES",
+  "dir": "ltr",
+  "display_override": ["window-controls-overlay", "standalone", "browser"],
+  "id": "agro-gestion-integral"
 }
