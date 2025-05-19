@@ -5,12 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <meta name="description" content="Sistema de gestión agropecuaria con funcionalidad online/offline" />
     <title>Agro Gestión Integral</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="application-name" content="Agro Gestión Integral">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AgroGest">
+    <meta name="theme-color" content="#3B7A57">
+    
+    <!-- No indexar en buscadores -->
+    <meta name="robots" content="noindex, nofollow">
+    
+    <!-- Iconos para iOS y otros dispositivos -->
+    <link rel="apple-touch-icon" href="/icons/badge-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/badge-icon.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/icons/badge-icon.png">
+    <link rel="shortcut icon" href="/icons/badge-icon.png">
+    
+    <!-- Manifiesto PWA -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Fuentes y estilos -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#3B7A57">
   </head>
   <body>
     <div id="root"></div>

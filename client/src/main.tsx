@@ -7,21 +7,33 @@ import { AuthProvider } from "./context/AuthContext";
 import { SyncProvider } from "./context/SyncContext";
 
 // Register service worker for PWA
-// Temporarily disabling service worker until we fix class extension issues
-/*
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker
       .register("/service-worker.js")
       .then((registration) => {
-        console.log("SW registered: ", registration);
+        console.log("Service Worker registrado correctamente:", registration);
+        
+        // Solicitar permisos de notificación cuando sea apropiado
+        if ('Notification' in window) {
+          // Verificar si ya tenemos permiso
+          if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+            // Esperar a que el usuario interactúe con la página antes de solicitar permisos
+            document.addEventListener('click', function askNotificationPermission() {
+              Notification.requestPermission().then(permission => {
+                console.log('Permiso de notificación:', permission);
+                // Remover el event listener después de solicitar el permiso
+                document.removeEventListener('click', askNotificationPermission);
+              });
+            }, { once: true });
+          }
+        }
       })
       .catch((registrationError) => {
-        console.log("SW registration failed: ", registrationError);
+        console.error("Error al registrar el Service Worker:", registrationError);
       });
   });
 }
-*/
 
 createRoot(document.getElementById("root")!).render(
   <QueryClientProvider client={queryClient}>

@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import NotificationInitializer from "@/components/notifications/NotificationInitializer";
+import { PWAInstallPrompt } from "@/components/notifications/PWAInstallPrompt";
 import Dashboard from "@/pages/dashboard";
 import MachinesIndex from "@/pages/machines/index";
 import MachineDetail from "@/pages/machines/[id]";
@@ -41,6 +42,7 @@ function App() {
     <TooltipProvider>
       <Toaster />
       <NotificationInitializer />
+      <PWAInstallPrompt />
       <Switch>
         {/* Ruta principal va directo al Dashboard */}
         <Route path="/">
