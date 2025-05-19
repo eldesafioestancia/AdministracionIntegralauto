@@ -1035,9 +1035,26 @@ export class MemStorage implements IStorage {
 // Inicializar el almacenamiento
 export const storage = new MemStorage();
 
-// Cargar datos de ejemplo
+// Variable para controlar si los datos de muestra ya fueron cargados
+let sampleDataLoaded = false;
+
+// Cargar datos de ejemplo solo si no se han cargado antes
 async function loadSampleData() {
+  // Si los datos ya fueron cargados, no se vuelven a cargar
+  if (sampleDataLoaded) {
+    console.log("[Sample Data] Los datos de muestra ya fueron cargados anteriormente. Omitiendo carga.");
+    return;
+  }
+  
   try {
+    // Verificar si ya existen animales en el sistema
+    const existingAnimals = await storage.getAnimals();
+    if (existingAnimals.length > 0) {
+      console.log(`[Sample Data] Se encontraron ${existingAnimals.length} animales existentes. No se cargarán datos de muestra.`);
+      sampleDataLoaded = true;
+      return;
+    }
+    
     // Crear máquinas de ejemplo
     const machine = await storage.createMachine({
       brand: "John Deere",
@@ -1243,6 +1260,8 @@ async function loadSampleData() {
     console.log(`[Sample Data] Finanza 2 creada: ${finance2.concept} (ID: ${finance2.id})`);
 
     console.log("[Sample Data] Datos de ejemplo cargados exitosamente.");
+    // Marcar que los datos se han cargado
+    sampleDataLoaded = true;
   } catch (error) {
     console.error("[Sample Data] Error al crear datos de ejemplo:", error);
   }
@@ -1253,7 +1272,20 @@ loadSampleData();
 
 // Actualizar animales con datos aleatorios después de cargar
 setTimeout(async () => {
+  // Si no hay datos de muestra cargados, no actualizar animales
+  if (!sampleDataLoaded) {
+    console.log("[Sample Data] No se han cargado datos de muestra. Omitiendo actualización de animales.");
+    return;
+  }
+  
   try {
+    // Verificar si hay animales en el sistema antes de intentar actualizarlos
+    const animalsCheck = await storage.getAnimals();
+    if (animalsCheck.length === 0) {
+      console.log("[Sample Data] No hay animales para actualizar con datos aleatorios.");
+      return;
+    }
+    
     const categories = ["vaca", "vaquillona", "toro", "novillo", "ternero", "ternera"];
     
     // Estados reproductivos y sus categorías aplicables
