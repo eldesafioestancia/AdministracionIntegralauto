@@ -497,7 +497,21 @@ export default function MachinesIndex() {
                     <TableHead>Estado</TableHead>
                     <TableHead>Acciones</TableHead>
                     <TableHead className="w-10 text-right">
-                      {/* Columna para checkboxes */}
+                      <input 
+                        type="checkbox"
+                        className="h-4 w-4 rounded border-gray-300 text-primary"
+                        checked={filteredMachines.length > 0 && selectedMachines.length === filteredMachines.length}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            // Seleccionar todos
+                            setSelectedMachines(filteredMachines.map((m: any) => m.id));
+                          } else {
+                            // Deseleccionar todos
+                            setSelectedMachines([]);
+                          }
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                      />
                     </TableHead>
                   </TableRow>
                 </TableHeader>
@@ -586,18 +600,16 @@ export default function MachinesIndex() {
                         </div>
                       </TableCell>
                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-10 w-10 ml-2" 
-                          title={selectedMachines.includes(machine.id) ? "Deseleccionar" : "Seleccionar"}
-                          onClick={(e) => {
+                        <input 
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-gray-300 text-primary"
+                          checked={selectedMachines.includes(machine.id)}
+                          onChange={(e) => {
                             e.stopPropagation();
                             handleSelectMachine(machine.id);
                           }}
-                        >
-                          <i className={`${selectedMachines.includes(machine.id) ? "ri-checkbox-fill text-primary" : "ri-checkbox-blank-line text-gray-400"} text-xl`}></i>
-                        </Button>
+                          onClick={(e) => e.stopPropagation()}
+                        />
                       </TableCell>
                     </TableRow>
                   ))}

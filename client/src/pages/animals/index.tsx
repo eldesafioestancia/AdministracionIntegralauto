@@ -663,7 +663,21 @@ export default function AnimalsIndex() {
                     <TableHead className="hidden md:table-cell">Ubicación</TableHead>
                     <TableHead className="text-right">Acciones</TableHead>
                     <TableHead className="w-10 text-right">
-                      {/* Columna para checkboxes */}
+                      <input 
+                        type="checkbox"
+                        className="h-4 w-4 rounded border-gray-300 text-primary"
+                        checked={filteredAnimals.length > 0 && selectedAnimals.length === filteredAnimals.length}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            // Seleccionar todos
+                            setSelectedAnimals(filteredAnimals.map(animal => animal.id));
+                          } else {
+                            // Deseleccionar todos
+                            setSelectedAnimals([]);
+                          }
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                      />
                     </TableHead>
                   </TableRow>
                 </TableHeader>
