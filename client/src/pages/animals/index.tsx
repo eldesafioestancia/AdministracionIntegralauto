@@ -780,18 +780,16 @@ export default function AnimalsIndex() {
                     </div>
                   </TableCell>
                   <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-10 w-10 ml-2" 
-                      title={selectedAnimals.includes(animal.id) ? "Deseleccionar" : "Seleccionar"}
-                      onClick={(e) => {
+                    <input 
+                      type="checkbox"
+                      className="h-4 w-4 rounded border-gray-300 text-primary"
+                      checked={selectedAnimals.includes(animal.id)}
+                      onChange={(e) => {
                         e.stopPropagation();
                         handleSelectAnimal(animal.id);
                       }}
-                    >
-                      <i className={`${selectedAnimals.includes(animal.id) ? "ri-checkbox-fill text-primary" : "ri-checkbox-blank-line text-gray-400"} text-xl`}></i>
-                    </Button>
+                      onClick={(e) => e.stopPropagation()}
+                    />
                   </TableCell>
                 </TableRow>
               ))}
