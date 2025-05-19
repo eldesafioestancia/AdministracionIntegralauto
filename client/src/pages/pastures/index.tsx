@@ -740,7 +740,7 @@ export default function PasturesIndex() {
   };
   
   // Función para manejar la selección de pasturas (checkbox)
-  const handleSelectPasture = (id: number, e: React.MouseEvent) => {
+  const handleSelectPasture = (id: number, e: React.SyntheticEvent) => {
     e.stopPropagation();
     if (selectedPastures.includes(id)) {
       setSelectedPastures(selectedPastures.filter(pastureId => pastureId !== id));
@@ -779,10 +779,32 @@ export default function PasturesIndex() {
           {selectedPastures.length > 0 && (
             <Button 
               variant="destructive"
-              onClick={() => {
+              onClick={async () => {
                 if (confirm(`¿Está seguro de eliminar ${selectedPastures.length} parcelas seleccionadas?`)) {
-                  console.log("Eliminando parcelas:", selectedPastures);
-                  // Aquí iría la lógica para eliminar múltiples parcelas
+                  try {
+                    // Eliminar cada pastura seleccionada
+                    for (const pastureId of selectedPastures) {
+                      await apiRequest("DELETE", `/api/pastures/${pastureId}`);
+                    }
+                    
+                    // Actualizar la lista de pasturas
+                    queryClient.invalidateQueries({ queryKey: ["/api/pastures"] });
+                    
+                    // Limpiar selección
+                    setSelectedPastures([]);
+                    
+                    toast({
+                      title: "Parcelas eliminadas",
+                      description: `Se han eliminado ${selectedPastures.length} parcelas correctamente`,
+                    });
+                  } catch (error) {
+                    console.error("Error al eliminar parcelas:", error);
+                    toast({
+                      variant: "destructive",
+                      title: "Error",
+                      description: "No se pudieron eliminar todas las parcelas",
+                    });
+                  }
                 }
               }}
             >
@@ -1182,8 +1204,22 @@ export default function PasturesIndex() {
                   <TableHead>Agua</TableHead>
                   <TableHead>Estado</TableHead>
                   <TableHead>Acciones</TableHead>
-                  <TableHead className="w-4">
-                    {/* Columna extra para balance */}
+                  <TableHead className="w-10 text-right">
+                    <input 
+                      type="checkbox"
+                      className="h-4 w-4 rounded border-gray-300 text-primary"
+                      checked={Array.isArray(pastures) && pastures.length > 0 && selectedPastures.length === pastures.length}
+                      onChange={(e) => {
+                        if (e.target.checked && Array.isArray(pastures)) {
+                          // Seleccionar todas las pasturas
+                          setSelectedPastures(pastures.map((p: any) => p.id));
+                        } else {
+                          // Deseleccionar todas
+                          setSelectedPastures([]);
+                        }
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    />
                   </TableHead>
                 </TableRow>
               </TableHeader>
@@ -1262,15 +1298,15 @@ export default function PasturesIndex() {
                           >
                             <i className="ri-pencil-line text-xl text-amber-500"></i>
                           </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-10 w-10" 
-                            title={selectedPastures.includes(pasture.id) ? "Deseleccionar" : "Seleccionar"}
-                            onClick={(e) => handleSelectPasture(pasture.id, e)}
-                          >
-                            <i className={`${selectedPastures.includes(pasture.id) ? "ri-checkbox-fill text-primary" : "ri-checkbox-blank-line text-gray-400"} text-xl`}></i>
-                          </Button>
+                          <input 
+                            type="checkbox"
+                            className="h-4 w-4 rounded border-gray-300 text-primary ml-2"
+                            checked={selectedPastures.includes(pasture.id)}
+                            onChange={(e) => {
+                              handleSelectPasture(pasture.id, e);
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                          />
                         </div>
                       </TableCell>
                       <TableCell className="w-4" onClick={(e) => e.stopPropagation()}>
