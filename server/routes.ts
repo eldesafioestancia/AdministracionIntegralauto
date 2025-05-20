@@ -18,6 +18,12 @@ import {
   importData,
   getDatabaseStats
 } from "./database";
+import {
+  deletePermanently,
+  applyPermanentDeletions,
+  getDeletedRecords,
+  addDeletedRecord
+} from "./deletePermanently";
 import { generateToken, hashPassword, verifyPassword, authenticateToken, checkRole } from "./auth";
 import {
   insertUserSchema,

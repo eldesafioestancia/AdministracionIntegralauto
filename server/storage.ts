@@ -1032,17 +1032,66 @@ export class MemStorage implements IStorage {
   }
 }
 
+import * as fs from 'fs';
+import * as path from 'path';
+
+interface PersistentState {
+  dataLoaded: boolean;
+  deletedRecords: {
+    machines: number[];
+    animals: number[];
+    pastures: number[];
+  };
+}
+
+// Ruta al archivo de estado persistente
+const statePath = path.join(process.cwd(), 'persistent_state.json');
+
+// Cargar estado persistente
+function loadPersistentState(): PersistentState {
+  try {
+    if (fs.existsSync(statePath)) {
+      const stateData = fs.readFileSync(statePath, 'utf8');
+      return JSON.parse(stateData);
+    }
+  } catch (err) {
+    console.error('Error al cargar estado persistente:', err);
+  }
+  
+  // Estado por defecto si no existe o hay error
+  return {
+    dataLoaded: false,
+    deletedRecords: {
+      machines: [],
+      animals: [],
+      pastures: []
+    }
+  };
+}
+
+// Guardar estado persistente
+function savePersistentState(state: PersistentState) {
+  try {
+    fs.writeFileSync(statePath, JSON.stringify(state, null, 2), 'utf8');
+  } catch (err) {
+    console.error('Error al guardar estado persistente:', err);
+  }
+}
+
 // Inicializar el almacenamiento
 export const storage = new MemStorage();
 
-// Variable para controlar si los datos de muestra ya fueron cargados
-let sampleDataLoaded = false;
+// Cargar el estado persistente
+let persistentState = loadPersistentState();
 
 // Cargar datos de ejemplo solo si no se han cargado antes
 async function loadSampleData() {
-  // Si los datos ya fueron cargados, no se vuelven a cargar
-  if (sampleDataLoaded) {
+  // Si los datos ya fueron cargados en una sesión anterior, no se vuelven a cargar
+  if (persistentState.dataLoaded) {
     console.log("[Sample Data] Los datos de muestra ya fueron cargados anteriormente. Omitiendo carga.");
+    
+    // Aplicar eliminaciones persistentes
+    await applyPersistedDeletions();
     return;
   }
   
@@ -1051,7 +1100,13 @@ async function loadSampleData() {
     const existingAnimals = await storage.getAnimals();
     if (existingAnimals.length > 0) {
       console.log(`[Sample Data] Se encontraron ${existingAnimals.length} animales existentes. No se cargarán datos de muestra.`);
-      sampleDataLoaded = true;
+      
+      // Marcar como cargado en el estado persistente
+      persistentState.dataLoaded = true;
+      savePersistentState(persistentState);
+      
+      // Aplicar eliminaciones persistentes
+      await applyPersistedDeletions();
       return;
     }
     
@@ -1270,10 +1325,94 @@ async function loadSampleData() {
 // Cargar datos de ejemplo cuando se inicia el servidor
 loadSampleData();
 
+// Función para aplicar las eliminaciones persistentes que debe ser definida antes de ser usada
+function applyPersistedDeletions() {
+  return new Promise<void>(async (resolve) => {
+    try {
+      console.log("[Persist] Aplicando eliminaciones persistentes...");
+      
+      // Eliminar máquinas persistidas como eliminadas
+      for (const machineId of persistentState.deletedRecords.machines) {
+        try {
+          // Usar el método original para evitar recursión infinita
+          await originalDeleteMachine.call(storage, machineId);
+          console.log(`[Persist] Eliminada máquina persistida: ID ${machineId}`);
+        } catch (err) {
+          // Es posible que la máquina ya no exista, lo que está bien
+          console.log(`[Persist] No se encontró máquina para eliminar: ID ${machineId}`);
+        }
+      }
+      
+      // Eliminar animales persistidos como eliminados
+      for (const animalId of persistentState.deletedRecords.animals) {
+        try {
+          // Usar el método original para evitar recursión infinita
+          await originalDeleteAnimal.call(storage, animalId);
+          console.log(`[Persist] Eliminado animal persistido: ID ${animalId}`);
+        } catch (err) {
+          // Es posible que el animal ya no exista, lo que está bien
+          console.log(`[Persist] No se encontró animal para eliminar: ID ${animalId}`);
+        }
+      }
+      
+      // Eliminar pasturas persistidas como eliminadas
+      for (const pastureId of persistentState.deletedRecords.pastures) {
+        try {
+          // Usar el método original para evitar recursión infinita
+          await originalDeletePasture.call(storage, pastureId);
+          console.log(`[Persist] Eliminada pastura persistida: ID ${pastureId}`);
+        } catch (err) {
+          // Es posible que la pastura ya no exista, lo que está bien
+          console.log(`[Persist] No se encontró pastura para eliminar: ID ${pastureId}`);
+        }
+      }
+      
+      console.log("[Persist] Completada la aplicación de eliminaciones persistentes");
+    } catch (err) {
+      console.error("[Persist] Error al aplicar eliminaciones persistentes:", err);
+    }
+    resolve();
+  });
+}
+
+// Sobreescribir los métodos de eliminación para persistir los IDs eliminados
+const originalDeleteMachine = storage.deleteMachine;
+storage.deleteMachine = async function(id: number) {
+  await originalDeleteMachine.call(storage, id);
+  // Añadir a la lista de máquinas eliminadas si no está ya
+  if (!persistentState.deletedRecords.machines.includes(id)) {
+    persistentState.deletedRecords.machines.push(id);
+    savePersistentState(persistentState);
+    console.log(`[Persist] Máquina ID ${id} añadida a registros eliminados persistentes`);
+  }
+};
+
+const originalDeleteAnimal = storage.deleteAnimal;
+storage.deleteAnimal = async function(id: number) {
+  await originalDeleteAnimal.call(storage, id);
+  // Añadir a la lista de animales eliminados si no está ya
+  if (!persistentState.deletedRecords.animals.includes(id)) {
+    persistentState.deletedRecords.animals.push(id);
+    savePersistentState(persistentState);
+    console.log(`[Persist] Animal ID ${id} añadido a registros eliminados persistentes`);
+  }
+};
+
+const originalDeletePasture = storage.deletePasture;
+storage.deletePasture = async function(id: number) {
+  await originalDeletePasture.call(storage, id);
+  // Añadir a la lista de pasturas eliminadas si no está ya
+  if (!persistentState.deletedRecords.pastures.includes(id)) {
+    persistentState.deletedRecords.pastures.push(id);
+    savePersistentState(persistentState);
+    console.log(`[Persist] Pastura ID ${id} añadida a registros eliminados persistentes`);
+  }
+};
+
 // Actualizar animales con datos aleatorios después de cargar
 setTimeout(async () => {
   // Si no hay datos de muestra cargados, no actualizar animales
-  if (!sampleDataLoaded) {
+  if (!persistentState.dataLoaded) {
     console.log("[Sample Data] No se han cargado datos de muestra. Omitiendo actualización de animales.");
     return;
   }
