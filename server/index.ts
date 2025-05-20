@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { setupUploadRoutes } from "./upload";
+import { applyPermanentDeletions } from "./deletePermanently";
 // Import sample data
 import "../sample-data";
 // Import pastures data loader
@@ -10,6 +11,17 @@ import "../load-pastures";
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Aplicar eliminaciones permanentes al iniciar el servidor
+// Este proceso elimina los elementos que han sido marcados como eliminados permanentemente
+setTimeout(async () => {
+  try {
+    await applyPermanentDeletions();
+    console.log('[Sistema] Eliminaciones permanentes aplicadas con éxito');
+  } catch (error) {
+    console.error('[Sistema] Error al aplicar eliminaciones permanentes:', error);
+  }
+}, 5000); // Esperar 5 segundos para que los datos de muestra se carguen primero
 
 app.use((req, res, next) => {
   const start = Date.now();

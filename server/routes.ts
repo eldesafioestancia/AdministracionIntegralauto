@@ -1381,6 +1381,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Rutas para eliminación permanente de elementos
+  
+  // Ruta para eliminar permanentemente un elemento
+  app.delete("/api/permanent-delete/:type/:id", deletePermanently);
+  
+  // Ruta para obtener la lista de elementos eliminados permanentemente
+  app.get("/api/deleted-records", getDeletedRecords);
+  
+  // Ruta para añadir un elemento a la lista de eliminados permanentemente
+  app.post("/api/deleted-records", addDeletedRecord);
+
   const httpServer = createServer(app);
   return httpServer;
 }
