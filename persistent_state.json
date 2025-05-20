@@ -1,7 +1,10 @@
 {
   "dataLoaded": true,
   "deletedRecords": {
-    "machines": [],
+    "machines": [
+      2,
+      1
+    ],
     "animals": [],
     "pastures": []
   }
