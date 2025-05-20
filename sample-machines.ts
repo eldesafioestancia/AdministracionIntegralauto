@@ -1,4 +1,27 @@
 import { storage } from './server/storage';
+import fs from 'fs';
+import path from 'path';
+
+// Función para verificar si una máquina debe ser excluida (porque fue eliminada)
+function shouldExcludeMachine(id: number): boolean {
+  // Verificar si existe el archivo de registros eliminados
+  const deletedRecordsPath = path.join(process.cwd(), 'deleted_records.json');
+  if (!fs.existsSync(deletedRecordsPath)) {
+    return false;
+  }
+  
+  try {
+    // Leer el archivo de registros eliminados
+    const data = fs.readFileSync(deletedRecordsPath, 'utf-8');
+    const deletedRecords = JSON.parse(data);
+    
+    // Verificar si la máquina está en la lista de eliminados
+    return deletedRecords.machines && deletedRecords.machines.includes(id);
+  } catch (error) {
+    console.error('[Error] No se pudo verificar máquinas eliminadas:', error);
+    return false;
+  }
+}
 
 // Lista de máquinas para agregar
 const machinesList = [
@@ -257,17 +280,47 @@ const machinesList = [
 async function seedMachines() {
   console.log("[Sample Data] Creando máquinas aleatorias...");
   
-  // Crear cada máquina
-  for (const machineData of machinesList) {
-    try {
-      const machine = await storage.createMachine(machineData);
-      console.log(`[Sample Data] Máquina creada: ${machine.brand} ${machine.model} (ID: ${machine.id})`);
-    } catch (error) {
-      console.error(`[Sample Data] Error al crear máquina ${machineData.brand} ${machineData.model}:`, error);
+  // Cargar lista de IDs eliminados
+  let deletedMachineIds: number[] = [];
+  try {
+    const deletedRecordsPath = path.join(process.cwd(), 'deleted_records.json');
+    if (fs.existsSync(deletedRecordsPath)) {
+      const deletedRecords = JSON.parse(fs.readFileSync(deletedRecordsPath, 'utf-8'));
+      deletedMachineIds = deletedRecords.machines || [];
+      console.log(`[Sample Data] Se encontraron ${deletedMachineIds.length} máquinas eliminadas que no serán recreadas`);
     }
+  } catch (error) {
+    console.error('[Sample Data] Error al cargar registros eliminados:', error);
   }
   
-  console.log("[Sample Data] Máquinas aleatorias creadas exitosamente.");
+  // Crear cada máquina, asignándole un ID específico para poder filtrarlas
+  // Por cómo funciona el sistema, necesitamos usar IDs consistentes
+  let id = 1;
+  for (const machineData of machinesList) {
+    // Verificar si este ID está en la lista de eliminados
+    if (deletedMachineIds.includes(id)) {
+      console.log(`[Sample Data] Omitiendo máquina ID ${id} (${machineData.brand} ${machineData.model}) porque fue eliminada previamente`);
+      id++;
+      continue;
+    }
+    
+    try {
+      // Verificar si la máquina ya existe para evitar duplicados
+      const existingMachine = await storage.getMachine(id);
+      if (existingMachine) {
+        console.log(`[Sample Data] La máquina ID ${id} (${existingMachine.brand} ${existingMachine.model}) ya existe, no se recrea`);
+      } else {
+        const machine = await storage.createMachine(machineData);
+        console.log(`[Sample Data] Máquina creada: ${machine.brand} ${machine.model} (ID: ${machine.id})`);
+      }
+    } catch (error) {
+      console.error(`[Sample Data] Error al procesar máquina ${machineData.brand} ${machineData.model}:`, error);
+    }
+    
+    id++;
+  }
+  
+  console.log("[Sample Data] Proceso de creación de máquinas completado.");
 }
 
 // Exportar la función para poder usarla en sample-data.ts

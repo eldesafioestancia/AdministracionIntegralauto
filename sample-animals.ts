@@ -1,8 +1,28 @@
 import { storage } from "./server/storage";
+import fs from 'fs';
+import path from 'path';
+
+// Función para obtener IDs de animales eliminados
+function getDeletedAnimalIds(): number[] {
+  try {
+    const deletedRecordsPath = path.join(process.cwd(), 'deleted_records.json');
+    if (fs.existsSync(deletedRecordsPath)) {
+      const deletedRecords = JSON.parse(fs.readFileSync(deletedRecordsPath, 'utf-8'));
+      return deletedRecords.animals || [];
+    }
+  } catch (error) {
+    console.error('[Error] No se pudo leer el archivo de animales eliminados:', error);
+  }
+  return [];
+}
 
 async function seedAnimals() {
   try {
-    console.log("Iniciando carga de datos de ejemplo para animales...");
+    // Cargar lista de IDs eliminados
+    const deletedAnimalIds = getDeletedAnimalIds();
+    console.log(`[Sample Data] Se encontraron ${deletedAnimalIds.length} animales eliminados que no serán recreados`);
+    
+    console.log("[Sample Data] Iniciando carga de datos de ejemplo para animales...");
 
     // Crear animales de ejemplo
     const animal1 = await storage.createAnimal({
