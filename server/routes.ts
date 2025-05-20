@@ -1297,6 +1297,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Rutas para nuestro sistema de eliminación permanente
+  app.get("/api/deleted-records", (req: Request, res: Response) => {
+    const { getDeletedRecords } = require('./deletePermanently');
+    getDeletedRecords(req, res);
+  });
+  
+  app.post("/api/deleted-records", (req: Request, res: Response) => {
+    const { addDeletedRecord } = require('./deletePermanently');
+    addDeletedRecord(req, res);
+  });
+  
+  app.delete("/api/deleted-permanently/:type/:id", (req: Request, res: Response) => {
+    const { deletePermanently } = require('./deletePermanently');
+    deletePermanently(req, res);
+  });
+  
   // Rutas para notificaciones push
   app.get("/api/notifications/vapid-public-key", getPublicKey);
   app.post("/api/notifications/subscribe", subscribe);
