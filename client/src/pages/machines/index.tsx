@@ -196,33 +196,14 @@ export default function MachinesIndex() {
     }
     
     try {
-      // Crear un array de promesas para eliminar todas las máquinas seleccionadas y registrarlas como eliminadas permanentemente
+      // Crear un array de promesas para eliminar todas las máquinas seleccionadas
       const deletePromises = selectedMachines.map(id => 
-        // Primero eliminamos normalmente
         fetch(`/api/machines/${id}`, {
           method: "DELETE",
           credentials: "include"
-        })
-        .then(response => {
+        }).then(response => {
           if (!response.ok) {
             throw new Error(`Error al eliminar máquina ID ${id}: ${response.statusText}`);
-          }
-          
-          // Luego registramos para eliminación permanente
-          return fetch(`/api/deleted-records`, {
-            method: "POST",
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              type: "machines",
-              id: id
-            })
-          });
-        })
-        .then(response => {
-          if (!response.ok) {
-            console.warn(`La máquina ID ${id} fue eliminada pero no se pudo registrar para eliminación permanente`);
           }
           return response;
         })
@@ -232,7 +213,7 @@ export default function MachinesIndex() {
       await Promise.all(deletePromises);
       
       toast({
-        description: `${selectedMachines.length} ${selectedMachines.length === 1 ? 'máquina eliminada' : 'máquinas eliminadas'} correctamente y no volverán a aparecer al reiniciar`,
+        description: `${selectedMachines.length} ${selectedMachines.length === 1 ? 'máquina eliminada' : 'máquinas eliminadas'} correctamente`,
       });
       
       queryClient.invalidateQueries({ queryKey: ["/api/machines"] });

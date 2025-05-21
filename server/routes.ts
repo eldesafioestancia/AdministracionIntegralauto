@@ -18,12 +18,6 @@ import {
   importData,
   getDatabaseStats
 } from "./database";
-import {
-  deletePermanently,
-  applyPermanentDeletions,
-  getDeletedRecords,
-  addDeletedRecord
-} from "./deletePermanently";
 import { generateToken, hashPassword, verifyPassword, authenticateToken, checkRole } from "./auth";
 import {
   insertUserSchema,
@@ -1297,22 +1291,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Rutas para nuestro sistema de eliminación permanente
-  app.get("/api/deleted-records", (req: Request, res: Response) => {
-    const { getDeletedRecords } = require('./deletePermanently');
-    getDeletedRecords(req, res);
-  });
-  
-  app.post("/api/deleted-records", (req: Request, res: Response) => {
-    const { addDeletedRecord } = require('./deletePermanently');
-    addDeletedRecord(req, res);
-  });
-  
-  app.delete("/api/deleted-permanently/:type/:id", (req: Request, res: Response) => {
-    const { deletePermanently } = require('./deletePermanently');
-    deletePermanently(req, res);
-  });
-  
   // Rutas para notificaciones push
   app.get("/api/notifications/vapid-public-key", getPublicKey);
   app.post("/api/notifications/subscribe", subscribe);
@@ -1396,17 +1374,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
-
-  // Rutas para eliminación permanente de elementos
-  
-  // Ruta para eliminar permanentemente un elemento
-  app.delete("/api/permanent-delete/:type/:id", deletePermanently);
-  
-  // Ruta para obtener la lista de elementos eliminados permanentemente
-  app.get("/api/deleted-records", getDeletedRecords);
-  
-  // Ruta para añadir un elemento a la lista de eliminados permanentemente
-  app.post("/api/deleted-records", addDeletedRecord);
 
   const httpServer = createServer(app);
   return httpServer;
